@@ -4,9 +4,9 @@
   "release_notes": "- เพิ่มระบบอัปเดตอัตโนมัติ",
   "announcements": [
     {
-      "type": "warn",
-      "text": "TEST",
-      "date": ""
+      "type": "info",
+      "text": "สวัสดีวันจันทร์",
+      "date": "10-8-69"
     }
   ]
 }
