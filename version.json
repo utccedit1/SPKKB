@@ -1,12 +1,12 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1/SPKKB.app.zip",
-  "release_notes": "- เพิ่มระบบอัปเดตอัตโนมัติ\n- เพิ่มกระดานประกาศหน้า login",
+  "release_notes": "เพิ่มระบบ กำหนดเองในหมวดตัดต่อด้วย AI",
   "announcements": [
     {
       "type": "info",
       "text": "โปรดปิด CapCut ก่อนกด 'ลงมือทำ' ทุกครั้ง",
-      "date": "10 ส.ค. 69"
+      "date": "11 ส.ค. 69"
     },
     {
       "type": "warn",
