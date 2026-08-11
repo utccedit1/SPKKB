@@ -1,17 +1,12 @@
 {
   "version": "1.1",
   "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1/SPKKB.app.zip",
-  "release_notes": "เพิ่มระบบ กำหนดเองในหมวดตัดต่อด้วย AI",
+  "release_notes": "สามารถกำหนด นาที วิ ในหมวด Ai ตัดต่อได้แล้ว",
   "announcements": [
     {
-      "type": "info",
-      "text": "โปรดปิด CapCut ก่อนกด 'ลงมือทำ' ทุกครั้ง",
-      "date": "11 ส.ค. 69"
-    },
-    {
-      "type": "warn",
-      "text": "ห้ามแชร์แอปให้บุคคลภายนอกโดยไม่ได้รับอนุญาต",
-      "date": ""
+      "type": "update",
+      "text": "เตรียมอัพเดทใหม่เร็วๆนี้",
+      "date": "10-8-69"
     }
   ]
 }
