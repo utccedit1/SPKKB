@@ -1,12 +1,17 @@
 {
-  "version": "20.1.2",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v20.1.2/ChuayDuayJa.app.zip",
-  "release_notes": "- เพิ่มระบบอัปเดตอัตโนมัติ",
+  "version": "1.0",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1/SPKKB.app.zip",
+  "release_notes": "- เพิ่มระบบอัปเดตอัตโนมัติ\n- เพิ่มกระดานประกาศหน้า login",
   "announcements": [
     {
-      "type": "update",
-      "text": "เตรียมอัพเดทใหม่เร็วๆนี้",
-      "date": "10-8-69"
+      "type": "info",
+      "text": "โปรดปิด CapCut ก่อนกด 'ลงมือทำ' ทุกครั้ง",
+      "date": "10 ส.ค. 69"
+    },
+    {
+      "type": "warn",
+      "text": "ห้ามแชร์แอปให้บุคคลภายนอกโดยไม่ได้รับอนุญาต",
+      "date": ""
     }
   ]
 }
