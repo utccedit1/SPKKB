@@ -4,9 +4,9 @@
   "release_notes": "แก้บัคตัดคลิป Too Many",
   "announcements": [
     {
-      "type": "update",
-      "text": "เตรียมอัพเดทใหม่เร็วๆนี้",
-      "date": "10-8-69"
+      "type": "warn",
+      "text": "V1.2 พร้อมใช้งานแล้ว ",
+      "date": "13 ส.ค.69"
     }
   ]
 }
