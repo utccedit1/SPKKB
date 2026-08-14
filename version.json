@@ -7,6 +7,11 @@
       "type": "warn",
       "text": "V1.2 พร้อมใช้งานแล้ว ",
       "date": "13 ส.ค.69"
+    },
+    {
+      "type": "update",
+      "text": "V1.3 มาแล้ว อัพเกรดระบบ API Gemeni โหมด auto model",
+      "date": "14/08/69"
     }
   ]
 }
