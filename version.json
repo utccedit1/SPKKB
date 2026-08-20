@@ -1,13 +1,8 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.0/SPKKB.app.zip",
-  "release_notes": "Auto Gemeni Model",
+  "release_notes": "V1.3 มาแล้ว อัพเกรดระบบ API Gemeni โหมด auto model",
   "announcements": [
-    {
-      "type": "warn",
-      "text": "V1.2 พร้อมใช้งานแล้ว ",
-      "date": "13 ส.ค.69"
-    },
     {
       "type": "update",
       "text": "V1.3 มาแล้ว อัพเกรดระบบ API Gemeni โหมด auto model",
