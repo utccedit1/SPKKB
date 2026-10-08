@@ -1,7 +1,7 @@
 {
-  "version": "1.5.3",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.3/SPKKB.app.zip",
-  "release_notes": "แก้อัปเดตจาก AppTranslocation โฟลเดอร์อ่านอย่างเดียว และ Applications ที่เขียนไม่ได้: ติดตั้งรุ่นใหม่ใน Applications ของผู้ใช้เอง พร้อมสำรองและเปิดโปรแกรมใหม่อัตโนมัติ รวมระบบสิทธิ์ Firebase ของรุ่น 1.5.2",
+  "version": "1.5.4",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.4/SPKKB.app.zip",
+  "release_notes": "แก้แถบอัปเดตเด้งซ้ำ: รุ่นล่าสุดไม่แสดงค้างอัตโนมัติ ตรวจเองแสดง 4 วินาที ปุ่มข้ามก่อนจำการปิดไว้และแจ้งอีกเมื่อมีรุ่นใหม่",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "559dcbcdd929d093d681672d4504600174c139f33a0fac20acd5f1d4d0542bbe",
-  "size": 277204915,
+  "sha256": "72bf9c7e317e666f231ad541b054012b768553f40fb22f04828fb30776b3815b",
+  "size": 277204798,
   "platform": "macos",
   "architecture": "arm64"
 }
