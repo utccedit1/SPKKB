@@ -1,12 +1,16 @@
 {
-  "version": "1.4",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.0/SPKKB.app.zip",
-  "release_notes": "v1.4 มาแล้วเด้ออออ",
+  "version": "1.5.0",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.0/SPKKB.app.zip",
+  "release_notes": "แก้ระบบอัปเดต ตรวจไฟล์ก่อนติดตั้ง สำรองตัวเก่า และรวมการปรับหน้าใช้งาน/งานซับ/ตัดคลิป",
   "announcements": [
     {
       "type": "update",
       "text": "v1.4 มาแล้วเด้ออออ",
       "date": "20/8/69"
     }
-  ]
+  ],
+  "sha256": "57f1e60542fde87ecd066d1225107fd8260dee7ba316c64f9da821ebbffa3b92",
+  "size": 278228795,
+  "platform": "macos",
+  "architecture": "arm64"
 }
