@@ -1,7 +1,7 @@
 {
-  "version": "1.5.2",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.2/SPKKB.app.zip",
-  "release_notes": "แก้ความปลอดภัยสิทธิ์ใช้งาน: ยืนยันตัวตนและสิทธิ์จาก Firebase เท่านั้น ไม่เชื่อแอดมินจากไฟล์ในเครื่อง ตรวจการระงับสิทธิ์ซ้ำ ปิด local fallback และป้องกันคำขอข้ามเว็บไซต์",
+  "version": "1.5.3",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.3/SPKKB.app.zip",
+  "release_notes": "แก้อัปเดตจาก AppTranslocation โฟลเดอร์อ่านอย่างเดียว และ Applications ที่เขียนไม่ได้: ติดตั้งรุ่นใหม่ใน Applications ของผู้ใช้เอง พร้อมสำรองและเปิดโปรแกรมใหม่อัตโนมัติ รวมระบบสิทธิ์ Firebase ของรุ่น 1.5.2",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "dd8be88fe552ffbaac89052fddbbafe193985121d39fc7055d55c3ed7b94c708",
-  "size": 277203194,
+  "sha256": "559dcbcdd929d093d681672d4504600174c139f33a0fac20acd5f1d4d0542bbe",
+  "size": 277204915,
   "platform": "macos",
   "architecture": "arm64"
 }
