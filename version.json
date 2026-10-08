@@ -1,7 +1,7 @@
 {
-  "version": "1.5.0",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.0/SPKKB.app.zip",
-  "release_notes": "แก้ระบบอัปเดต ตรวจไฟล์ก่อนติดตั้ง สำรองตัวเก่า และรวมการปรับหน้าใช้งาน/งานซับ/ตัดคลิป",
+  "version": "1.5.1",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.1/SPKKB.app.zip",
+  "release_notes": "แก้ระบบอัปเดต อ่านข้อมูลรุ่นล่าสุดจาก GitHub โดยตรง ตรวจขนาด/SHA-256/เวอร์ชัน สำรองตัวเก่า และรวมการปรับงานซับ/ตัดคลิป",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "57f1e60542fde87ecd066d1225107fd8260dee7ba316c64f9da821ebbffa3b92",
-  "size": 278228795,
+  "sha256": "a27d7330946ae25dddd7ac5905f3c44f4c26c8cb63897021e8c225a164834e74",
+  "size": 278232964,
   "platform": "macos",
   "architecture": "arm64"
 }
