@@ -1,7 +1,7 @@
 {
-  "version": "1.5.4",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.4/SPKKB.app.zip",
-  "release_notes": "แก้แถบอัปเดตเด้งซ้ำ: รุ่นล่าสุดไม่แสดงค้างอัตโนมัติ ตรวจเองแสดง 4 วินาที ปุ่มข้ามก่อนจำการปิดไว้และแจ้งอีกเมื่อมีรุ่นใหม่",
+  "version": "1.5.7",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.7/SPKKB.app.zip",
+  "release_notes": "เพิ่มแท็บตรวจคำไทยและอังกฤษในซับและ Super Text พร้อมโหมดตรวจเฉพาะคำสะกดผิดเป็นค่าเริ่มต้น คงสำนวนและเว้นวรรคเดิม เลือกยืนยันคำแก้ จำศัพท์เฉพาะ และสำรองกู้คืน ปรับการวิเคราะห์ไฮไลต์จาก Auto Caption",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "72bf9c7e317e666f231ad541b054012b768553f40fb22f04828fb30776b3815b",
-  "size": 277204798,
+  "sha256": "1c1db1c75e4bef8fb3d910b7031c9d3ef1e0a8969fe210e18f7a0d01fbf71828",
+  "size": 277237485,
   "platform": "macos",
   "architecture": "arm64"
 }
