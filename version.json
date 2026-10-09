@@ -1,7 +1,7 @@
 {
-  "version": "1.5.7",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.7/SPKKB.app.zip",
-  "release_notes": "เพิ่มแท็บตรวจคำไทยและอังกฤษในซับและ Super Text พร้อมโหมดตรวจเฉพาะคำสะกดผิดเป็นค่าเริ่มต้น คงสำนวนและเว้นวรรคเดิม เลือกยืนยันคำแก้ จำศัพท์เฉพาะ และสำรองกู้คืน ปรับการวิเคราะห์ไฮไลต์จาก Auto Caption",
+  "version": "1.5.8",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.8/SPKKB.app.zip",
+  "release_notes": "แสดงเลขเวอร์ชันชัดเจนในโปรแกรม อัปเดตทดแทนแอปเดิมและย้ายแอปเก่าลงถังขยะหลังติดตั้งสำเร็จ ลดแอปซ้ำและไฟล์สำรองสะสม",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "1c1db1c75e4bef8fb3d910b7031c9d3ef1e0a8969fe210e18f7a0d01fbf71828",
-  "size": 277237485,
+  "sha256": "47ba51ce217cd7e26fabe87d6875e1e753574bfb1dcd0f8f068b98809b4f209f",
+  "size": 277239668,
   "platform": "macos",
   "architecture": "arm64"
 }
