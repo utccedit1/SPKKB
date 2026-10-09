@@ -1,7 +1,7 @@
 {
-  "version": "1.5.8",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.8/SPKKB.app.zip",
-  "release_notes": "แสดงเลขเวอร์ชันชัดเจนในโปรแกรม อัปเดตทดแทนแอปเดิมและย้ายแอปเก่าลงถังขยะหลังติดตั้งสำเร็จ ลดแอปซ้ำและไฟล์สำรองสะสม",
+  "version": "1.5.9",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.9/SPKKB.app.zip",
+  "release_notes": "แก้ตรวจคำทับศัพท์ รองรับศัพท์อังกฤษ 3D, AI/ML, R&D, C++ และคงคำเดิมพร้อมแจ้งเตือนเมื่อ AI ส่งคำแทนไม่ถูกต้องหลังลองแก้",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "47ba51ce217cd7e26fabe87d6875e1e753574bfb1dcd0f8f068b98809b4f209f",
-  "size": 277239668,
+  "sha256": "44c81f6694aab00aeff41c5469f697dde899eb9e03253f9ce81e87d9593dd991",
+  "size": 277240408,
   "platform": "macos",
   "architecture": "arm64"
 }
