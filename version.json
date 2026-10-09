@@ -1,7 +1,7 @@
 {
-  "version": "1.5.10",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.10/SPKKB.app.zip",
-  "release_notes": "แก้ระบบคำทับศัพท์ให้ตรวจคำอ้างอิงรายคำ คงคำเดิมเมื่อ AI อ้างคำหรือจำนวนครั้งผิด ไม่หยุดทั้งงาน และแจ้งคำที่ข้าม ป้องกันคำแทนซ้อนทับและคงชุดเดิมเมื่อคำตอบไม่ครบ",
+  "version": "1.5.11",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.11/SPKKB.app.zip",
+  "release_notes": "เว้นวรรคไม้ยมก ๆ อัตโนมัติ เพิ่มรายละเอียดคำทับศัพท์ที่คงเดิมพร้อมข้อความต้นฉบับ คำที่ AI อ้าง คำอังกฤษ และเวลาในคลิป จำรายงานแยกตามโปรเจกต์",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "6b95760fb0433ad7f00b098c087dfcacc9112383481afed89029442aed173842",
-  "size": 277239646,
+  "sha256": "c5357af831252e6aac60317d533a1bbe15f971987cd6dd3e46ae54b28f2bfa96",
+  "size": 277241649,
   "platform": "macos",
   "architecture": "arm64"
 }
