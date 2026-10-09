@@ -1,7 +1,7 @@
 {
-  "version": "1.5.9",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.9/SPKKB.app.zip",
-  "release_notes": "แก้ตรวจคำทับศัพท์ รองรับศัพท์อังกฤษ 3D, AI/ML, R&D, C++ และคงคำเดิมพร้อมแจ้งเตือนเมื่อ AI ส่งคำแทนไม่ถูกต้องหลังลองแก้",
+  "version": "1.5.10",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.10/SPKKB.app.zip",
+  "release_notes": "แก้ระบบคำทับศัพท์ให้ตรวจคำอ้างอิงรายคำ คงคำเดิมเมื่อ AI อ้างคำหรือจำนวนครั้งผิด ไม่หยุดทั้งงาน และแจ้งคำที่ข้าม ป้องกันคำแทนซ้อนทับและคงชุดเดิมเมื่อคำตอบไม่ครบ",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "44c81f6694aab00aeff41c5469f697dde899eb9e03253f9ce81e87d9593dd991",
-  "size": 277240408,
+  "sha256": "6b95760fb0433ad7f00b098c087dfcacc9112383481afed89029442aed173842",
+  "size": 277239646,
   "platform": "macos",
   "architecture": "arm64"
 }
