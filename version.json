@@ -1,7 +1,7 @@
 {
-  "version": "1.5.16",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.16/SPKKB.app.zip",
-  "release_notes": "เพิ่มตรวจสถานะ CapCut จากตัวแอปจริง แยกสิทธิ์ macOS ที่ไม่ตรงกับไฟล์แอปหลังอัปเดตออกจากปัญหาหน้าจอ พร้อมวิธีแก้ตรงสาเหตุ ตรวจหน้าหลักและยังบล็อกการเขียนเมื่อหน้าไทม์ไลน์เปิด",
+  "version": "1.5.17",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.17/SPKKB.app.zip",
+  "release_notes": "แก้ซับยาวเกินเกณฑ์แล้วเอฟเฟกต์หาย: ทำไลน์เน้นครบแม้เกินจำนวนตัวอักษรที่แนะนำ พร้อมแจ้งเตือนท่อนยาว รองรับภาษาไทย อังกฤษ และทุกโหมดไลน์เน้น โดยคงการเลือกเฉพาะซับเดิม",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "4b2e9eed6f1f0cb8ea3e69f4a9f84bb596294289926474f1a6f52734e31dc5ba",
-  "size": 277256265,
+  "sha256": "1fd86bc7fdde3425d3da00c916a07b9fa0e19b78a818c90284f2b31eef849d8f",
+  "size": 277255808,
   "platform": "macos",
   "architecture": "arm64"
 }
