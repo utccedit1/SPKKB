@@ -1,7 +1,7 @@
 {
-  "version": "1.5.14",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.14/SPKKB.app.zip",
-  "release_notes": "แก้การล็อกจัดซับ ตัด กู้คืน และบันทึกจุดกู้คืน: ตรวจหน้าไทม์ไลน์แทนการบังคับปิด CapCut ออกจากโปรเจกต์กลับหน้าหลักได้โดยเปิดแอปค้างไว้ ยังป้องกันการเขียนทับเมื่อหน้าไทม์ไลน์เปิดอยู่ ผ่านการทดสอบ 160 รายการ",
+  "version": "1.5.15",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.15/SPKKB.app.zip",
+  "release_notes": "แก้ตรวจหน้าหลัก CapCut ไม่พบแม้ให้สิทธิ์แล้ว รองรับองค์ประกอบ HomePageStartProjectName/Desp ของ CapCut รุ่นปัจจุบัน ยังคงบล็อกการแก้ไฟล์เมื่อมีหน้าไทม์ไลน์เปิดอยู่",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "ba09e110b6d072113be70c9174a250d854d48aca32934782a22154255e79a0f1",
-  "size": 277252401,
+  "sha256": "926e360957132e81ad03851ff3af37c16b18fc6e6e79ea0bbfa386f6913cca40",
+  "size": 277249902,
   "platform": "macos",
   "architecture": "arm64"
 }
