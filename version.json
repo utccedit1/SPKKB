@@ -1,7 +1,7 @@
 {
-  "version": "1.5.12",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.12/SPKKB.app.zip",
-  "release_notes": "สรุปไฮไลต์ ประเด็นสำคัญ และเหตุผลเลือกคลิปตามภาษาซับต้นฉบับ รองรับโปรเจกต์ภาษาอังกฤษโดยไม่แปลคำพูดเป็นไทย และไม่ใช้ผลวิเคราะห์เก่าจากกติกาภาษาเดิม",
+  "version": "1.5.13",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.13/SPKKB.app.zip",
+  "release_notes": "เพิ่มตัวเลือกแปลไทยรายท่อนใน Event แสดงข้อความต้นฉบับ คำแปลเต็มประโยค เนื้อหาและเวลาแต่ละท่อน ใช้คำแปลเดิมประกอบแผนตัด ไม่แก้ซับหรือเสียง แสดงหมายเหตุเมื่อซับต้นฉบับกำกวม",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "a6b14a92677e2d939d5f38289da37da97b17cdb4ef44b363337b46ad60babf61",
-  "size": 277245487,
+  "sha256": "20f1cd46583a01f8288f33c84aaebd4ea3c1b97152a88673885089458f77febd",
+  "size": 277248501,
   "platform": "macos",
   "architecture": "arm64"
 }
