@@ -1,7 +1,7 @@
 {
-  "version": "1.5.13",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.13/SPKKB.app.zip",
-  "release_notes": "เพิ่มตัวเลือกแปลไทยรายท่อนใน Event แสดงข้อความต้นฉบับ คำแปลเต็มประโยค เนื้อหาและเวลาแต่ละท่อน ใช้คำแปลเดิมประกอบแผนตัด ไม่แก้ซับหรือเสียง แสดงหมายเหตุเมื่อซับต้นฉบับกำกวม",
+  "version": "1.5.14",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.14/SPKKB.app.zip",
+  "release_notes": "แก้การล็อกจัดซับ ตัด กู้คืน และบันทึกจุดกู้คืน: ตรวจหน้าไทม์ไลน์แทนการบังคับปิด CapCut ออกจากโปรเจกต์กลับหน้าหลักได้โดยเปิดแอปค้างไว้ ยังป้องกันการเขียนทับเมื่อหน้าไทม์ไลน์เปิดอยู่ ผ่านการทดสอบ 160 รายการ",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "20f1cd46583a01f8288f33c84aaebd4ea3c1b97152a88673885089458f77febd",
-  "size": 277248501,
+  "sha256": "ba09e110b6d072113be70c9174a250d854d48aca32934782a22154255e79a0f1",
+  "size": 277252401,
   "platform": "macos",
   "architecture": "arm64"
 }
