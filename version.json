@@ -1,7 +1,7 @@
 {
-  "version": "1.5.11",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.11/SPKKB.app.zip",
-  "release_notes": "เว้นวรรคไม้ยมก ๆ อัตโนมัติ เพิ่มรายละเอียดคำทับศัพท์ที่คงเดิมพร้อมข้อความต้นฉบับ คำที่ AI อ้าง คำอังกฤษ และเวลาในคลิป จำรายงานแยกตามโปรเจกต์",
+  "version": "1.5.12",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.12/SPKKB.app.zip",
+  "release_notes": "สรุปไฮไลต์ ประเด็นสำคัญ และเหตุผลเลือกคลิปตามภาษาซับต้นฉบับ รองรับโปรเจกต์ภาษาอังกฤษโดยไม่แปลคำพูดเป็นไทย และไม่ใช้ผลวิเคราะห์เก่าจากกติกาภาษาเดิม",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "c5357af831252e6aac60317d533a1bbe15f971987cd6dd3e46ae54b28f2bfa96",
-  "size": 277241649,
+  "sha256": "a6b14a92677e2d939d5f38289da37da97b17cdb4ef44b363337b46ad60babf61",
+  "size": 277245487,
   "platform": "macos",
   "architecture": "arm64"
 }
