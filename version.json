@@ -1,7 +1,7 @@
 {
-  "version": "1.5.15",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.15/SPKKB.app.zip",
-  "release_notes": "แก้ตรวจหน้าหลัก CapCut ไม่พบแม้ให้สิทธิ์แล้ว รองรับองค์ประกอบ HomePageStartProjectName/Desp ของ CapCut รุ่นปัจจุบัน ยังคงบล็อกการแก้ไฟล์เมื่อมีหน้าไทม์ไลน์เปิดอยู่",
+  "version": "1.5.16",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.16/SPKKB.app.zip",
+  "release_notes": "เพิ่มตรวจสถานะ CapCut จากตัวแอปจริง แยกสิทธิ์ macOS ที่ไม่ตรงกับไฟล์แอปหลังอัปเดตออกจากปัญหาหน้าจอ พร้อมวิธีแก้ตรงสาเหตุ ตรวจหน้าหลักและยังบล็อกการเขียนเมื่อหน้าไทม์ไลน์เปิด",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "926e360957132e81ad03851ff3af37c16b18fc6e6e79ea0bbfa386f6913cca40",
-  "size": 277249902,
+  "sha256": "4b2e9eed6f1f0cb8ea3e69f4a9f84bb596294289926474f1a6f52734e31dc5ba",
+  "size": 277256265,
   "platform": "macos",
   "architecture": "arm64"
 }
