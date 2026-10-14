@@ -1,7 +1,7 @@
 {
-  "version": "1.5.17",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.17/SPKKB.app.zip",
-  "release_notes": "แก้ซับยาวเกินเกณฑ์แล้วเอฟเฟกต์หาย: ทำไลน์เน้นครบแม้เกินจำนวนตัวอักษรที่แนะนำ พร้อมแจ้งเตือนท่อนยาว รองรับภาษาไทย อังกฤษ และทุกโหมดไลน์เน้น โดยคงการเลือกเฉพาะซับเดิม",
+  "version": "1.5.18",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.18/SPKKB.app.zip",
+  "release_notes": "แก้อัปเดตให้แทนที่แอปหลักใน Applications ของผู้ใช้เสมอ ถอนรายการสำเนาเก่าจากการค้นหา เก็บไฟล์สร้างรุ่นแบบไม่เป็นแอปซ้ำ และเพิ่มทางสำรองตรวจหน้าต่าง CapCut เมื่อ AXWindows ว่าง",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "1fd86bc7fdde3425d3da00c916a07b9fa0e19b78a818c90284f2b31eef849d8f",
-  "size": 277255808,
+  "sha256": "42917a947638464956dd830fb70968406c6719569a83456d4bf4a5238a5d4c3e",
+  "size": 277255326,
   "platform": "macos",
   "architecture": "arm64"
 }
