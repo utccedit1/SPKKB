@@ -1,7 +1,7 @@
 {
-  "version": "1.5.18",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.18/SPKKB.app.zip",
-  "release_notes": "แก้อัปเดตให้แทนที่แอปหลักใน Applications ของผู้ใช้เสมอ ถอนรายการสำเนาเก่าจากการค้นหา เก็บไฟล์สร้างรุ่นแบบไม่เป็นแอปซ้ำ และเพิ่มทางสำรองตรวจหน้าต่าง CapCut เมื่อ AXWindows ว่าง",
+  "version": "1.5.19",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.19/SPKKB.app.zip",
+  "release_notes": "แก้การจัดซับและเครื่องมือแก้ไขให้รองรับไทม์ไลน์ที่สอง สำรองและกู้คืนเฉพาะไทม์ไลน์ที่เลือก ไม่เขียนทับไทม์ไลน์หลักหรือไทม์ไลน์อื่น",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "42917a947638464956dd830fb70968406c6719569a83456d4bf4a5238a5d4c3e",
-  "size": 277255326,
+  "sha256": "af33174e3ead438f49af0ec4bd9111fbd737f2e4010b69a8c2c9a92dcd1f5ed9",
+  "size": 277256946,
   "platform": "macos",
   "architecture": "arm64"
 }
