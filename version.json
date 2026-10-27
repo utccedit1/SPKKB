@@ -1,7 +1,7 @@
 {
-  "version": "1.5.45",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.45/SPKKB.app.zip",
-  "release_notes": "เพิ่มงานตัดคลิปด้วย AI และ Artlist Stock Bridge แบบใช้บัญชีของแต่ละคน ปรับการรองรับ multicam และคลิปยาว เพิ่มกล่องติดตามสถานะ แก้เพลงให้ต่อเนื่องและได้ระดับเสียงที่เหมาะสม ป้องกัน B-roll ซ้ำ ปรับ Super Text เป็นวลีขยี้ประเด็น ใช้ฟอนต์ สี ขนาด และเอฟเฟกต์จาก Studio พร้อมแก้ซูมข้ามจุดตัดและตำแหน่งซับแนวนอน รุ่นนี้เพิ่มการกู้หน้าค้นหา Artlist หนึ่งครั้ง ลองคำค้นสำรอง และเก็บงานตัดไว้เมื่อภาพบางชิ้นโหลดไม่ได้ ผ่านชุดทดสอบ 375 รายการและทดสอบดาวน์โหลดไฟล์จริง",
+  "version": "1.5.46",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.46/SPKKB.app.zip",
+  "release_notes": "แก้ Webhook ตัด AI หมดเวลารอเร็ว เพิ่มเวลารอแผนเป็น 5 นาที แสดงสถานะระหว่างรอ รับการยกเลิก และไม่ส่งคำขอซ้ำหลังอ่านคำตอบหมดเวลา",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "5e8c535abb3eee292764d26101e193af6f9581ca49ff3a63e8c408b0d43d6e84",
-  "size": 157097705,
+  "sha256": "089f400810fdcc21b7722d223da813317acbf06e43121a45da8ae724b5a85f4a",
+  "size": 157100476,
   "platform": "macos",
   "architecture": "arm64"
 }
