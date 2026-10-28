@@ -144,3 +144,5 @@
 | 2026-10-28 | P1.4 / P4.4 — Chrome Save dialog | ผู้ใช้ยืนยัน dialog เลือกชื่อ/โฟลเดอร์ ตรวจ worker เส้นทางเว็บและ official Chrome docs: ต้องตรวจ Ask where to save each file ในโปรไฟล์ปลายทาง; `audits/chrome-save-dialog-1.5.52/report.md` | ให้ผู้ใช้เครื่องปลายทางปิดตัวเลือกและทดสอบ; ไม่เปลี่ยน settings เครื่องนี้หรือเผยแพร่รุ่นใหม่ |
 
 | 2026-10-28 | P1.4 — placeholder 1.5.53 | แก้ remember/preview ใช้ resolved copy เพื่อ stat สื่อ B-roll-only โดยคง output paths เดิม; preflight ก่อน AI; regression plain/nested build-review-commit, missing media และ changed media ผ่าน | แพ็ก/ตรวจ public/update; ยังไม่ยืนยันเครื่องปลายทาง |
+
+| 2026-10-28 | P1.4 — 1.5.53 เผยแพร่ | 423 tests + JS 13 ชุด, bundle/signature/ZIP/public download/hash ผ่าน main manifest 47e8184842425bdfa7b7ba3d955b7e341b0c41ac; เครื่องปลายทางกดอัปเดตได้ | เครื่องพัฒนาหน้าจอล็อก ยังไม่ติดตั้งหรือยืนยัน native UI/live project รอบนี้ |

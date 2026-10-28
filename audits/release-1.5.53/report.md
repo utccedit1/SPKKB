@@ -11,3 +11,5 @@
 - Release: https://github.com/utccedit1/SPKKB/releases/tag/v1.5.53
 
 ยังไม่ได้ยืนยันโปรเจกต์บนเครื่องปลายทางหรือ live playback/export ไม่เริ่มค้นหรือเขียนโปรเจกต์จริงซ้ำ การตรวจ UI เครื่องพัฒนาถูกจำกัดเพราะหน้าจอล็อก
+
+เผยแพร่สำเร็จ ตรวจ public download size/hash ตรง manifest main commit `47e8184842425bdfa7b7ba3d955b7e341b0c41ac` เครื่องปลายทางตรวจอัปเดตได้ ยังไม่ติดตั้ง native app รอบนี้เพราะหน้าจอล็อก
