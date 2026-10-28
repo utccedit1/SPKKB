@@ -154,3 +154,7 @@
 | 2026-10-28 | P1.4 / P4.2 — native acceptance 1.5.54 | หลังปลดล็อก ติดตั้งผ่าน updater สำเร็จ native version/log container/เปิด Finder ผ่านปุ่มจริง; โปรเจกต์ทดสอบแยกใช้ภาพจำลอง ผ่าน B-roll build-review-commit เปิด CapCut เห็นสื่อทั้งสองและเฟรม B-roll ที่ 00:00:02:01 เล่นครบ/กลับหน้าหลัก ไม่พบ missing dialog; `audits/release-1.5.54/installed-verification.json` | ยังไม่ทดสอบ live Artlist batch/เครื่องปลายทาง/export และไม่ได้ส่งผลทดสอบเข้าโปรเจกต์ผู้ใช้ |
 
 | 2026-10-28 | P1.4 — CapCut roundtrip 1.5.55 | live CapCut เปิดสื่อ 1.5.54 สำเร็จ แต่พบ save ลบ ks_role และคงชื่อแทร็ก/volume=0 จึงเพิ่ม exact-name + muted recognition สำหรับ repair พร้อมห้าม shared material และ regression | ตรวจ full suite/package/release/install และ repair หลัง CapCut save จริงบนโปรเจกต์แยก |
+
+| 2026-10-28 | P1.4 — 1.5.55 release | 432 tests + JS 13 ชุด, bundle/signature/ZIP/public download/hash ผ่าน main manifest 71553c3ed5ed0658c2b6fc4a64b78c689d90acd5; ซ่อมโปรเจกต์หลัง CapCut save ผ่าน tracks/media/registry checks และกลับหน้าหลักแล้ว | ยืนยันติดตั้ง/native window; ยังไม่ live Artlist batch หรือ export |
+
+| 2026-10-28 | P4.2 — 1.5.55 ติดตั้ง | updater receipt=installed, native window 1.5.55 และหน้า B-roll โปรเจกต์เดิมแสดง; `audits/release-1.5.55/installed-verification.json` | เครื่องอื่นอัปเดตได้; ยังไม่ Artlist batch/export บนเครื่องปลายทาง |

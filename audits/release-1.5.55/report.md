@@ -13,3 +13,7 @@ ZIP 157144209 bytes SHA-256 `8ed291e847bb8f808bd8562fd6ba49b58c35d6edc48f24f7f0d
 Release: https://github.com/utccedit1/SPKKB/releases/tag/v1.5.55
 
 ยังไม่ทดสอบ batch Artlist จริงบนเครื่องปลายทางหรือ export/การฟังเสียงรอบนี้
+
+เผยแพร่และตรวจ public download/hash สำเร็จ manifest main commit `71553c3ed5ed0658c2b6fc4a64b78c689d90acd5`; กลับหน้าหลัก CapCut ผ่านเมนูที่แสดงจริงแล้ว โปรเจกต์ทดสอบยังเก็บไว้
+
+ติดตั้งผ่าน updater แล้ว receipt=installed ตรวจ native window 1.5.55 และเปิดหน้า B-roll โปรเจกต์เดิมพร้อมใช้งาน CapCut อยู่หน้าหลัก
