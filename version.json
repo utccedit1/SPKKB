@@ -1,7 +1,7 @@
 {
-  "version": "1.5.49",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.49/SPKKB.app.zip",
-  "release_notes": "ปรับคำค้น B-roll ให้เป็นภาพจริงที่ค้นหาได้ ใช้ไฟล์ที่ตรวจแล้วจากคำสำคัญตรงกันและกันภาพซ้ำ แสดงคำเตือนหากไม่มี B-roll ปรับเสียงพูดพีกเป้าหมาย −4 dBFS (ช่วง −6 ถึง −2) และเพลง −18 dBFS จากการวัดไฟล์จริง ไม่ลดเพลงซ้ำด้วย sidechain",
+  "version": "1.5.50",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.50/SPKKB.app.zip",
+  "release_notes": "แก้การบันทึกไทม์ไลน์ให้ไฟล์สำเนาตรงกันพร้อมสำรองและกู้คืน หยุดส่งงานเสียงซ้ำหลังหมดเวลารอ เพิ่มรายการผลตัดต่อที่สร้างเสร็จให้กลับมาใช้ต่อหลังเปิดแอปใหม่ แก้หน้าจอค้างเมื่องานเดิมหาย และปรับเก็บแพ็กเก่า 5 รุ่นโดยไม่ย้ายรุ่นที่กำลังเปิด",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "2a54877ca4cfcde3b26c23fbfdaf61acd3c599c9e2534b0c038c70a56bf8d994",
-  "size": 157112552,
+  "sha256": "df783b740b438a9a8c5a4e71441d0f46f18f9f1a467c231528d624fd371ad9a2",
+  "size": 157119800,
   "platform": "macos",
   "architecture": "arm64"
 }
