@@ -1,7 +1,7 @@
 {
-  "version": "1.5.46",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.46/SPKKB.app.zip",
-  "release_notes": "แก้ Webhook ตัด AI หมดเวลารอเร็ว เพิ่มเวลารอแผนเป็น 5 นาที แสดงสถานะระหว่างรอ รับการยกเลิก และไม่ส่งคำขอซ้ำหลังอ่านคำตอบหมดเวลา",
+  "version": "1.5.47",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.47/SPKKB.app.zip",
+  "release_notes": "แก้ B-roll ปกติให้คืนเฉพาะคำค้นภาษาอังกฤษ ไม่ใช้ซับไทยแทนเมื่อ AI ล้มเหลว เพิ่มเวลารอพร้อมสถานะให้ B-roll และเพิ่มรายงานเทียบเส้นทางแชท/B-roll/ตัด AI กับขั้นที่ Webhook หมดเวลา โดยไม่บันทึกซับ รหัส หรือ URL เต็ม",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "089f400810fdcc21b7722d223da813317acbf06e43121a45da8ae724b5a85f4a",
-  "size": 157100476,
+  "sha256": "26220d82cc61ea4faf6dc6db4511ff38653a71c8f2230322f9a04fd3464e6795",
+  "size": 157107853,
   "platform": "macos",
   "architecture": "arm64"
 }
