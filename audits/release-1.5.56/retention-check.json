@@ -1,0 +1,6 @@
+{
+  "preview_ok": false,
+  "moved": false,
+  "reason": "Reference/running-app scan could not safely approve old-build cleanup",
+  "error_type": "ValueError"
+}

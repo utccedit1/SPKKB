@@ -20,3 +20,14 @@ Stock Bridge 0.1.7: หลังอัปเดตแอปให้กด Reloa
 ทดสอบภาพ/เสียงจำลองด้วย ffmpeg ใน regression และเคยตรวจ CapCut save roundtrip แยกใน P0.8 แล้ว แต่รอบนี้ยังไม่ได้ยืนยัน live AI/Artlist batch 10 คลิป, native playback/audio/export หลัง patch และ fresh install/long soak บนเครื่องปลายทาง จึงไม่เรียกว่าไม่มีบั๊กทุกเครื่อง
 
 การ build แรกเผลอเลือก Python 3.9 จาก PATH ในโฟลเดอร์ app จึงไม่ใช้ผลนั้น ชุดที่แจกสร้างใหม่ด้วย Python 3.14.6 ใน workpath แยกและตรวจ bundle self-test/modules/signature แล้ว ไม่แก้ pipeline หรือใช้ผล build runtime เก่าเป็นไฟล์แจก
+
+
+## เผยแพร่และติดตั้งแล้ว
+
+ดาวน์โหลดสาธารณะตรวจครบ 157151184 bytes และ SHA-256 ตรงก่อนเปลี่ยน manifest สำเร็จ main commit `a6c6006bf836d5a1c7dd2b1316936aa054c0fb0c` ผู้ใช้เครื่องอื่นกดตรวจอัปเดตได้แล้ว
+
+ซอร์สรวมการแก้อยู่บน branch `source/readiness-fixes-2026-10-28` (source code commit `4e0bf0306ce36386170ecc80292d32b02837a0e0`) ไม่ merge ซอร์สเข้า main และไม่อัปโหลด runtime/สื่อ/บัญชีส่วนตัว
+
+ติดตั้งผ่าน updater เดิม receipt=installed ตรวจ Info.plist/self-test/signature และ native window เป็น 1.5.56 เปิดโปรเจกต์เดิมแบบอ่านอย่างเดียวและเห็นหน้า B-roll/log/repair/folder ไม่ได้สั่งสร้าง/ใส่สื่อหรือแก้งานจริง (`installed-verification.json`)
+
+ตรวจ retention แบบอ่านอย่างเดียวแล้ว แต่ guard ไม่อนุมัติการตรวจอ้างอิงไฟล์เก่าทั้งหมด จึงไม่ย้าย build เก่าโดยเดาหรือข้าม guard (`retention-check.json`) ไม่ล้าง Trash
