@@ -137,7 +137,7 @@ async function loadResults(){
   const j=await post({action:'results'});area.textContent='';
   for(const row of j.results||[]){
    const line=document.createElement('div'),button=document.createElement('button');
-   line.textContent='ผลล่าสุด · '+new Date(row.created*1000).toLocaleString('th-TH')+' · '+(row.operation==='enhance'?'ปรับคลิปเดิม':'ตัดคลิป')+' ';
+   line.textContent='ผลล่าสุด · '+new Date(row.created*1000).toLocaleString('th-TH')+' · '+(row.operation==='broll_only'?'เพิ่ม B-roll เท่านั้น':row.operation==='enhance'?'ปรับคลิปเดิม':'ตัดคลิป')+' ';
    button.type='button';button.textContent='ตรวจและใช้ผลนี้ต่อ';
    button.onclick=async()=>{
     if(busy)return;controls(true);install=null;

@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.50 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.51 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -45,6 +45,14 @@
 ### P1.3 B-roll ปกติคำค้นอังกฤษ — DONE เฉพาะขอบเขต 1.5.47
 
 ไม่ใช้ซับไทยเป็น fallback เมื่อ AI ล้มเหลว ตรวจ query/keywords และรับ alternative อังกฤษได้ ทดสอบจริงได้ 23 รายการ หลักฐาน `audits/ai-diagnostics-1.5.47/` หากแก้ส่วนนี้ต้องรักษา regression cases เดิม; ไม่ตีความว่าระบบ stock อื่นเสร็จทั้งหมด
+
+### P1.4 เพิ่ม B-roll อย่างเดียวผ่าน Artlist — PARTIAL (เผยแพร่ 1.5.51 สำหรับทดลองใช้จริง)
+
+- เพิ่มโหมดในหน้า B-roll เดิม โดยคงค้นคำ/ลิงก์และมีมเดิมไว้ ใช้ซับปัจจุบัน ไม่ถอดเสียงใหม่
+- เพิ่มได้เฉพาะแทร็กภาพใหม่ปิดเสียงและวัสดุ companion; ตรวจ structural invariant ทั้งก่อนสร้างผลและตอนนำเข้า ห้ามเปลี่ยนรอยตัด ซับ เพลง เสียง โมชั่น ความยาว/ค่าของโปรเจกต์เดิม
+- ใช้ผลสำเนา receipts กู้คืน hash/media stamps และ guard/backup/mirror/rollback เดิม ต้องตรวจผลแล้วกดใส่หลังกลับหน้าหลัก CapCut
+- หลักฐาน `audits/broll-only-1.5.50/` และ `audits/release-1.5.51/`; เผยแพร่และติดตั้ง 1.5.51 แล้ว ยังรอ live Artlist/CapCut playback acceptance
+- เกณฑ์ที่ยังค้าง: ทดสอบค้น/ดาวน์โหลดจริงด้วยบัญชีและข้อมูลที่อนุญาต ตรวจ playback/export ใน CapCut และแพ็กฟีเจอร์ก่อนประกาศว่าใช้ได้ในแอปแจก
 
 ## Phase 2 — ผลตัดไม่หายและนำเข้าเข้าใจง่าย
 
@@ -122,3 +130,9 @@
 | 2026-10-28 | P4/P5.4 — Release 1.5.50 (กำลังทำ) | ผู้ใช้อนุญาตแพ็ก เผยแพร่รุ่นใหม่ และเปลี่ยนแอปเป็นรุ่นล่าสุด รวม F01–F06; เริ่มตรวจ runtime/tests/source และงานค้างก่อนอัปเดต | self-test/signature/credential exclusion/ZIP/hash/public download/manifest และตรวจรุ่นที่ติดตั้งจริง |
 
 | 2026-10-28 | P4/P5.4 — Release 1.5.50 | แพ็กซอร์ส F01–F06 ด้วย Python 3.14.6; 406 tests + UI 12 ชุด, bundle self-test/signature/credential exclusion ผ่าน; ZIP 157119800 bytes SHA-256 df783b740b438a9a8c5a4e71441d0f46f18f9f1a467c231528d624fd371ad9a2; public download/manifest ผ่าน; updater รุ่น 1.5.49 เห็น 1.5.50; ติดตั้งผ่าน updater และเปิดโปรเจกต์เดิมใน 1.5.50 แล้ว; `audits/release-1.5.50/` | ยังไม่ playback/export ใหม่หรือ fresh install เครื่องอื่น; retention หยุดตาม guard เพราะ metadata อีกโปรเจกต์อ่านไม่ได้ จึงยังไม่ย้ายรุ่นเก่า |
+
+| 2026-10-28 | P1.4 | เพิ่ม broll_auto.py / broll_auto_ui.py และ CLI operation broll_only; คงโหมดหาไอเดียเดิม; validate_additions ตรวจการตัดต่อเดิมเท่าเดิมทุกฟิลด์และปิดเสียงภาพใหม่, contract ใน import ticket, copy/staging + receipts + rollback; Python 415 tests และ JS 13 ชุดผ่าน; `audits/broll-only-1.5.50/` | ยังเป็นซอร์สหลัง 1.5.50 ไม่ publish/ติดตั้ง ไม่ใช้บัญชีจริงหรือแก้โปรเจกต์ผู้ใช้; ต้อง live Artlist/CapCut playback/export ก่อน release |
+
+| 2026-10-28 | P1.4 / P4 / P5.4 — 1.5.51 (กำลังทำ) | ผู้ใช้อนุญาตออกเวอร์ชันใหม่และติดตั้งโหมด B-roll อย่างเดียวให้ลองใช้จริง; ตรวจซอร์ส/แพ็กก่อน Release และใช้ updater เดิมตรวจงานค้าง | tests/bundle/ZIP/hash/public manifest/install/native UI; ยังไม่เริ่มค้นหรือเขียนโปรเจกต์ผู้ใช้ |
+
+| 2026-10-28 | P1.4 / P4 / P5.4 — Release 1.5.51 | Python 415 tests + JS 13 ชุดผ่าน; bundle self-test/signature/credential exclusion/ZIP/public hash/manifest ผ่าน; เผยแพร่และติดตั้งผ่าน updater เดิมแล้ว หน้า B-roll จริงแสดงใน 1.5.51; `audits/release-1.5.51/report.md` | ยังไม่ยืนยัน live Artlist/CapCut playback/export หรือเครื่องอื่น; retention หยุดตาม guard เพราะ metadata โปรเจกต์อื่นอ่านไม่ได้ |

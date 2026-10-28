@@ -128,6 +128,10 @@ def suggest(proj, cfg):
         '"th_hint":"นักศึกษาเดินในมหาวิทยาลัย",'
         '"note":"เปิดคลิปด้วยบรรยากาศสดใส"}]')
 
+    if cfg.get('stock_auto') is True:
+        from .stock_media import STOCK_SEARCH_POLICY
+        task += '\n'+STOCK_SEARCH_POLICY+' Put two concrete alternative searches in keywords. Do not propose music or memes.'
+
     items = [];invalid_queries=0
     try:
         with CE.ai_feature("broll"):

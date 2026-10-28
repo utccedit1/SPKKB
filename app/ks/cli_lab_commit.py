@@ -69,9 +69,14 @@ def preview(owner, project, folder, expected=None, result_id=None):
     if expected is not None:
         if digest(raw) != expected['source_hash'] or digest(edited_raw) != expected['output_hash'] or stamps != {k:tuple(v) for k,v in expected['media'].items()}:
             raise ValueError('ต้นฉบับ ผลตัดต่อ หรือสื่อเปลี่ยนจากตอนสร้าง ยังไม่นำเข้า กรุณาตรวจผลและต้นฉบับก่อนเตรียมนำเข้าใหม่ด้วยตนเอง')
+    broll_only = (result/'broll_only_report.json').is_file() or bool(expected and expected.get('operation')=='broll_only')
+    if broll_only:
+        from .broll_auto import validate_additions
+        validate_additions(current,edited)
     token = uuid.uuid4().hex
     ticket = dict(owner=owner, project=str(target), result=str(result),
         source_hash=digest(raw), output_hash=digest(edited_raw), media=stamps, created=time.time())
+    if broll_only: ticket['contract'] = 'broll_only'
     if result_id: ticket['result_id'] = result_id
     job_store.save('installs',token,ticket)
     with _lock:
@@ -84,6 +89,9 @@ def preview(owner, project, folder, expected=None, result_id=None):
 
 def review_notes(folder):
     notes=[];folder=Path(folder)
+    if (folder/'broll_only_report.json').is_file():
+        report=json.loads((folder/'broll_only_report.json').read_bytes())
+        notes.append(f"เพิ่มเฉพาะ B-roll {report['inserted']} ช็อต · รอยตัด ซับ เพลง เสียง โมชั่น และแทร็กเดิมคงเดิม")
     if (folder/'audio_levels_report.json').is_file():
         levels=json.loads((folder/'audio_levels_report.json').read_bytes())
         peak=levels.get('after_peak_dbfs')
@@ -129,6 +137,9 @@ def commit(owner, project, token):
             if not p.is_file() or (p.stat().st_size, p.stat().st_mtime_ns) != tuple(stamp):
                 raise ValueError('ไฟล์สื่อเปลี่ยน กรุณาตรวจผลก่อนใช้ใหม่')
         current = json.loads(raw); edited = json.loads(output_raw); validate(edited)
+        if ticket.get('contract') == 'broll_only':
+            from .broll_auto import validate_additions
+            validate_additions(current,edited)
         # Keep the editor's original project/timeline identity and schema markers.
         for key in ('id', 'name', 'platform', 'last_modified_platform', 'version', 'create_time'):
             if key in current: edited[key] = copy.deepcopy(current[key])
@@ -151,6 +162,7 @@ def commit(owner, project, token):
                         assets.mkdir(parents=True, exist_ok=True)
                         dest = assets/(uuid.uuid4().hex[:8]+'_'+path.name)
                         shutil.copyfile(path,dest); material['path'] = str(dest)
+            if ticket.get('contract') == 'broll_only':validate_additions(current,edited)
             data = json.dumps(edited,ensure_ascii=False).encode('utf-8')
             updates = T.mirror_updates(before, data)
             updates.update({'draft_info_original.json':None,'.spinworld_state.json':None})

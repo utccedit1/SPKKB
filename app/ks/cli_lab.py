@@ -72,7 +72,7 @@ from .job_admission import admit
 @admit
 def start_job(owner, project, data):
     operation = data.get('operation')
-    if operation not in ('plan', 'apply', 'enhance', 'setup_alignment'):
+    if operation not in ('plan', 'apply', 'enhance', 'setup_alignment', 'broll_only'):
         raise ValueError('งานเบื้องหลังไม่รองรับคำสั่งนี้')
     path = str(Path(project).resolve())
     with _jobs_lock:
@@ -105,7 +105,7 @@ def start_job(owner, project, data):
             progress('กำลังเริ่มงาน')
             result = handle(owner, path, dict(data, action=operation), progress)
             with _jobs_lock:
-                _jobs[token].update(state='done', result=result, message='สร้างคลิปเสร็จแล้ว · ตรวจผลและสรุปด้านล่าง' if operation in ('apply','enhance') else 'วางแผนเสร็จแล้ว · ตรวจแผนด้านล่าง', updated=time.time())
+                _jobs[token].update(state='done', result=result, message='สร้างคลิปเสร็จแล้ว · ตรวจผลและสรุปด้านล่าง' if operation in ('apply','enhance','broll_only') else 'วางแผนเสร็จแล้ว · ตรวจแผนด้านล่าง', updated=time.time())
                 job_store.save('cli',token,_jobs[token])
         except Exception as exc:
             with _jobs_lock:
@@ -117,6 +117,9 @@ def start_job(owner, project, data):
 
 def handle(owner, project, data, progress=lambda message: None):
     action = data.get('action')
+    if action == 'broll_only':
+        from .broll_auto import build
+        return build(owner,project,data,progress)
     if action in ('results', 'result_review'):
         from . import cli_results
         return cli_results.listing(owner, project) if action == 'results' else cli_results.review(owner, project, data.get('result_id'))

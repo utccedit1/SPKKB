@@ -898,7 +898,8 @@ window.ksSide = function(name, navEl) {
     from .updater import CURRENT_VERSION
     from .cli_lab_ui import inject as inject_cli_lab
     from .onboarding import inject as inject_setup
-    return inject_setup(inject_cli_lab(apply_workflow(apply_design(html)))).replace('__STUDIO_VERSION__',CURRENT_VERSION)
+    from .broll_auto_ui import inject as inject_broll_auto
+    return inject_setup(inject_broll_auto(inject_cli_lab(apply_workflow(apply_design(html))))).replace('__STUDIO_VERSION__',CURRENT_VERSION)
 
 
 def _move_audio_brain(html):

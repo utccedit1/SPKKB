@@ -1,6 +1,6 @@
 # โครงสร้างและแบบระบบ — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานซอร์ส/Release: **1.5.50**
+อัปเดต: 28 ตุลาคม 2026 · ฐานซอร์ส/Release: **1.5.51**
 
 เอกสารนี้อธิบายระบบที่มีอยู่จริงและหลักการที่ต้องรักษา อ่านคู่กับ `TASK_PHASES.md` ก่อนเริ่มงาน หากโค้ดไม่ตรงเอกสาร ให้ตรวจหลักฐานและแก้เอกสารในงานเดียวกัน ไม่ใช้เอกสารเก่าเป็นข้อยืนยันว่าฟังก์ชันยังใช้ได้
 
@@ -42,7 +42,7 @@ flowchart TD
 | Multicam/เสียง | `cli_lab_nested.py`, `cli_lab_alignment.py` | อ่าน draft ซ้อน สร้างเสียงสำหรับ align ซับเดิม |
 | คำพูด/ซับ | `caption_roles.py`, `caption_resegment.py`, `text_layout.py` | แยกบทพูดจาก overlay และจัดท่อน/บรรทัด |
 | งานภาพและข้อความ | `cli_lab_brand_style.py`, `cli_lab_typography.py`, `caption_style.py`, `timeline_motion.py`, `cli_lab_social.py`, `cli_lab_presentation.py` | สไตล์ร่วม ซูม keyframe ข้อความเน้นและจังหวะภาพ |
-| B-roll ปกติ | `broll.py` | เสนอคำค้นอังกฤษ/ลิงก์ค้นหา; คนละเส้นทางกับดาวน์โหลดอัตโนมัติ |
+| B-roll ปกติ/เพิ่มภาพเท่านั้น | `broll.py`, `broll_auto.py`, `broll_auto_ui.py` | คงคำค้น/ลิงก์เดิม เพิ่มเส้นทาง Artlist แบบ add-only ในซอร์ส P1.4 |
 | คลังสื่อ | `stock_accounts.py`, `stock_browser.py`, `stock_media.py`, `stock_project.py`, `stock_polish.py` | งานบัญชี/ดาวน์โหลด ตรวจไฟล์ จัดลงคลิป และปลายทางตามโปรเจกต์ |
 | ส่วนขยาย | `app/stock_extension/` | Chrome Manifest V3; ทำงานบนเว็บที่ผู้ใช้ล็อกอิน |
 | ระดับเสียง | `audio_levels.py`, `stock_polish.py` | วัด sample peak dBFS, เสียงพูดเป้าหมาย −4 และเพลง −18; ไม่ใช่ค่า fader หรือ LUFS |
@@ -107,6 +107,16 @@ receipt แยกตาม hash ของเจ้าของและชนิ
 
 ผู้ใช้ล็อกอินบัญชีของตัวเองใน Chrome และเชื่อม Stock Bridge เฉพาะเครื่อง แอปไม่รับรหัสผ่าน/คุกกี้เพื่อแจกไปเครื่องอื่น Artlist อัตโนมัติผ่านเว็บจริงจึงขึ้นกับหน้าเว็บ สมาชิกและสิทธิ์ดาวน์โหลด **Envato ยังไม่ใช่เส้นทางดาวน์โหลดอัตโนมัติที่รองรับ** แม้มีหน้าเชื่อมบัญชี/ลิงก์ค้นหา ไม่มีหลักฐานว่าใช้ Artlist MCP ในโค้ดนี้
 
+### 4.4.1 เพิ่ม B-roll อย่างเดียว — P1.4 (เผยแพร่ใน 1.5.51 สำหรับทดลองใช้จริง)
+
+หน้า B-roll เดิมคงโหมดคิดคำค้น/มีมไว้ และเพิ่ม “หาและเตรียม B-roll” → ตรวจผล → “ใส่เฉพาะ B-roll” ใช้ CLI job operation `broll_only` และ STATE.capture เดิม ผลสำเร็จอยู่ใน receipts ชนิด results/operation=broll_only จึงกู้หลังเปิดหน้าใหม่ได้
+
+`broll_auto.build` อ่านซับปัจจุบันในสำเนา เรียกสมอง broll เพื่อคิดคำค้นอังกฤษ และ Stock Bridge ของเจ้าของเพื่อดาวน์โหลด Artlist จำกัดจำนวนภาพ 1–30 ช็อต ข้ามช่วงที่มี overlay เดิมและไม่ใช้ภาพซ้ำภายในงาน เครื่องมือ CLI เห็นเพียง draft นำเข้าว่าง แล้วนำเฉพาะวัสดุและแทร็กภาพใหม่มา append กับสำเนาต้นฉบับ ปิดเสียงภาพใหม่ วางเหนือภาพหลักและใต้ซับเดิม ไม่เรียก normalize_speech, resegment, cut, motion, typography, music หรือ speaker PiP
+
+`validate_additions` ตรวจว่าค่าระดับโปรเจกต์/ความยาว แทร็กและวัสดุเดิมเหมือนเดิมทุกฟิลด์ อนุญาตเพิ่มเฉพาะวัสดุภาพและ companion ที่จำเป็น พร้อมตรวจ ID/ช่วงเวลา/ระดับแสดงภาพและ volume=0 หากลำดับภาพกับซับใน schema นั้นแยกไม่ได้จะหยุด ไม่ย้ายซับเดิมเพื่อให้ผ่าน guard
+
+ผลมี broll_only_report.json; preview ผูก contract=broll_only ใน ticket และตรวจซ้ำใน commit ทั้งก่อนและหลังจัดเก็บสื่อ ใช้ hash/media stamps/active timeline/backup/mirror transaction/rollback เดิม การเลือกผลผ่าน receipt บังคับ operation เดิมแม้ report หาย จึงไม่ผ่อนเป็นโหมดแก้ทั้งคลิปโดยเงียบ ๆ
+
 ### 4.5 อัปเดตและแจกจ่าย
 
 แพ็ก runtime → self-test/ตรวจ signature → ZIP + SHA-256 + size → Release → ดาวน์โหลดไฟล์สาธารณะตรวจซ้ำ → อัปเดต manifest เป็นขั้นสุดท้าย Installer ใช้ตำแหน่งติดตั้งเดิมและสำรอง ห้ามหยุดงานที่กำลังรันเพื่อเปลี่ยนแอปโดยไม่ตรวจสถานะก่อน รุ่นปัจจุบันยังมีความเสี่ยงจาก ad-hoc signing/TCC บน macOS; ยังไม่ถือว่าติดตั้งครั้งแรกและอัปเดตทุกเครื่องผ่านแล้ว
@@ -117,6 +127,7 @@ receipt แยกตาม hash ของเจ้าของและชนิ
 
 | สิ่งที่ตรวจแล้ว | หลักฐานใน workspace |
 |---|---|
+| 1.5.51: 415 tests + JS 13 ชุด, bundle/signature/public hash/manifest/install และหน้า B-roll จริงผ่าน | `audits/release-1.5.51/` (ยังรอ live Artlist/CapCut playback acceptance) |
 | 1.5.50: 406 tests + JS 12 ชุด, bundled self-test/signature, public download/hash/manifest และอัปเดตจริงในเครื่องผ่าน | `audits/release-1.5.50/` (ยังไม่ได้ตรวจ playback/export ใหม่หรือเครื่องอื่น) |
 | 1.5.49: 393 tests; สำเนาโปรเจกต์ปัจจุบันใส่ B-roll 4 ช็อต พีกพูด −4.0 และเพลง −18.0; import มี backup | `audits/stock-audio-1.5.49/` (ยังต้องตรวจ playback ใน CapCut) |
 | 1.5.48: 390 Python tests + UI recovery + packaged self-test/signature | `audits/import-review-1.5.48/` |
