@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.54 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.55 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -150,3 +150,7 @@
 | 2026-10-28 | P1.4 — log / missing media 1.5.54 | เพิ่ม structured counts/log UI, ลด no_match ซ้ำ/หยุด keyword fallback เมื่อ infrastructure ล้มเหลว; copy+hash B-roll เข้าโปรเจกต์และ merge media registry/local_material_id ใน transaction เดิม; native folder action และซ่อม B-roll เดิมผ่าน review/commit contract | full tests/bundle/public release; ยังต้อง live CapCut playback และเครื่องปลายทาง |
 
 | 2026-10-28 | P1.4 — 1.5.54 เผยแพร่ | 431 Python tests + JS 13 ชุด, bundle/signature/credential exclusion/ZIP/public size/hash ผ่าน manifest c0f01fc24d899fd35ad0566e39ad358c0cae2be9; เครื่องอื่นกดอัปเดตได้ | ยังไม่ติดตั้งเครื่องพัฒนาเพราะหน้าจอล็อก และยังไม่ CapCut live playback/export บนเครื่องที่รายงาน |
+
+| 2026-10-28 | P1.4 / P4.2 — native acceptance 1.5.54 | หลังปลดล็อก ติดตั้งผ่าน updater สำเร็จ native version/log container/เปิด Finder ผ่านปุ่มจริง; โปรเจกต์ทดสอบแยกใช้ภาพจำลอง ผ่าน B-roll build-review-commit เปิด CapCut เห็นสื่อทั้งสองและเฟรม B-roll ที่ 00:00:02:01 เล่นครบ/กลับหน้าหลัก ไม่พบ missing dialog; `audits/release-1.5.54/installed-verification.json` | ยังไม่ทดสอบ live Artlist batch/เครื่องปลายทาง/export และไม่ได้ส่งผลทดสอบเข้าโปรเจกต์ผู้ใช้ |
+
+| 2026-10-28 | P1.4 — CapCut roundtrip 1.5.55 | live CapCut เปิดสื่อ 1.5.54 สำเร็จ แต่พบ save ลบ ks_role และคงชื่อแทร็ก/volume=0 จึงเพิ่ม exact-name + muted recognition สำหรับ repair พร้อมห้าม shared material และ regression | ตรวจ full suite/package/release/install และ repair หลัง CapCut save จริงบนโปรเจกต์แยก |

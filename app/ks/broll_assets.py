@@ -33,8 +33,11 @@ def register(metadata, materials):
 
 
 def repair_materials(draft):
-    ids={s.get('material_id') for t in draft.get('tracks',[]) if t.get('ks_role')=='broll_only' for s in t.get('segments',[])}
-    other={s.get('material_id') for t in draft.get('tracks',[]) if t.get('ks_role')!='broll_only' for s in t.get('segments',[])}
+    from .broll_auto import NAME
+    def owned(track):
+        return track.get('type')=='video' and bool(track.get('segments')) and (track.get('ks_role')=='broll_only' or track.get('name')==NAME) and all(s.get('volume')==0 for s in track['segments'])
+    ids={s.get('material_id') for t in draft.get('tracks',[]) if owned(t) for s in t.get('segments',[])}
+    other={s.get('material_id') for t in draft.get('tracks',[]) if not owned(t) for s in t.get('segments',[])}
     if not ids or ids & other:raise ValueError('ไม่พบ B-roll ที่แยกจากงานเดิมอย่างปลอดภัย')
     return [m for m in draft.get('materials',{}).get('videos',[]) if m.get('id') in ids]
 

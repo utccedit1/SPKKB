@@ -214,3 +214,15 @@ class BrollOnlyTests(unittest.TestCase):
         preview=A.prepare_repair('alice',self.proj);C.commit('alice',self.proj,preview['install_id'])
         entries=json.loads((self.proj/'draft_meta_info.json').read_bytes())['draft_materials'][0]['value']
         self.assertEqual(entries[0],old);self.assertNotEqual(entries[-1]['id'],old['id'])
+
+    def test_repair_after_capcut_strips_custom_role_uses_exact_muted_track_name(self):
+        from ks import broll_assets as A
+        result=self.build();review=R.review('alice',self.proj,result['result_id']);C.commit('alice',self.proj,review['install_id'])
+        d=json.loads((self.proj/'draft_info.json').read_bytes())
+        for track in d['tracks']:track.pop('ks_role',None)
+        before=copy.deepcopy(d);(self.proj/'draft_info.json').write_text(json.dumps(d))
+        preview=A.prepare_repair('alice',self.proj);C.commit('alice',self.proj,preview['install_id'])
+        A.validate_repair(before,json.loads((self.proj/'draft_info.json').read_bytes()))
+        for track in d['tracks']:
+            if track.get('name')==B.NAME:track['segments'][0]['volume']=1
+        with self.assertRaises(ValueError):A.repair_materials(d)

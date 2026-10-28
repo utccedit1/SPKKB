@@ -20,3 +20,7 @@ Release: https://github.com/utccedit1/SPKKB/releases/tag/v1.5.54
 ข้อจำกัด: Mac หน้าจอล็อก จึงยังไม่ติดตั้งหรือเปิด playback/export ใน CapCut รอบนี้ ไม่ทดสอบ live AI/stock batch บนบัญชีจริงซ้ำ และยังไม่ยืนยันผลบนเครื่องที่ผู้ใช้รายงาน ไม่รับรองเวลารวมของเว็บ Artlist จากการทดสอบจำลอง
 
 เผยแพร่และตรวจ public asset สำเร็จ main manifest commit `c0f01fc24d899fd35ad0566e39ad358c0cae2be9` ยังไม่ได้ติดตั้งตรวจ native UI รอบนี้เพราะเครื่องล็อก
+
+## ตรวจหลังปลดล็อก
+
+ติดตั้งผ่าน updater และตรวจ native window 1.5.54 แล้ว เห็นช่อง log/ปุ่มซ่อม/เปิดโฟลเดอร์จริง ปุ่มเปิดโฟลเดอร์เปิด Finder ไป cli_lab_assets ของโปรเจกต์ที่เลือกได้ สร้างโปรเจกต์ทดสอบแยกด้วยภาพจำลองในเครื่อง ผ่าน build/review/commit จริงและ metadata registry เปิดใน CapCut ได้ ไม่มี missing-media dialog และเห็นเฟรม B-roll ที่ 00:00:02:01 เล่นครบ 6 วินาทีแล้วกลับหน้าหลัก โปรเจกต์เดิมไม่ได้ถูกนำผลทดสอบเข้า ไม่เรียก AI/Artlist จริง และยังไม่ได้ export
