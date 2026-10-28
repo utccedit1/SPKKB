@@ -1,0 +1,6 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const event={addListener(){}};let url='https://artlist.io/stock-footage/search?terms=calendar',moves=[];
+const chrome={storage:{local:{get:async()=>({})}},runtime:{onMessage:event},downloads:{onDeterminingFilename:event,onChanged:event},alarms:{get:async()=>true,onAlarm:event},tabs:{get:async()=>({url,status:'complete'}),update:async(id,data)=>{if(data.url){url=data.url;moves.push(url);}},onUpdated:event}};
+const ctx=vm.createContext({chrome,URL,AbortSignal,setTimeout:fn=>fn()});vm.runInContext(fs.readFileSync('app/stock_extension/worker.js','utf8'),ctx);
+vm.runInContext("phase=async()=>{};pageTask=async(id,task)=>{if(task.action==='search_route')throw Error('wrong catalog search must not be submitted');return {url:'https://artlist.io/royalty-free-music/song/calm/123',title:'Calm'};}",ctx);
+(async()=>{const result=await vm.runInContext("chooseStock({kind:'music',query:'calm corporate'},1)",ctx);assert(result.url.includes('/song/'));assert.equal(moves[0],'https://artlist.io/royalty-free-music/search?terms=calm%20corporate');console.log('Music switches out of footage catalog before submitting a search');})().catch(e=>{console.error(e);process.exitCode=1});

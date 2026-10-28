@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เลือกโปรเจกต์ — ช่วยด้วยจ้า Studio</title>
+<style>
+:root{--bg:#f5f6f8;--card:#ffffff;--line:#e4e7ed;--txt:#111827;--sub:#6b7280;--acc:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,'Segoe UI','Sarabun',sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:720px;margin:0 auto;padding:28px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--sub);font-size:13px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.card h2{font-size:14px;margin:0 0 12px;color:var(--acc)}
+input[type=text]{width:100%;padding:10px;background:#fff;border:1.5px solid var(--line);
+ border-radius:9px;color:var(--txt);font-size:14px;transition:border-color .15s}
+button{cursor:pointer;border:none;border-radius:9px;padding:10px 14px;font-size:14px;font-weight:600}
+.primary{background:var(--acc);color:#fff}
+.ghost{background:#f1f5f9;color:var(--txt);border:1.5px solid var(--line)}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.crumbs{font-size:12px;color:var(--sub);margin:10px 0;word-break:break-all}
+.dirlist{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:9px}
+.dirrow{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.dirrow:last-child{border-bottom:none}
+.dirrow:hover{background:#f8fafc}
+.badge{font-size:11px;background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:20px;font-weight:600}
+.recent{display:flex;flex-direction:column;gap:8px}
+.recent div{padding:10px 12px;border:1px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px}
+.recent div:hover{background:#f8fafc}
+.err{color:#dc2626;font-size:13px;margin-top:8px}
+</style></head><body>
+<div class="wrap">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:32px;height:32px;background:#2563eb;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px">🎬</div><h1 style="margin:0">ช่วยด้วยจ้า Studio</h1></div>
+<div class="sub">เลือกโฟลเดอร์โปรเจกต์ CapCut (ที่มีไฟล์ draft_info.json) เพื่อเริ่มใช้งาน</div>
+<div id="quota-info" style="display: none;" class="quota-container">
+    <div>📅 วันหมดอายุ: <span id="txt-expire">-</span></div>
+    <div>📊 โควต้าการใช้งาน: <span id="txt-quota">-</span></div>
+    <div class="progress-bar">
+        <div id="bar-fill" class="progress-fill"></div>
+    </div>
+</div>
+<div class="card" id="recentCard" style="display:none">
+ <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+  <h2 style="margin:0">โปรเจกต์ล่าสุด</h2>
+  <button class="ghost" onclick="clearRecent()" style="font-size:12px;padding:5px 10px;color:#dc2626;border-color:#fecaca">🗑 ล้างทั้งหมด</button>
+ </div>
+ <div class="recent" id="recentList"></div>
+</div>
+
+<div class="card">
+ <h2>เรียกดูโฟลเดอร์</h2>
+ <input type="text" id="pathBox" placeholder="พิมพ์ path โฟลเดอร์ หรือเรียกดูด้านล่าง">
+ <div class="row">
+  <button class="ghost" onclick="go($('pathBox').value)">ไปที่ path นี้</button>
+  <button class="primary" onclick="selectHere()">✓ เลือกโฟลเดอร์นี้เป็นโปรเจกต์</button>
+ </div>
+ <div class="crumbs" id="crumbs"></div>
+ <div class="dirlist" id="dirlist"></div>
+ <div class="err" id="err"></div>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let CUR=null, HAS_DRAFT=false;
+function cleanPath(s){ // ตัด " ' และ \ ที่ติดมาจาก Finder (ก๊อป Copy as Pathname)
+  s=(s||'').trim().replace(/^["']+|["']+$/g,'').trim().replace(/\\ /g,' ');
+  if(s.startsWith('file://')){ try{ s=decodeURIComponent(s.slice(7)); }catch(e){ s=s.slice(7); } }
+  return s.trim();
+}
+async function loadRecent(){
+  const r=await fetch('/api/recent'); const j=await r.json();
+  if(j.recent && j.recent.length){
+    $('recentCard').style.display='block';
+    const box=$('recentList'); box.innerHTML='';
+    j.recent.forEach(p=>{
+      const d=document.createElement('div');
+      d.textContent=(p.valid?'✅ ':'⚠️ ')+p.path;
+      d.onclick=()=>selectProject(p.path);
+      box.appendChild(d);
+    });
+  }
+}
+async function go(path){
+  $('err').textContent='';
+  path=cleanPath(path); $('pathBox').value=path;
+  const r=await fetch('/api/browse?path='+encodeURIComponent(path||''));
+  const j=await r.json();
+  if(j.error){ $('err').textContent=j.error; return; }
+  CUR=j.path; HAS_DRAFT=j.has_draft??(j.entries||[]).some(e=>e.name==='draft_info.json'&&!e.is_dir);
+  $('pathBox').value=CUR;
+  $('crumbs').textContent=CUR+(HAS_DRAFT?'  —  ✅ พบ draft_info.json ในนี้':'  —  ยังไม่พบ draft_info.json');
+  const box=$('dirlist'); box.innerHTML='';
+  if(j.parent){
+    const up=document.createElement('div'); up.className='dirrow';
+    up.innerHTML='<span>⬆️ .. (ขึ้นไปหนึ่งชั้น)</span>';
+    up.onclick=()=>go(j.parent); box.appendChild(up);
+  }
+  (j.dirs||(j.entries||[]).filter(e=>e.is_dir).map(e=>e.name)).forEach(name=>{
+    const row=document.createElement('div'); row.className='dirrow';
+    row.innerHTML='<span>📁 '+name.replace(/</g,'&lt;')+'</span>';
+    row.onclick=()=>go(CUR+'/'+name);
+    box.appendChild(row);
+  });
+}
+function selectHere(){ if(!CUR){ $('err').textContent='ยังไม่ได้เลือกโฟลเดอร์'; return; } selectProject(CUR); }
+async function selectProject(path){
+  const r=await fetch('/api/select_project',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path})});
+  const j=await r.json();
+  if(j.error){ $('err').textContent=j.error; return; }
+  location.href='/editor';
+}
+async function clearRecent(){
+  if(!confirm('ล้างประวัติโปรเจกต์ล่าสุดทั้งหมด?'))return;
+  await fetch('/api/clear_recent',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  $('recentCard').style.display='none';
+}
+loadRecent(); go('');
+</script></body></html>

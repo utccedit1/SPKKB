@@ -1,0 +1,2385 @@
+<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ช่วยด้วยจ้า Studio — CapCut</title>
+<style>
+:root{--bg:#f5f6f8;--card:#ffffff;--line:#e4e7ed;--txt:#111827;--sub:#6b7280;--acc:#2563eb;--accb:#0ea5e9}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,'Segoe UI','Sarabun',sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:12px;color:var(--sub)}
+.topbar a{color:var(--acc);cursor:pointer;text-decoration:none;font-weight:600}
+.topbar a:hover{color:#1d4ed8}
+h1{font-size:22px;margin:0 0 4px;color:var(--txt)}.sub{color:var(--sub);font-size:13px;margin-bottom:20px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card h2{font-size:15px;margin:0 0 14px;color:var(--txt);font-weight:700}
+/* การ์ดพับเก็บได้ */
+.card.collapsible>h2{cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;transition:margin .15s}
+.card.collapsible>h2::before{content:"\25be";font-size:11px;color:var(--sub);transition:transform .15s;flex-shrink:0}
+.card.collapsed>h2::before{transform:rotate(-90deg)}
+.card.collapsed>h2{margin-bottom:0}
+.card.collapsed>*:not(h2){display:none!important}
+.card.collapsible>h2:hover{color:var(--acc)}
+.row{display:flex;flex-wrap:wrap;gap:16px}
+.f{flex:1;min-width:150px}
+label{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px;letter-spacing:.2px}
+input[type=text],input[type=number],input[type=password],select,textarea{width:100%;padding:9px 11px;background:#fff;border:1.5px solid var(--line);
+ border-radius:10px;color:var(--txt);font-size:14px;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+input[type=text]:focus,input[type=number]:focus,input[type=password]:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea{resize:vertical;min-height:60px}
+input[type=color]{width:44px;height:36px;padding:2px;border-radius:8px;border:1.5px solid var(--line);background:#fff}
+.colorbox{display:flex;gap:6px;align-items:center}
+.colorbox input[type=text]{flex:1}
+.accdots{display:flex;gap:3px;align-items:center;flex-shrink:0}
+.accdot{width:17px;height:17px;border-radius:5px;cursor:pointer;border:1.5px solid rgba(0,0,0,.12);
+  box-shadow:0 1px 3px rgba(0,0,0,.12);transition:transform .08s}
+.accdot:hover{transform:scale(1.25)}
+.val{color:var(--acc);font-weight:700}
+.hint{color:var(--sub);font-size:12px}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.pst{border:1.5px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;text-align:center;background:#fff;transition:border-color .15s,box-shadow .15s}
+.pst:hover{border-color:var(--acc);box-shadow:0 2px 8px rgba(37,99,235,.1)}
+.pst.on{border-color:var(--acc);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.pst .pv{border-radius:8px;padding:14px 0;font-weight:800;font-size:18px;margin-bottom:6px}
+.pst .pn{font-size:12px;font-weight:700;color:var(--txt)}.pst .pd{font-size:10.5px;color:var(--sub)}
+.prev{background:#1a1a2e;border-radius:14px;padding:26px;text-align:center;min-height:70px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;position:relative;transition:background .15s}
+.chip{padding:2px 6px;display:inline-block;transition:color .12s, background .12s, transform .12s;transform-origin:center bottom}
+@keyframes wpop{0%{transform:scale(.55);opacity:.25}55%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
+.chip.pop{animation:wpop .34s cubic-bezier(.2,1.3,.4,1)}
+.mspd{padding:3px 9px;font-size:11px;border-radius:7px;background:var(--inp);color:var(--txt);border:1.5px solid var(--line);font-weight:600}
+.mspd.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#motionBtn{padding:3px 12px;font-size:11px;border-radius:7px;background:var(--acc);color:#fff;border:none;font-weight:700}
+#motionBtn.playing{background:#fee2e2;color:#dc2626}
+.prevbar{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.prevbar small{color:var(--sub);font-size:11px}
+.prevbar button{padding:3px 9px;font-size:11px;border-radius:7px;background:var(--inp);color:var(--txt);border:1.5px solid var(--line);font-weight:600}
+.prevbar button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.caps{max-height:320px;overflow:auto;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+.cap{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px}
+.cap:last-child{border-bottom:none}
+.cap.skip{opacity:.4}
+.cap .idx{color:var(--sub);width:34px}
+.cap .w{color:var(--sub);width:46px}
+.cap .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cap.capml{display:block;padding:8px 10px}
+.cap.capml .caprow1{display:flex;gap:8px;align-items:center}
+.cap.capml .capsuper{display:flex;gap:6px;align-items:center;margin-top:6px;padding-left:34px;flex-wrap:wrap}
+.cap.capml .capsuper .kwl{color:#7c3aed;font-size:11px;white-space:nowrap;font-weight:600}
+.cap.capml .capsuper input{flex:1;min-width:120px;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:8px;color:var(--txt);padding:6px 8px;font-size:12px}
+.cap.capml .capsuper input:focus{border-color:#7c3aed;outline:none}
+.toolbar{display:flex;gap:14px;padding:8px 10px;font-size:12px;border-bottom:1.5px solid var(--line)}
+.toolbar a{color:var(--acc);cursor:pointer;font-weight:600}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+button{cursor:pointer;border:none;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:700;transition:background .15s,transform .1s}
+button:active{transform:scale(.97)}
+.primary{background:var(--acc);color:#fff}
+.primary:hover{background:#1d4ed8}
+.ghost{background:var(--inp);color:var(--txt);border:1.5px solid var(--line)}
+.ghost:hover{background:#e2e8f0}
+.danger{background:#fee2e2;color:#dc2626;border:1.5px solid #fecaca}
+.danger:hover{background:#fecaca}
+#msg{margin-top:12px;padding:10px 12px;border-radius:10px;display:none;font-size:13px;font-weight:500}
+#msg.ok{background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;display:block}
+#msg.err{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;display:block}
+.safewrap{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.safecanvas{position:relative;width:180px;height:320px;background:#1a1a2e;border-radius:10px;overflow:hidden;flex-shrink:0;border:1.5px solid var(--line)}
+.safearea{position:absolute;border:1.5px dashed #ef4444;box-sizing:border-box}
+.supdot{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;line-height:1.02;text-align:center}
+.supdot span{white-space:nowrap;font-weight:normal;text-shadow:2px 2px 4px rgba(0,0,0,.8);display:block}
+.supanim{display:inline-block;transform-origin:center center}
+@keyframes sup_pop{0%{transform:scale(.4);opacity:0}55%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+@keyframes sup_smooth{0%{transform:scale(.82);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes sup_zoomblur{0%{transform:scale(1.28);opacity:0;filter:blur(6px)}60%{opacity:1;filter:blur(1px)}100%{transform:scale(1);filter:blur(0)}}
+@keyframes sup_rise{0%{transform:translateY(28px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.supanim.a_pop{animation:sup_pop .5s cubic-bezier(.2,1.3,.4,1)}
+.supanim.a_pop_smooth{animation:sup_smooth .5s cubic-bezier(.25,.9,.3,1)}
+.supanim.a_zoom_blur{animation:sup_zoomblur .55s ease-out}
+.supanim.a_rise{animation:sup_rise .5s cubic-bezier(.25,.9,.3,1)}
+#supPlayBtn{padding:3px 10px;font-size:11px;border-radius:7px;background:var(--acc);color:#fff;border:none;font-weight:700;margin-top:6px}
+.snaprow{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px}
+.snaprow:last-child{border-bottom:none}
+.snaprow button{padding:6px 10px;font-size:11px}
+.badge{font-size:10px;background:#dcfce7;color:#16a34a;padding:1px 7px;border-radius:20px;margin-left:6px;font-weight:600}
+code{background:var(--inp);border:1.5px solid var(--line);border-radius:5px;padding:1px 5px;font-size:11px;color:#374151}
+.aicap{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:13px;display:flex;gap:8px;align-items:center;background:#fff}
+.aicap input[type=text]{flex:1;width:100%}
+.aicap .idx{color:var(--sub);width:34px}
+.aicap .kwf{display:flex;flex-direction:column;gap:3px}
+.aicap .kwl{font-size:11px;color:var(--sub);font-weight:600}
+.aicap .kwf input[type=text]{background:#faf5ff;pointer-events:auto}
+/* ── Collapsible hint rows ── */
+.hint-toggle{display:inline-flex;align-items:center;gap:4px;cursor:pointer;user-select:none;
+ font-size:11px;color:var(--sub);background:var(--line);border:none;border-radius:6px;
+ padding:2px 8px;margin-left:6px;font-weight:600;vertical-align:middle}
+.hint-toggle:hover{color:var(--txt)}
+.hint-row{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.65;
+ border-left:2px solid var(--line);padding-left:10px}
+.hint-row.collapsed{display:none}
+/* ── Dark mode for cards/caps ── */
+[data-theme=dark] .caps{background:#1a1d27}
+[data-theme=dark] .cap{border-color:#2d3148}
+[data-theme=dark] .aicap{background:#1a1d27}
+[data-theme=dark] .pst{background:#1a1d27}
+[data-theme=dark] .prev{background:#0d0d1a}
+[data-theme=dark] code{background:#1a1d27;border-color:#2d3148;color:#93c5fd}
+.tabbar{position:sticky;top:0;z-index:20;display:flex;gap:6px;flex-wrap:wrap;background:var(--bg);padding:10px 0 8px;margin-bottom:6px;border-bottom:1.5px solid var(--line)}
+.tabbar button{padding:8px 14px;font-size:13px;font-weight:700;border-radius:10px;background:#fff;color:var(--sub);border:1.5px solid var(--line)}
+.tabbar button:hover{color:var(--txt);border-color:#c4c9d4}
+.tabbar button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.tabsec{display:none}
+.tabsec.on{display:block}
+.progwrap{background:var(--inp);border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:13px}
+.progtitle{font-weight:700;margin-bottom:8px;color:var(--txt)}
+.progtrack{height:10px;background:#e4e7ed;border-radius:8px;overflow:hidden}
+.progbar{height:100%;width:0%;background:linear-gradient(90deg,var(--accb),var(--acc));transition:width .3s ease;border-radius:8px}
+.progbar.err{background:#ef4444}
+.progmeta{margin-top:7px;color:var(--sub);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.progstage{color:var(--txt);font-weight:600}
+</style></head><body>
+<!-- ═══ UPDATE BANNER ═══ -->
+<div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(90deg,#1a1a2e 0%,#16213e 100%);
+  border-bottom:2px solid #e94560;padding:9px 18px;
+  align-items:center;gap:12px;
+  font-family:'Sarabun',sans-serif;font-size:13px;color:#eee;
+  box-shadow:0 2px 14px rgba(233,69,96,0.25);">
+  <span style="font-size:18px">🆕</span>
+  <div style="flex:1;min-width:0">
+    <strong id="upd-title" style="color:#fff">มีเวอร์ชันใหม่!</strong>
+    <div id="upd-notes" style="font-size:11px;color:#aaa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+  </div>
+  <div id="upd-prog-wrap" style="display:none;width:150px;flex-shrink:0">
+    <div style="background:#333;border-radius:4px;height:7px;overflow:hidden">
+      <div id="upd-prog-bar" style="height:100%;background:#e94560;border-radius:4px;width:0%;transition:width 0.4s ease"></div>
+    </div>
+    <div id="upd-prog-lbl" style="font-size:10px;color:#aaa;margin-top:3px;text-align:center">กำลังดาวน์โหลด...</div>
+  </div>
+  <button id="upd-btn" onclick="updStart()"
+    style="background:#e94560;color:#fff;border:none;border-radius:7px;
+    padding:6px 15px;cursor:pointer;font-size:12px;font-weight:700;
+    white-space:nowrap;transition:opacity 0.2s;flex-shrink:0">⬇️ อัปเดตเลย</button>
+  <button id="upd-dismiss" onclick="updDismiss()"
+    style="background:transparent;color:#888;border:1px solid #555;border-radius:7px;
+    padding:6px 10px;cursor:pointer;font-size:11px;flex-shrink:0">ข้ามก่อน</button>
+</div>
+<!-- ═══ END UPDATE BANNER ═══ -->
+<div class="wrap">
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:28px;height:28px;background:var(--acc);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🎬</div>
+    <span style="font-weight:700;color:var(--txt);font-size:14px">ช่วยด้วยจ้า Studio</span>
+    <span style="color:var(--line)">|</span>
+    <span id="projPath" style="color:var(--sub)">โปรเจกต์: -</span>
+  </div>
+  <a onclick="location.href='/'" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:#f1f5f9;border:1.5px solid var(--line)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.36"/></svg>
+    เปลี่ยนโปรเจกต์
+  </a>
+</div>
+<div class="sub" style="margin-bottom:16px">ไลน์เน้นไล่สีทีละคำ + Super Text — ปิด CapCut ก่อนกด "ลงมือทำ" เสมอ</div>
+
+<div class="tabbar">
+  <button data-tab="main" class="on" onclick="showTab('main',this)">ซับ &amp; ไลน์เน้น</button>
+  <button data-tab="super" onclick="showTab('super',this)">Super Text</button>
+  <button data-tab="caps" onclick="showTab('caps',this)">เลือก / จัดซับ</button>
+  <button data-tab="clip" onclick="showTab('clip',this)">ตัดคลิป</button>
+  <button data-tab="hist" onclick="showTab('hist',this)">ประวัติ</button>
+  <button data-tab="ann_mgr" id="tabBtn_ann_mgr" onclick="showTab('ann_mgr',this)" style="display:none">📢 ประกาศ</button>
+</div>
+
+<div class="tabsec on" id="tab_main">
+<div class="card collapsible"><h2>🎨 พรีเซ็ตซับ (ไลน์เน้น/ซับหลัก)</h2>
+<div class="presets" id="presets"></div>
+<small class="hint">พรีเซ็ตกลุ่มนี้ตั้งค่า <b>เฉพาะซับหลัก</b> (สี/ไฮไลต์/กล่อง/ไล่สี/เด้ง) — ไม่ยุ่งกับ Super Text · พรีเซ็ต Super Text อยู่แยกในการ์ด 💥 ด้านล่าง เพื่อไม่ให้เอฟเฟกต์ตีกัน</small>
+</div>
+
+<div class="card collapsible collapsed"><h2>🏛️ แม่แบบสีประจำคณะ/หน่วยงาน (UTCC Brand)</h2>
+<small class="hint">สีทางการอ้างอิงจาก Brand Identity Guidelines — <b>เลือกคณะ → เลือกสีเน้น → กดปุ่มเดียวแมทสีเข้าทั้งคลิป</b> (ปรับต่อทีหลังได้)</small>
+<div class="row" style="margin-top:10px;align-items:flex-end">
+ <div class="f" style="flex:2;min-width:220px"><label>1️⃣ เลือกคณะ / หน่วยงาน</label>
+   <select id="palSel"></select></div>
+ <div class="f"><label>2️⃣ ใช้สีไหนเป็น "สีเน้น/ไฮไลต์"</label>
+   <select id="palAccent"></select></div>
+</div>
+<div id="palSwatches" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px"></div>
+<div class="row" style="margin-top:14px">
+ <button class="primary" style="min-width:100%" onclick="applyPaletteWholeClip()">🎨 3️⃣ แมทสีคณะนี้เข้ากับทั้งคลิป (ปุ่มเดียวจบ)</button>
+</div>
+<small class="hint" style="display:block;margin-top:8px">
+ ▸ ปุ่มนี้จะจับ <b>สีเน้นที่เลือก</b> ไปใส่: คำที่เน้น (ไฮไลต์) · Super Text · เส้นขอบ/กล่องที่เปิดใช้อยู่ ให้เข้าธีมคณะทั้งคลิปในคลิกเดียว<br>
+ ▸ ตัวอักษรปกติจะตั้งเป็น <b>สีขาว</b> (อ่านง่ายบนวิดีโอ) และกรอบทึบใช้ <b>สีเข้ม/น้ำเงินแบรนด์</b> ให้ตัดกับตัวอักษร<br>
+ ▸ 🎨 <b>ทุกช่องเลือกสีด้านล่าง</b> จะมี “จุดสีคณะ” เล็กๆ ต่อท้าย — คลิกจุดเพื่อหยิบสีของคณะที่เลือกไว้มาใส่ช่องนั้นได้ทันที (เปลี่ยนคณะด้านบน จุดสีก็เปลี่ยนตาม)
+</small>
+<details style="margin-top:10px"><summary style="cursor:pointer;color:var(--accb);font-size:12px">⚙️ โหมดกำหนดเอง (คลิกช่องสีแล้วเลือกว่าจะใส่ตรงไหน)</summary>
+ <div class="row" style="margin-top:8px"><div class="f">
+   <label>คลิกช่องสีด้านบนแล้วนำไปใช้เป็น</label>
+   <select id="palTarget">
+     <option value="hc">สีคำที่เน้น (ไฮไลต์)</option>
+     <option value="nc">สีตัวปกติ</option>
+     <option value="spc">สี Super Text (คำขยี้บน)</option>
+     <option value="spsub">สี Super Text (บรรทัดล่าง)</option>
+     <option value="bgc">สีกรอบพื้นหลัง (box)</option>
+     <option value="spbgc">สีกรอบ Super Text</option>
+     <option value="sc">สีเส้นขอบตัวอักษร</option>
+     <option value="shcolor">สีเงา</option>
+   </select></div></div>
+ <small class="hint">โหมดนี้สำหรับคนอยากจับสีทีละช่องเอง — เลือกช่องปลายทางตรงนี้ก่อน แล้วคลิกช่องสีด้านบน</small>
+</details>
+</div>
+
+<div class="card collapsible"><h2>1) ฟอนต์ & สี</h2>
+<div class="row">
+ <div class="f" style="min-width:100%"><label>ฟอนต์ (จากในเครื่อง) — พิมพ์เพื่อค้นหา · ค่าเริ่มต้นของทีม: <b>DB Heavent Blk v3.2.1</b></label>
+   <input type="text" id="fontsearch" placeholder="🔍 ค้นหาฟอนต์ เช่น Heavent, Sarabun, TH...">
+   <select id="font" size="6" style="margin-top:8px"></select><small class="hint" id="fontpath"></small></div>
+</div>
+<div class="row" style="margin-top:14px">
+ <div class="f"><label>สีคำที่เน้น</label><div class="colorbox">
+   <input type="color" id="hc" value="#febe00">
+   <input type="text" id="hchex" value="#febe00"></div></div>
+ <div class="f"><label>สีตัวปกติ</label><div class="colorbox">
+   <input type="color" id="nc" value="#ffffff">
+   <input type="text" id="nchex" value="#ffffff"></div></div>
+</div>
+</div>
+
+<div class="card collapsible"><h2>2) ขนาด & จังหวะ</h2>
+<div class="row">
+ <div class="f"><label>ขนาดคำที่เน้น — <span class="val" id="hsv">16</span></label>
+   <input type="range" id="hs" min="6" max="30" step="0.5" value="16"></div>
+ <div class="f"><label>ขนาดตัวปกติ — <span class="val" id="nsv">12</span></label>
+   <input type="range" id="ns" min="6" max="30" step="0.5" value="12"></div>
+</div>
+<div class="row" style="margin-top:6px">
+ <div class="f"><label>รูปแบบไลน์เน้น</label>
+   <select id="karaoke_style">
+     <option value="line">ทั้งบรรทัด + ไฮไลต์ไล่ทีละคำ (คลาสสิก)</option>
+     <option value="color_sweep">ไล่สีทีละคำ (ทั้งประโยคค้าง สีวิ่งซ้าย→ขวา)</option>
+     <option value="box_travel">ทั้งบรรทัดค้าง + กล่องทึบวิ่งทีละคำ (แนะนำ)</option>
+     <option value="word_box">กล่องหุ้มเฉพาะคำที่กำลังพูด (คำต่อคำ โผล่ทีละคำ)</option>
+   </select></div>
+ <div class="f"><label>ตัดคำภาษาไทยแบบ <span id="tokStatus" class="hint"></span></label>
+   <select id="token_mode">
+     <option value="word">คำเต็ม (ต้องมี pythainlp ในเครื่อง)</option>
+     <option value="syllable">พยางค์ (ไม่ต้องลงอะไรเพิ่ม)</option>
+   </select>
+   <small id="tokWarn" class="hint" style="display:none;color:#d97706"></small></div>
+</div>
+<div class="row" style="margin-top:6px">
+ <div class="f"><label>ความยาวซับแนะนำ (ตัวอักษร) — <span class="val" id="mcv">40</span></label>
+   <input type="range" id="mc" min="10" max="120" step="1" value="40"><small>ใช้แบ่งซับและเตือนท่อนยาว ซับที่เกินเกณฑ์ยังได้เอฟเฟกต์</small></div>
+ <div class="f"><label>วิธีแบ่งจังหวะเวลา</label>
+   <select id="timing"><option value="even">ตามจังหวะพูด — กระจายตามน้ำหนักคำ/พยางค์ (แนะนำ)</option>
+   <option value="equal">เวลาเท่าๆ กันทุกคำ — ขึ้นคำสม่ำเสมอ (ปรับความเร็วได้จากจำนวนคำ/ช่วงซับ)</option>
+   <option value="token">ใช้เวลาจริงรายคำถ้ามี (auto caption รุ่นที่เก็บเวลาแต่ละคำ)</option></select></div>
+ <div class="f"><label>ปรับจังหวะ/ชดเชยเวลา (ms) — <span class="val" id="tofsv">0</span> <small class="hint">(+ ช้าลง / − เร็วขึ้น)</small></label>
+   <input type="range" id="timing_offset" min="-1000" max="1000" step="50" value="0"></div>
+</div>
+<div class="row" style="margin-top:12px;align-items:center">
+ <div class="f"><label><input type="checkbox" id="shadow" checked> เงาตัวอักษร</label></div>
+ <div class="f"><label><input type="checkbox" id="karaoke_pop"> 💥 เด้งทีละคำ</label></div>
+</div>
+<div class="row" style="margin-top:12px;align-items:flex-end;background:var(--inp);border-radius:10px;padding:10px">
+ <div class="f" style="flex-basis:100%"><label><input type="checkbox" id="subPosOn" checked> 📍 ตั้งตำแหน่งซับหลักให้ทุกท่อน (ค่าจาก CapCut)</label>
+   <small class="hint">ค่าเริ่มต้นทีม X=0, Y=-1207 (พิกัดแบบ CapCut: 0,0=กึ่งกลางจอ · +X=ขวา · +Y=ขึ้นบน) — ปิดได้ถ้าอยากคงตำแหน่งเดิมของซับ</small></div>
+ <div class="f"><label>ตำแหน่ง X (CapCut px)</label><input type="number" id="subPosX" value="0" step="1"></div>
+ <div class="f"><label>ตำแหน่ง Y (CapCut px)</label><input type="number" id="subPosY" value="-1207" step="1"></div>
+</div>
+<div id="shadowAdv" class="row" style="margin-top:8px">
+ <div class="f"><label>สีเงา</label><div class="colorbox">
+   <input type="color" id="shcolor" value="#000000"><input type="text" id="shcolorhex" value="#000000"></div></div>
+ <div class="f"><label>ความเข้มเงา — <span class="val" id="shav">0.70</span></label>
+   <input type="range" id="shalpha" min="0" max="1" step="0.05" value="0.7"></div>
+ <div class="f"><label>ระยะเงา — <span class="val" id="shdv">4.0</span></label>
+   <input type="range" id="shdist" min="0" max="20" step="0.5" value="4"></div>
+ <div class="f"><label>มุมเงา (°) — <span class="val" id="shanv">-45</span></label>
+   <input type="range" id="shangle" min="-180" max="180" step="5" value="-45"></div>
+ <div class="f"><label>ความฟุ้งเงา — <span class="val" id="shbv">0.05</span></label>
+   <input type="range" id="shblur" min="0" max="1" step="0.01" value="0.05"></div>
+</div>
+</div>
+
+<div class="card collapsible collapsed"><h2>3) เส้นขอบ & กรอบพื้นหลัง</h2>
+<div class="row" style="align-items:flex-end">
+ <div class="f"><label><input type="checkbox" id="stroke"> เส้นขอบตัวอักษร (outline)</label>
+   <div class="colorbox"><input type="color" id="sc" value="#000000">
+   <input type="text" id="schex" value="#000000"></div></div>
+ <div class="f"><label>ความหนาเส้นขอบ — <span class="val" id="swv">0.06</span></label>
+   <input type="range" id="sw" min="0.01" max="0.15" step="0.01" value="0.06"></div>
+</div>
+<div class="row" style="margin-top:14px;align-items:flex-end">
+ <div class="f"><label><input type="checkbox" id="bg"> กรอบพื้นหลัง (box)</label>
+   <div class="colorbox"><input type="color" id="bgc" value="#000000">
+   <input type="text" id="bgchex" value="#000000"></div></div>
+ <div class="f"><label>ความทึบกรอบ — <span class="val" id="bgav">0.7</span></label>
+   <input type="range" id="bga" min="0" max="1" step="0.05" value="0.7"></div>
+ <div class="f"><label>มุมโค้ง — <span class="val" id="bgrv">0.2</span></label>
+   <input type="range" id="bgr" min="0" max="1" step="0.05" value="0.2"></div>
+<div class="f"><label>ขนาดกรอบ แนวกว้าง (padding) — <span class="val" id="bgpwv">0.04</span></label>
+  <input type="range" id="bgpw" min="0" max="0.3" step="0.01" value="0.04"></div>
+<div class="f"><label>ขนาดกรอบ แนวสูง (padding) — <span class="val" id="bgphv">0.04</span></label>
+  <input type="range" id="bgph" min="0" max="0.3" step="0.01" value="0.04"></div>
+<small class="hint" style="grid-column:1/-1">💡 "ขนาดกรอบ" = ระยะเผื่อรอบตัวอักษร ยิ่งน้อยกรอบยิ่งแนบตัวอักษร
+ (โหมดกล่องหุ้มทีละคำจะบีบให้เล็กสุดอัตโนมัติ เพื่อไม่ให้กรอบไปทับคำข้างๆ จนอ่านไม่ออก)</small>
+</div>
+</div>
+
+<div class="card collapsible"><h2>4) ตัวอย่าง (พรีวิวเคลื่อนไหว)</h2>
+ <div class="prevbar"><small>พื้นหลังพรีวิว:</small>
+   <button data-bg="auto" onclick="setPrevBg('prev',this)" class="on">อัตโนมัติ (ตรงข้ามสีตัวอักษร)</button>
+   <button data-bg="#ffffff" onclick="setPrevBg('prev',this)">ขาว</button>
+   <button data-bg="#000000" onclick="setPrevBg('prev',this)">ดำ</button>
+   <button data-bg="#7d7d7d" onclick="setPrevBg('prev',this)">เทา</button></div>
+ <div class="prevbar" style="margin-top:2px">
+   <button id="motionBtn" onclick="toggleMotion()">▶ เล่นตัวอย่างเคลื่อนไหว</button>
+   <small>ความเร็ว</small>
+   <button class="mspd" data-ms="900" onclick="setMotionSpeed(this)">ช้า</button>
+   <button class="mspd on" data-ms="600" onclick="setMotionSpeed(this)">ปกติ</button>
+   <button class="mspd" data-ms="360" onclick="setMotionSpeed(this)">เร็ว</button>
+   <small id="motionMode" style="margin-left:auto"></small>
+ </div>
+ <div class="prev" id="prev"><span class="chip" id="p1">คำ</span> <span class="chip" id="p2">เน้น</span> <span class="chip" id="p3">ปกติ</span></div>
+ <small class="hint">พรีวิวนี้จำลองการเคลื่อนไหวตามพรีเซ็ต/ค่าที่ปรับ (ไฮไลต์ไล่คำ · ไล่สี · กล่องทึบวิ่ง · เด้งทีละคำ) เพื่อดูจังหวะคร่าวๆ — ผลจริงความคมชัดเต็มดูใน CapCut อีกที</small>
+</div>
+
+</div><!-- /tab_main -->
+
+<div class="tabsec" id="tab_super">
+<div class="card collapsible"><h2>💥 Super Text — คำขยี้เน้นประเด็น (ข้อความใหญ่แยกชิ้น)</h2>
+<div class="row" style="align-items:center">
+ <div class="f" style="min-width:100%"><label><input type="checkbox" id="super_on"> เปิดใช้ Super Text (สร้างแทร็กใหม่วางเหนือซับ)</label></div>
+</div>
+<!-- ✌️ 2 บรรทัด — ยกขึ้นมาก่อนพรีเซ็ต ใหญ่และเด่นขึ้น -->
+<div class="row" style="margin-top:10px">
+ <div class="f" style="min-width:100%">
+  <label style="display:flex;align-items:center;gap:10px;background:#faf5ff;border:2px solid #c4b5fd;border-radius:10px;padding:12px 14px;font-size:15px;font-weight:700;cursor:pointer">
+   <input type="checkbox" id="sp2line" style="width:22px;height:22px;accent-color:#7c3aed">
+   ✌️ แบบ 2 บรรทัด
+   <span style="font-weight:400;color:#7c3aed;font-size:13px">(บรรทัดบนเน้นสีเด่น+ตัวใหญ่ / บรรทัดล่างตัวขาวเล็กกว่า)</span>
+  </label>
+  <small class="hint" style="margin-top:4px;display:block">เหมาะกับสโลแกน เช่น <b>เรียนสาขานี้</b> (บน) / ไปประกอบอาชีพได้จริง (ล่าง) — ให้ AI ช่วยคิดทั้ง 2 บรรทัดได้ในการ์ด 🤖 ด้านล่าง</small>
+ </div>
+</div>
+<div class="row" id="spHideRow" style="margin-top:6px;display:none">
+ <div class="f" style="min-width:100%">
+  <label style="display:flex;align-items:center;gap:10px;background:#fff8e7;border:2px solid #fcd34d;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer">
+   <input type="checkbox" id="spHideCap" checked style="width:20px;height:20px;accent-color:#d97706">
+   🙈 ซ่อนซับต้นฉบับของท่อนที่ใส่ Super Text 2 บรรทัด (ให้เหลือแค่ Super Text)
+  </label>
+  <small class="hint" style="margin-top:4px;display:block">แก้อาการ "Supertext | ซับ | Supertext" ซ้อนกัน — เมื่อท่อนไหนมี Super Text 2 บรรทัด ซับต้นฉบับของท่อนนั้นจะถูกซ่อน เหลือแต่ 2 เลเยอร์ Super Text เท่านั้น</small>
+ </div>
+</div>
+<div class="f" style="min-width:100%;margin-top:12px"><label>🎬 พรีเซ็ต Super Text (เอฟเฟกต์เข้า)</label></div>
+<div class="presets" id="superPresets"></div>
+<small class="hint">พรีเซ็ตกลุ่มนี้ตั้งค่า <b>เฉพาะ Super Text</b> (สี/ขนาด/สไตล์เอฟเฟกต์เข้า) — ไม่ยุ่งกับซับหลัก ปรับต่อได้ด้านล่าง<br>
+💡 คำขยี้ที่จะดึงออกมา ให้ใช้ปุ่ม <b>"ให้ AI อ่านซับ &amp; คิดคำ Super Text"</b> ในการ์ด 🤖 ด้านล่าง (แก้ไข/พิมพ์เองได้ทั้ง 2 บรรทัดหลัง AI เสนอ) — ถ้าบรรทัดไหน AI ไม่ได้เสนอ ระบบจะดึง "คำที่ยาวสุด" ในซับนั้นมาให้อัตโนมัติ</small>
+<div class="row" id="sp2row" style="margin-top:6px;display:none">
+ <div class="f"><label>สีบรรทัดล่าง (คำธรรมดา)</label><div class="colorbox">
+   <input type="color" id="spsub" value="#ffffff"><input type="text" id="spsubhex" value="#ffffff"></div></div>
+ <div class="f"><label>ขนาดบรรทัดล่างเทียบบรรทัดบน — <span class="val" id="spsubrv">0.6</span></label>
+   <input type="range" id="spsubr" min="0.4" max="0.95" step="0.05" value="0.6"></div>
+</div>
+<div class="row" id="sp2row2" style="margin-top:6px;display:none">
+ <div class="f"><label><input type="checkbox" id="splayer" checked> 🧱 แยกเป็น 2 เลเยอร์ (จัดตำแหน่งคำเน้น/คำปกติแยกกันได้)</label>
+   <small class="hint">บรรทัดล่าง (คำปกติ) จะอยู่กึ่งกลางจอเสมอ ส่วนบรรทัดบน (คำเน้นตัวใหญ่) จัดชิดตามด้านล่างนี้</small></div>
+ <div class="f"><label>การจัดวางคำเน้น (เทียบขอบบรรทัดล่าง)</label>
+   <select id="spalign">
+     <option value="left">ชิดซ้าย</option>
+     <option value="center">กึ่งกลาง</option>
+     <option value="right">ชิดขวา</option>
+   </select></div>
+</div>
+<div class="row" style="margin-top:10px">
+ <div class="f"><label>สีคำขยี้ (บรรทัดบน)</label><div class="colorbox">
+   <input type="color" id="spc" value="#ffe000"><input type="text" id="spchex" value="#ffe000"></div></div>
+ <div class="f"><label>ขนาดตัวอักษร — <span class="val" id="spszv">18</span></label>
+   <input type="range" id="spsz" min="10" max="40" step="1" value="18"></div>
+ <div class="f"><label>ขยายใหญ่ (scale) — <span class="val" id="spscalev">2</span></label>
+   <input type="range" id="spscale" min="1" max="4" step="0.1" value="2"></div>
+</div>
+<!-- ข้อ 3: ตำแหน่ง Super Text อยู่ 'ข้างจอพรีวิวจำลอง' เลื่อนแล้วเห็นจุดขยับทันที ไม่ต้องเลื่อนหน้าลงไปดู -->
+<div class="row" id="spPosRow" style="margin-top:8px;align-items:stretch">
+ <div class="f" style="flex:1.4;min-width:260px">
+   <label>ตำแหน่งแนวตั้ง (บน→ล่าง) — <span class="val" id="spyv">0.35</span></label>
+   <input type="range" id="spy" min="-0.9" max="0.9" step="0.05" value="0.35">
+   <label style="margin-top:8px;display:block">ตำแหน่งแนวนอน (ซ้าย→ขวา) — <span class="val" id="spxv">0</span></label>
+   <input type="range" id="spx" min="-0.9" max="0.9" step="0.05" value="0">
+   <small class="hint">👉 เลื่อนสไลเดอร์แล้วดูจุด "คำขยี้" ในจอจำลองด้านขวาขยับตามทันที (กรอบเส้นประ = พื้นที่ปลอดภัย ตามสัดส่วนจอโปรเจกต์ <span title="พรีวิวประมาณตามสัดส่วนจริง ฟอนต์และเงาอาจต่างจาก CapCut กรุณาตรวจหลังสร้าง" id="canvasInfo">-</span>)</small>
+ </div>
+ <div class="f" style="flex:1;min-width:180px;align-items:center;justify-content:center">
+   <div class="safecanvas" id="safecanvas" style="margin:0 auto">
+     <div class="safearea" id="safearea"></div>
+     <div class="supdot" id="supdot"><span class="supanim">คำขยี้</span></div>
+   </div>
+   <button id="supPlayBtn" onclick="playSupAnim()">▶ เล่นเอฟเฟกต์เข้า</button>
+ </div>
+</div>
+<div class="row" style="margin-top:6px">
+ <div class="f"><label>เวลาแสดง</label>
+   <select id="sptiming"><option value="full">ตลอดช่วงซับนั้น</option>
+   <option value="pop">โผล่ช่วงสั้น (pop)</option></select></div>
+ <div class="f"><label>ระยะ pop (มิลลิวินาที) — <span class="val" id="sppopv">1200</span></label>
+   <input type="range" id="sppop" min="400" max="4000" step="100" value="1200"></div>
+</div>
+<div class="row" style="margin-top:10px;align-items:center">
+<div class="f"><label><input type="checkbox" id="spanim" checked> ✨ เอฟเฟกต์ตอนเข้า (keyframe)</label></div>
+<div class="f"><label>สไตล์เอฟเฟกต์เข้า</label>
+  <select id="spanimtype">
+    <option value="pop">💥 เด้งเข้า (pop)</option>
+    <option value="pop_smooth">🫧 ขยายเข้านุ่มๆ (motion smooth)</option>
+    <option value="zoom_blur">🌀 ซูมเบลอเข้า (pop-in / motion blur)</option>
+    <option value="rise">🎈 ลอยขึ้นนุ่มๆ (rise)</option>
+    <option value="none">— ไม่มี (โผล่นิ่ง)</option>
+  </select></div>
+<div class="f"><label><input type="checkbox" id="spshadow" checked> เงา</label></div>
+ <div class="f"><label><input type="checkbox" id="spstroke" checked> เส้นขอบ</label>
+   <div class="colorbox"><input type="color" id="spsc" value="#000000"><input type="text" id="spschex" value="#000000"></div></div>
+ <div class="f"><label>หนาเส้นขอบ — <span class="val" id="spswv">0.08</span></label>
+   <input type="range" id="spsw" min="0.01" max="0.15" step="0.01" value="0.08"></div>
+</div>
+<div id="spShadowAdv" class="row" style="margin-top:8px;align-items:flex-end;background:var(--inp);border-radius:10px;padding:10px">
+ <div class="f" style="flex-basis:100%"><small class="hint">🌑 เงา Super Text (ปรับละเอียดแยกจากซับได้)</small></div>
+ <div class="f"><label>สีเงา</label>
+   <div class="colorbox"><input type="color" id="spshcolor" value="#000000"><input type="text" id="spshcolorhex" value="#000000"></div></div>
+ <div class="f"><label>ความเข้มเงา — <span class="val" id="spshav">0.70</span></label>
+   <input type="range" id="spshalpha" min="0" max="1" step="0.05" value="0.7"></div>
+ <div class="f"><label>ระยะเงา — <span class="val" id="spshdv">4</span></label>
+   <input type="range" id="spshdist" min="0" max="20" step="0.5" value="4"></div>
+ <div class="f"><label>มุมเงา (°) — <span class="val" id="spshanv">-45</span></label>
+   <input type="range" id="spshangle" min="-180" max="180" step="5" value="-45"></div>
+ <div class="f"><label>ความฟุ้งเงา — <span class="val" id="spshbv">0.05</span></label>
+   <input type="range" id="spshblur" min="0" max="1" step="0.01" value="0.05"></div>
+</div>
+<div class="row" style="margin-top:10px;align-items:flex-end">
+ <div class="f"><label><input type="checkbox" id="spbg"> กรอบพื้นหลัง</label>
+   <div class="colorbox"><input type="color" id="spbgc" value="#000000"><input type="text" id="spbgchex" value="#000000"></div></div>
+ <div class="f"><label>ความทึบกรอบ — <span class="val" id="spbgav">0.7</span></label>
+   <input type="range" id="spbga" min="0" max="1" step="0.05" value="0.7"></div>
+ <div class="f"><label>มุมโค้ง — <span class="val" id="spbgrv">0.25</span></label>
+   <input type="range" id="spbgr" min="0" max="1" step="0.05" value="0.25"></div>
+</div>
+<div class="prevbar" style="margin-top:12px"><small>พื้นหลังพรีวิว:</small>
+   <button data-bg="auto" onclick="setPrevBg('sprev',this)" class="on">อัตโนมัติ (ตรงข้ามสีตัวอักษร)</button>
+   <button data-bg="#ffffff" onclick="setPrevBg('sprev',this)">ขาว</button>
+   <button data-bg="#000000" onclick="setPrevBg('sprev',this)">ดำ</button>
+   <button data-bg="#7d7d7d" onclick="setPrevBg('sprev',this)">เทา</button></div>
+<div class="prev" id="sprev">คำขยี้</div>
+
+<h2 style="margin-top:22px">🛡️ Safe Space — กันคำหลุดขอบ/ตกจอ</h2>
+<div class="row">
+ <div class="f"><label>ขอบบน (กันโดนไอคอน/สถานะ) — <span class="val" id="stopv">12%</span></label>
+   <input type="range" id="stop" min="0" max="0.35" step="0.01" value="0.12"></div>
+ <div class="f"><label>ขอบล่าง (กันโดน UI/แคปชั่นหลัก) — <span class="val" id="sbotv">22%</span></label>
+   <input type="range" id="sbot" min="0" max="0.4" step="0.01" value="0.22"></div>
+ <div class="f"><label>ขอบซ้าย — <span class="val" id="sleftv">6%</span></label>
+   <input type="range" id="sleft" min="0" max="0.3" step="0.01" value="0.06"></div>
+ <div class="f"><label>ขอบขวา — <span class="val" id="srightv">6%</span></label>
+   <input type="range" id="sright" min="0" max="0.3" step="0.01" value="0.06"></div>
+</div>
+<small class="hint">คำที่ยาวเกินพื้นที่ปลอดภัยแนวนอนจะถูกย่อขนาดอัตโนมัติให้พอดี (ไม่ย่อเกิน 55%) —
+ปรับขอบตรงนี้แล้ว <b>กรอบเส้นประในจอจำลองด้านบน (ข้างสไลเดอร์ตำแหน่ง)</b> จะขยับตาม ·
+ถ้าจุดคำขยี้ล้นออกนอกเส้นประ ระบบจะหนีบตำแหน่ง/ย่อขนาดให้อัตโนมัติตอนกด "ลงมือทำ" จริงเสมอ</small>
+<small class="hint">Super Text วางบนแทร็กใหม่ "Super Text" — ถ้าอยากขยับตำแหน่ง/เวลาเพิ่มเติม ลากในไทม์ไลน์ CapCut ต่อได้เลย</small>
+
+<h2 style="margin-top:22px">🔊 Sound Effect (SFX) — เลือกเสียงให้ Super Text</h2>
+<div class="f" style="min-width:100%"><label><input type="checkbox" id="sfxOn" onchange="sfxToggle()"> เปิดใช้ SFX อัตโนมัติ — วางเสียงตรงจังหวะ Super Text (AI ข้ามจุดที่ไม่เหมาะได้)</label>
+  <small class="hint">ทำงานเฉพาะเมื่อเปิด Super Text — ระบบจะเพิ่มแทร็กเสียง "ช่วยด้วยจ้า SFX" ให้อัตโนมัติ (ปรับ/ลบในไทม์ไลน์ CapCut ต่อได้)</small></div>
+<div id="sfxBox" style="display:none;margin-top:6px">
+ <div class="row">
+  <div class="f" style="flex:2;min-width:280px"><label>📁 โฟลเดอร์ไฟล์เสียง SFX (วางพาธจาก Finder ได้เลย)</label>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="sfxDir" placeholder="/Users/…/SoundEffects" style="flex:1">
+      <button type="button" onclick="sfxLoad()" style="padding:10px 14px">โหลดรายชื่อ</button></div>
+    <small class="hint" id="sfxStatus">รองรับ .mp3 .wav .m4a .aac .ogg … · <b>เจาะลึกทุกโฟลเดอร์ย่อยให้อัตโนมัติ</b> (เลือกโฟลเดอร์ใหญ่ได้เลย)</small></div>
+ </div>
+ <div class="row" style="margin-top:6px">
+  <div class="f" style="min-width:100%"><label>🎚️ วิธีเลือกเสียงให้แต่ละ Super Text</label>
+    <select id="sfxMode" onchange="sfxModeToggle()">
+      <option value="single">ใช้ไฟล์เดียวกับทุกจุด (เลือกเอง)</option>
+      <option value="random">🎲 สุ่มสลับหลากหลาย (ทั้งโฟลเดอร์ ไม่ให้ซ้ำติดกัน)</option>
+      <option value="ai">🤖 ให้ AI เลือกเสียงให้เข้ากับแต่ละท่อน (จับอารมณ์/จังหวะ)</option>
+    </select>
+    <small class="hint" id="sfxModeHint">โหมด "ไฟล์เดียว" = ใช้เสียงเดียวทุกครั้งที่ Super Text เด้ง</small></div>
+ </div>
+ <div class="row" style="margin-top:6px">
+  <div class="f" id="sfxFileRow"><label>🎵 ไฟล์เสียงสำหรับ Super Text</label>
+    <select id="sfxSuperFile" onchange="sfxAudition()"><option value="">— ยังไม่โหลดรายชื่อ —</option></select>
+    <audio id="sfxAudio" controls preload="none" style="width:100%;margin-top:8px"></audio>
+    <input id="sfxDescription" placeholder="ฟังแล้วระบุ เช่น ติ๊งสั้นเบา ใช้เน้นข้อคิด โทนจริงจัง" style="margin-top:8px">
+    <button type="button" onclick="sfxSaveDescription()">บันทึกลักษณะเสียงนี้ให้ AI</button>
+    <button type="button" id="sfxAnalyzeButton" onclick="sfxAnalyze()">ส่งเสียงให้ AI วิเคราะห์</button>
+    <small class="hint" id="sfxEvidence" role="status">ยังไม่ได้วิเคราะห์ไฟล์เสียง</small>
+    <small class="hint">AI เลือกเสียงจากผลวิเคราะห์หรือคำอธิบายที่บันทึกไว้ ปุ่มวิเคราะห์จะส่งเสียงตัวอย่างไม่เกิน 12 วินาทีให้สมองงานเสียงที่ตั้งไว้ ผลเก็บในเครื่องและใช้ซ้ำได้ ไม่สุ่มแทนเมื่อเลือกไม่ได้ · การวิเคราะห์เสียงเป็นโหมดทดลอง หากปลายทางช้าหรือส่งผลไม่ครบจะไม่บันทึกว่าได้วิเคราะห์แล้ว</small></div>
+  <div class="f"><label>ระดับเสียง (gain) — <span class="val" id="sfxGainV">0.8</span></label>
+    <input type="range" id="sfxGain" min="0" max="2" step="0.05" value="0.8" oninput="$('sfxGainV').textContent=this.value"></div>
+ </div>
+</div>
+</div>
+
+<div class="card collapsible collapsed"><h2>🤖 AI ช่วยคิดคำ Super Text &amp; แคปชัน</h2>
+<div class="f" style="margin-bottom:10px">
+  <label style="font-weight:600;margin-bottom:4px;display:block">📝 บริบท / คำอธิบายเพิ่มเติม <small class="hint">(ใส่หรือไม่ก็ได้)</small></label>
+  <textarea id="ksExtraInfo" rows="2"
+    style="width:100%;resize:vertical;font-size:13px"
+    placeholder="เช่น: คณะบริหาร UTCC · อ.สมชาย · งาน Freshy Night · อยากเน้นคำว่า UTCC · โทนพลังงานสนุก"></textarea>
+  <small class="hint">AI จะใช้ข้อมูลนี้ช่วยคิดทั้งคำเน้น Super Text และแคปชัน — ใส่อะไรก็ได้ที่เกี่ยวกับคลิป</small>
+</div>
+<div class="btns" style="margin-bottom:8px">
+ <button class="primary" onclick="aiSuggest()">✨ ให้ AI อ่านซับ &amp; คิดคำ Super Text</button>
+ <select class="ks-ai-sel" id="ksb_suggest" title="เลือก AI สำหรับฟีเจอร์นี้"
+  onchange="ksQuickRoute('suggest',this.value)">
+  <option value="default">ตามสมองหลัก</option>
+  <option value="gemini">Gemini</option>
+  <option value="webhook_utcc">Webhook UTCC</option>
+  <option value="webhook">Webhook ทั่วไป</option>
+ </select>
+ <span class="aibadge" data-feat="suggest"></span>
+</div>
+<div id="aiResults"></div>
+<div class="btns" style="margin-top:10px">
+ <button class="primary" onclick="aiCaption()">📝 ให้ AI เขียนแคปชัน</button>
+ <select class="ks-ai-sel" id="ksb_caption" title="เลือก AI สำหรับฟีเจอร์นี้"
+  onchange="ksQuickRoute('caption',this.value)">
+  <option value="default">ตามสมองหลัก</option>
+  <option value="gemini">Gemini</option>
+  <option value="webhook_utcc">Webhook UTCC</option>
+  <option value="webhook">Webhook ทั่วไป</option>
+ </select>
+ <span class="aibadge" data-feat="caption"></span>
+</div>
+<div id="capResult" style="margin-top:8px"></div>
+</div>
+
+</div><!-- /tab_super -->
+
+<div class="tabsec" id="tab_ai">
+<!-- ย้ายไปแท็บ 🧠 สมอง AI และ 🔑 API Key ของฉัน แล้ว -->
+<!-- stub elements ที่ JS เดิมอ้างถึง — hidden ไม่กระทบ UI -->
+<div style="display:none">
+  <select id="aiBackend"><option value="gemini">gemini</option><option value="webhook_utcc">webhook_utcc</option><option value="webhook">webhook</option></select>
+  <select id="audioBackend"><option value="gemini">gemini</option><option value="webhook">webhook</option></select>
+  <select id="audioWebhookMode"><option value="auto">auto</option><option value="json">json</option><option value="multipart">multipart</option></select>
+  <input id="geminiKey"><input id="keyName"><input id="geminiModel" value="gemini-flash-latest">
+  <input id="audioGeminiKey"><input id="webhookUrl"><input id="audioWebhookUrl">
+  <textarea id="webhookHeaders"></textarea><textarea id="audioWebhookHeaders"></textarea>
+  <textarea id="geminiPersona"></textarea><textarea id="aiInstruction"></textarea>
+  <textarea id="capBrief"></textarea>
+  <input type="checkbox" id="webhookAudio"><input type="checkbox" id="aiTwoLine">
+  <select id="savedKeys"></select>
+  <span id="keyStatus"></span><span id="whStatus"></span><span id="audioKeyStatus"></span>
+  <span id="audioWhStatus"></span>
+  <div id="savedKeysRow"></div><div id="geminiBox"></div><div id="webhookBox"></div>
+  <div id="utccHint"></div><div id="audioGeminiBox"></div><div id="audioWebhookBox"></div>
+  <div id="audioModeHintAuto"></div><div id="audioModeHintJson"></div><div id="audioModeHintMp"></div>
+  <div id="whResult"></div><div id="audioWhResult"></div>
+  <div id="personaBox"></div><button id="personaToggle"></button>
+</div>
+</div><!-- /tab_ai -->
+
+<div class="tabsec" id="tab_caps">
+<div class="card collapsible"><h2>5) เลือกซับที่จะทำ</h2>
+<div class="row" style="margin-bottom:12px"><div class="f" style="min-width:100%">
+  <label><input type="checkbox" id="karaoke_on" checked> ทำไลน์เน้นไล่สีทีละคำ (ปิดได้ถ้าอยากใส่ Super Text อย่างเดียว)</label>
+</div></div>
+<div class="studio-caption-tools"> <label style="display:block;margin:8px 0"><input type="checkbox" id="captionHomeConfirmed"> บันทึกและออกจากโปรเจกต์แล้ว CapCut อยู่หน้าหลัก (ไม่ต้องปิดแอป) จะไม่เปิดโปรเจกต์จนกว่างานเสร็จ</label>
+<button class="primary" onclick="captionStyleOnly()">ปรับฟอนต์/ขนาดซับที่เลือก โดยคงสีคาราโอเกะ</button>
+<small class="hint">ใช้ฟอนต์และขนาดปกติ/ไฮไลต์ที่ตั้งด้านบน บันทึกและออกจากโปรเจกต์ไปหน้าหลักแล้วติ๊กยืนยัน หรือปิด CapCut ก่อน ไม่เรียก AI และไม่สร้าง Super Text ใหม่</small>
+</div>
+<div class="caps">
+ <div class="toolbar"><a onclick="pick(1)">เลือกทั้งหมด</a><a onclick="pick(0)">ไม่เลือกเลย</a>
+   <a onclick="pick(2)">เฉพาะที่ทำได้</a><span style="color:var(--sub);font-size:12px" id="capcount"></span></div>
+<div id="caps"></div>
+</div></div>
+
+<div class="card collapsible collapsed"><h2>🎯 แบ่งประโยคให้อ่านง่าย — AI อ่านข้อความ</h2>
+<small class="hint">หลังตัด dead air + auto caption ของ CapCut ซับมักมาเป็น "ก้อนยาว" ไม่ลงจังหวะ
+ให้ AI แบ่งตามวลีที่อ่านรู้เรื่อง จำนวนคำเป็นเป้าหมาย ยืดได้เล็กน้อยเพื่อเก็บวลีให้ครบ เช่น ตั้ง 10 คำ เก็บคำที่ 11 ได้เมื่อทำให้ความหมายสมบูรณ์
+<br>• ถ้า "ติ๊กเลือกซับ" ไว้ จะจัดเฉพาะที่เลือก — ไม่เลือกเลย = ทั้งคลิป &nbsp;•&nbsp; เมื่อเสร็จระบบโหลดซับใหม่ให้เอง<br>• ปรับคำซ้ำ เช่น จริงจริง → จริงๆ น้องน้อง → น้องๆ โดยคงคำเชื่อม เช่น ที่ ที่เรา ไว้<br>• บันทึกและปิด CapCut ก่อนจัดซับ ระบบมี backup ทุกครั้ง<br>• เวลาท่อนใหม่ประมาณจากน้ำหนักคำในช่วงเดิม ฟังก์ชันนี้ยังไม่ได้ฟังเสียงจริง</small>
+<button class="ghost" onclick="loadCaps(false,true)">↻ โหลดซับไทม์ไลน์ล่าสุดสำหรับจัดซับ</button>
+<label style="display:block;margin-top:10px"><input type="checkbox" id="resegEnglish"> เปลี่ยนคำทับศัพท์เป็นภาษาอังกฤษ (UTCC Webhook)</label>
+<small class="hint">เช่น คอนเทนต์ → Content เอเจนซี่ → Agency ตรวจทุกซับที่เลือก รวมซับสั้น ใช้เวลาเพิ่มตามจำนวนซับ คำที่ไม่มั่นใจคงเดิม เว้นวรรคระหว่างไทยกับอังกฤษอัตโนมัติ เช่น ทำ Content กับ Agency</small>
+<div class="row" style="margin-top:10px;align-items:flex-end">
+ <div class="f"><label>จำกัดความยาวต่อท่อน (คำ) — <span class="val" id="rswv">10</span></label>
+   <input type="range" id="reseg_words" min="4" max="14" step="1" value="10"></div>
+ <div class="f"><button class="primary" onclick="aiReseg()">🎯 แบ่งซับจากข้อความ</button></div>
+</div>
+<div id="resegResult" style="margin-top:10px"></div>
+</div>
+
+<div class="card collapsible collapsed"><h2>🎵 จับจังหวะจากไฟล์เสียงจริง (AI ฟังเสียง) — BETA</h2>
+<small class="hint">แม่นกว่าแบบข้อความล้วน! อัปโหลด <b>ไฟล์เสียงของคลิป (mp3 / m4a / wav)</b> ที่ <b>ไล่จากต้นคลิป 0:00</b>
+ระบบจะให้ AI "ฟังเสียง" แล้วถอดเป็นท่อนสั้นพร้อม <b>เวลาพูดจริง</b> → นำมาวางแทนซับก้อนใหญ่ให้ตรงจังหวะ
+<br>• ถ้า "ติ๊กเลือกซับ" ไว้ = ทำเฉพาะช่วงที่เลือก — ไม่เลือกเลย = ทั้งคลิป
+<br>• ⚠️ ไฟล์เสียง <u>ต้องเป็นของคลิปนี้และเริ่มพร้อม timeline ที่ 0:00</u> (เอ็กซ์พอร์ตเสียงทั้งไทม์ไลน์ออกมา) จังหวะจึงจะตรง
+<br>• แนะนำไฟล์ &lt; ~15 นาที / &lt; ~18MB &nbsp;•&nbsp; เมื่อเสร็จระบบโหลดซับใหม่ให้เอง<br>• ปรับคำซ้ำ เช่น จริงจริง → จริงๆ น้องน้อง → น้องๆ โดยคงคำเชื่อม เช่น ที่ ที่เรา ไว้<br>• บันทึกและปิด CapCut ก่อนจัดซับ ระบบมี backup ทุกครั้ง<br>• เวลาท่อนใหม่ประมาณจากน้ำหนักคำในช่วงเดิม ฟังก์ชันนี้ยังไม่ได้ฟังเสียงจริง</small>
+<div class="row" style="margin-top:10px;align-items:flex-end">
+ <div class="f" style="flex:2;min-width:240px"><label>ไฟล์เสียงของคลิป (mp3 / m4a / wav)</label>
+   <input type="file" id="alignAudio" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg"></div>
+ <div class="f"><label>จำกัดความยาวต่อท่อน (คำ) — <span class="val" id="alwv">10</span></label>
+   <input type="range" id="align_words" min="4" max="14" step="1" value="10"></div>
+ <div class="f"><button class="primary" onclick="aiAlignAudio()">🎵 ให้ AI ฟังเสียง &amp; จับจังหวะ</button></div>
+</div>
+<div id="alignResult" style="margin-top:10px"></div>
+</div>
+
+</div><!-- /tab_caps -->
+
+<div class="tabsec" id="tab_clip">
+<div class="card collapsible"><h2>✂️ ตัดคลิปอัตโนมัติ (Auto Clip) — ตัด dead air / AI ไฮไลต์ → สร้าง draft ใหม่</h2>
+<small class="hint" style="display:block;margin-bottom:12px;line-height:1.7">
+ ต้องมี <b>ffmpeg</b> ในเครื่อง (Mac: <code>brew install ffmpeg</code>) · โหมด AI ไฮไลต์ใช้ Gemini (ตั้งคีย์ในการ์ด AI ด้านบน)<br>
+ ▸ <b>ตัด dead air</b> = ตัดช่วงเงียบ/เว้นวรรคยาวออก &nbsp;·&nbsp; <b>AI ไฮไลต์</b> = ให้ AI เลือกช่วงเด็ดให้ได้ความยาวเป้า<br>
+ ▸ ทำงานบน <u>ไฟล์วิดีโอดิบ</u> — ไม่แตะโปรเจกต์เดิม กด "วางแผน" ดูผลก่อนเสมอ แล้วค่อยเลือกสร้าง draft ใหม่ หรือเรนเดอร์ mp4
+</small>
+<div class="row">
+ <div class="f" style="min-width:100%"><label>📹 path ไฟล์วิดีโอดิบ (เช่น /Users/you/clips/raw.mp4)</label>
+   <input type="text" id="acVideo" placeholder="พิมพ์/วาง path เต็มของไฟล์วิดีโอ (คลิกขวาไฟล์ใน Finder > กด Option > Copy as Pathname)"></div>
+</div>
+<div class="row" style="margin-top:12px">
+ <div class="f"><label>โหมด</label>
+   <select id="acMode" onchange="acToggleMode()">
+     <option value="deadair">✂️ ตัด dead air (ช่วงเงียบ) — ไม่ง้อ AI</option>
+     <option value="highlight">🤖 AI ไฮไลต์ (ตัดให้ได้ความยาวเป้า)</option>
+   </select></div>
+</div>
+<div id="acDeadair">
+ <div class="row" style="margin-top:12px">
+ <div class="f"><label>เงียบเกินกี่วิ ถึงตัด — <span class="val" id="acMinSilV">0.45</span> วิ</label>
+   <input type="range" id="acMinSil" min="0.2" max="3" step="0.05" value="0.45"></div>
+ <div class="f"><label>ระดับที่นับว่า "เงียบ" — <span class="val" id="acNoiseV">-28</span> dB</label>
+   <input type="range" id="acNoise" min="-50" max="-15" step="1" value="-28"></div>
+ <div class="f"><label>เว้นหัว-ท้ายกันคำขาด — <span class="val" id="acPadV">0.06</span> วิ</label>
+   <input type="range" id="acPad" min="0" max="0.5" step="0.02" value="0.06"></div>
+ </div>
+<small class="hint">ยังมีช่วงเงียบเหลือ → ลด "เงียบกี่วิ" เป็น 0.3 และลด pad · มีเสียงรบกวน → ปรับ dB เข้มขึ้น (เช่น -24) · คำขาดหัวท้าย → เพิ่ม pad เป็น 0.1-0.15</small>
+</div>
+<div id="acHighlight" style="display:none">
+ <div class="row" style="margin-top:12px">
+  <div class="f"><label>ความยาวคลิปเป้า</label>
+    <select id="acPreset" onchange="acToggleCustomDur()">
+      <option value="reel_60">Reel / TikTok ~60 วิ</option>
+      <option value="reel_90">Reel ยาว 60-90 วิ</option>
+      <option value="short_30">Teaser สั้น ~30 วิ</option>
+      <option value="yt_180">YouTube 3 นาที</option>
+      <option value="custom">⏱️ กำหนดเอง...</option>
+    </select></div>
+  <div class="f" style="flex:2;min-width:220px"><label>โฟกัสพิเศษ (บอก AI ว่าอยากเน้นช่วงไหน — เว้นว่างได้)</label>
+    <input type="text" id="acFocus" placeholder="เช่น ช่วงประกาศรับสมัคร, ตอนพูดถึงทุนการศึกษา"></div>
+ </div>
+ <div id="acCustomDurRow" style="display:none;margin-top:10px;align-items:flex-end;gap:10px;flex-wrap:wrap" class="row">
+  <div class="f" style="flex:0 0 auto">
+    <label>นาที</label>
+    <input type="number" id="acCustomMin" min="0" max="180" value="6" step="1"
+      style="width:72px;padding:6px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--inp);color:var(--txt);font-size:13px"
+      oninput="acUpdateCustomHint()">
+  </div>
+  <div class="f" style="flex:0 0 auto">
+    <label>วินาที</label>
+    <input type="number" id="acCustomSec" min="0" max="59" value="0" step="1"
+      style="width:72px;padding:6px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--inp);color:var(--txt);font-size:13px"
+      oninput="acUpdateCustomHint()">
+  </div>
+  <div class="f" style="flex:1;min-width:160px">
+    <label>&nbsp;</label>
+    <div id="acCustomHint" style="font-size:12px;color:var(--sub);padding:6px 0">
+      AI จะเลือกช่วงให้ได้ราวๆ <b id="acCustomHintVal">6 นาที</b> (±12%)
+    </div>
+  </div>
+ </div>
+<div class="f" style="margin-top:8px"><label><input type="checkbox" id="acTrimSil" checked> 🧹 เก็บกวาด dead air ที่ยังเหลือในช่วงที่ AI เลือก (แนะนำให้เปิด — คลิปกระชับ ไม่มีช่วงเงียบค้าง)</label></div>
+<small class="hint" id="whisperHint">ถ้าไม่ได้ลง faster-whisper ระบบจะให้ Gemini ฟังเสียงแทน (กินโควตา API นิดหน่อย) — คลิปยาวอาจใช้เวลาหลายสิบวินาที</small>
+<script>fetch('/api/whisper_status').then(r=>r.json()).then(j=>{const el=document.getElementById('whisperHint');if(el){el.innerHTML=j.utcc_audio_available?'✅ <b>UTCC Audio พร้อมใช้งาน</b> — ถอดเสียงผ่าน webhook ส่วนตัว แบ่งเสียงครั้งละ 3 นาที':j.available?'✅ <b>faster-whisper พร้อมใช้งาน</b> — ถอดเสียงในเครื่อง (ออฟไลน์ ไม่กิน API)':'⚠️ ไม่พบ faster-whisper — ระบบจะใช้ Gemini Audio แทน · <a href=\"https://github.com/SYSTRAN/faster-whisper\" target=\"_blank\">วิธีติดตั้ง</a>';}}).catch(()=>{});</script>
+</div>
+<div class="btns" style="margin-top:14px">
+ <button class="primary" onclick="acPlan()" title="วิเคราะห์วิดีโอแล้วแสดงช่วงที่จะเก็บ (ยังไม่สร้างอะไร)">🔍 วางแผนตัด</button>
+</div>
+<div id="acResult" style="margin-top:12px"></div>
+<div id="acActions" style="display:none;margin-top:12px">
+<div class="row"><div class="f" style="min-width:100%"><label>ตั้งชื่อผลลัพธ์ / จุดสำรอง (เว้นว่าง=อัตโนมัติ)</label>
+  <input type="text" id="acName" placeholder="เช่น ep1_cut"></div></div>
+ <div class="btns" style="margin-top:10px">
+ <button class="primary" onclick="acApplyInplace()" title="สำรองไฟล์เดิมทั้งหมด แล้วแทนที่ไทม์ไลน์ในโปรเจกต์นี้ (CapCut เห็นทันที คอมโบกับตัวทำซับต่อได้เลย)">✂️ ตัด+แทนที่ไทม์ไลน์ในโปรเจกต์นี้</button>
+ <button class="ghost" onclick="acRestore()" title="กู้คืน draft_info.json เดิมจากจุดสำรองล่าสุด (ก่อนตัด)">⟲ กู้คืนไทม์ไลน์เดิม</button>
+ <button class="ghost" onclick="acRender()" title="ตัด+ต่อเป็นไฟล์ mp4 พร้อมโพสต์ (ไม่แตะไทม์ไลน์)">📤 เรนเดอร์เป็น mp4</button>
+ <button class="ghost" onclick="acMakeDraft()" title="โหมดสำรอง: สร้างโฟลเดอร์ draft ใหม่แยก (CapCut อาจไม่เห็นถ้าไม่ใช่ timeline GUID)">🎬 สร้าง draft แยก</button>
+</div>
+<div id="acBackups" style="margin-top:8px"></div>
+<small class="hint" style="display:block;margin-top:8px">
+ ✂️ <b>แทนที่ไทม์ไลน์ในโปรเจกต์นี้</b> = สำรองไฟล์เดิมทั้งหมดอัตโนมัติ (ไว้ใน <code>.autoclip_backups/</code>) แล้วเขียนไทม์ไลน์ที่ตัด dead air ทับในโฟลเดอร์เดิมที่ CapCut อ่านจริง → เปิด CapCut มาทำซับต่อได้ทันที &nbsp;·&nbsp;
+ ⟲ <b>กู้คืน</b> = ย้อนกลับเป็นไทม์ไลน์เดิมก่อนตัด &nbsp;·&nbsp; ⚠️ <b>ปิด CapCut ก่อนกดเสมอ</b>
+</small>
+</div>
+</div>
+
+</div><!-- /tab_clip -->
+
+<div class="tabsec" id="tab_hist">
+<div class="card collapsible"><h2>🕘 ประวัติ / กู้คืน (ย้อนเวลาได้ถ้าพลาด)</h2>
+<div style="background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px;font-size:12.5px;line-height:1.7;color:var(--txt)">
+ <b style="color:var(--acc)">ระบบเซฟกันพลาด 3 ชั้น — ระบบทำให้อัตโนมัติ ไม่ต้องเซฟเอง</b><br>
+ <b>①  จุดประวัติอัตโนมัติ</b> = สำเนาก่อนทุกครั้งที่แก้ไฟล์ เก็บ 20 จุดล่าสุด<br>
+ <b>②  ต้นฉบับซับ</b> (<code>draft_info_original.json</code>) = แม่แบบสร้างไลน์เน้นใหม่<br>
+ <b>③  จุดกู้คืนต้นฉบับ</b> (<code>draft_info_backup.json</code>) = สถานะตอนเปิดครั้งแรก<br>
+ <span style="color:var(--sub)">📁 ไฟล์เก็บในโฟลเดอร์โปรเจกต์ ไม่ต้องแก้เอง ใช้ปุ่มด้านล่างพอ</span>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+ <small class="hint" style="flex:1;min-width:200px">รายการจุดประวัติ — เรียงตาม <b>"ลำดับที่ #"</b> (ตัวเลขยิ่งมาก = ยิ่งกดทีหลัง = ใหม่กว่า)
+  บนสุดคือจุดล่าสุด เลือกกู้คืนจุดไหนก็ได้:</small>
+ <button class="danger" style="padding:8px 12px;font-size:12px" onclick="clearSnaps()"
+   title="ลบจุดประวัติทั้งหมด (ไฟล์ต้นฉบับและจุดกู้คืนต้นฉบับยังอยู่ครบ)">🧹 ล้างประวัติทั้งหมด</button>
+</div>
+<div class="caps" style="margin-top:10px" id="snaplist"></div>
+</div>
+</div><!-- /tab_hist -->
+
+<div class="tabsec" id="tab_ann_mgr">
+<div class="card collapsible"><h2>📢 จัดการประกาศ (Admin)</h2>
+<div style="background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px;font-size:12.5px;line-height:1.7;color:var(--txt)">
+ <b style="color:var(--acc)">หน้านี้สำหรับผู้ดูแลระบบเท่านั้น</b> — สร้าง แก้ไข และจัดลำดับประกาศที่จะแสดงให้ผู้ใช้เห็น
+</div>
+<div class="row" style="margin-bottom:12px">
+ <button class="primary" onclick="loadAnnouncements()">↻ โหลดรายการประกาศ</button>
+ <button class="ghost" onclick="newAnnouncement()">➕ เพิ่มประกาศใหม่</button>
+</div>
+<div id="ann_form" style="display:none" class="card" style="margin-bottom:12px">
+ <h2 id="ann_form_title">✏️ ประกาศใหม่</h2>
+ <div class="f"><label>หัวข้อประกาศ</label><input type="text" id="ann_title" placeholder="เช่น อัปเดตระบบ v3.2"></div>
+ <div class="f" style="margin-top:8px"><label>เนื้อหา</label><textarea id="ann_body" rows="4" style="width:100%;padding:8px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;resize:vertical" placeholder="รายละเอียดประกาศ..."></textarea></div>
+ <div class="f" style="margin-top:8px"><label>ประเภท</label>
+  <select id="ann_type">
+   <option value="info">ℹ️ ข้อมูลทั่วไป</option>
+   <option value="warning">⚠️ คำเตือน</option>
+   <option value="success">✅ สำเร็จ/ข่าวดี</option>
+   <option value="danger">🚨 เร่งด่วน</option>
+  </select>
+ </div>
+ <div class="row" style="margin-top:10px">
+  <button class="primary" onclick="saveAnnouncement()">💾 บันทึกประกาศ</button>
+  <button class="ghost" onclick="document.getElementById('ann_form').style.display='none'">ยกเลิก</button>
+ </div>
+</div>
+<div id="ann_list" class="caps" style="margin-top:8px"><div class="snaprow"><span style="color:var(--sub)">กด "โหลดรายการประกาศ" เพื่อดูรายการ</span></div></div>
+</div>
+</div><!-- /tab_ann_mgr -->
+
+<div class="btns">
+ <button class="primary" onclick="apply()" title="สร้างไลน์เน้น/Super Text ลงไฟล์โปรเจกต์จริง (เก็บจุดประวัติให้ก่อนอัตโนมัติ)">▶ ลงมือทำ</button>
+ <button class="ghost" onclick="loadCaps()" title="อ่านซับล่าสุดจากไฟล์โปรเจกต์เข้ามาแสดงใหม่ (ยังไม่แก้ไฟล์)">↻ โหลดซับใหม่</button>
+ <button class="ghost" onclick="clearSuperText()" title="ล้างคำ Super Text ทั้งหมด (ทั้งที่ AI คิดและที่พิมพ์เอง) ให้ช่องว่างหมด — ยังไม่แก้ไฟล์">🧹 ล้าง Super Text</button>
+ <button class="ghost" onclick="checkpoint()" title="ตั้งให้สถานะปัจจุบันเป็นจุดที่ปุ่ม 'กู้คืนต้นฉบับ' จะย้อนกลับมาแทนจุดแรกสุด">📌 ตั้งสถานะนี้เป็นจุดกู้คืนต้นฉบับ</button>
+ <button class="danger" onclick="restore()" title="ย้อนกลับไปสถานะตอนเปิดใช้เครื่องมือครั้งแรก (หรือจุดที่ตั้งไว้ล่าสุด)">⟲ กู้คืนต้นฉบับ (จุดแรกสุด)</button>
+</div>
+<small class="hint" style="display:block;margin-top:8px">
+ ▶ <b>ลงมือทำ</b> = เขียนผลลงโปรเจกต์จริง &nbsp;·&nbsp;
+ ↻ <b>โหลดซับใหม่</b> = ดึงซับล่าสุดมาแสดง (ปลอดภัย ไม่แก้อะไร) &nbsp;·&nbsp;
+ 📌 <b>ตั้งจุดกู้คืน</b> = ปักหมุดสถานะนี้ไว้ &nbsp;·&nbsp;
+ ⟲ <b>กู้คืนต้นฉบับ</b> = ย้อนกลับไปจุดแรกสุด (ถ้าอยากย้อนแค่บางจุด ใช้ลิสต์ "ประวัติ" ด้านบน)
+</small>
+<div id="msg"></div>
+</div>
+<div class="chatbot-container" style="background: #1e1e1e; color: #fff; padding: 20px; border-radius: 8px;">
+    <h3>🤖 AI ผู้ช่วยอัจฉริยะ (Chatbot + Knowledge)</h3>
+    
+    <div style="margin-bottom: 15px;">
+        <label>🎯 บทบาท/Persona ของ AI:</label>
+        <textarea id="botRole" placeholder="เช่น สวมบทบาทเป็นเจ้าหน้าที่แนะแนวของ UTCC คอยตอบคำถามอย่างสุภาพ" style="width:100%; height:50px; background:#2d2d2d; color:#fff; border:1px solid #444; border-radius:4px; padding:5px;"></textarea>
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label>📚 คลังความรู้เพิ่มเติม (Knowledge Base):</label>
+        <textarea id="botKnowledge" placeholder="วางข้อมูลความรู้ตรงนี้ เช่น รายละเอียดหลักสูตรพยาบาลหอการค้า, เกณฑ์การรับสมัครเรียน..." style="width:100%; height:80px; background:#2d2d2d; color:#fff; border:1px solid #444; border-radius:4px; padding:5px;"></textarea>
+    </div>
+
+    <div id="chatHistory" style="height: 250px; overflow-y: auto; background: #111; border-radius: 4px; padding: 10px; margin-bottom: 15px;">
+        <div style="color: #888;">🤖: สวัสดีครับ! อยากให้ผมช่วยหาข้อมูล หรือพูดคุยเรื่องอะไรพิมพ์มาได้เลยครับ...</div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="chatInput" placeholder="พิมพ์ข้อความคุยกับ AI ที่นี่..." style="flex: 1; background: #2d2d2d; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 10px;">
+        <button onclick="sendChatMessage()" style="background: #ffcc00; color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">ส่งข้อความ</button>
+    </div>
+</div>
+
+<script>
+// ฟังก์ชันฟรอนต์เอนด์สำหรับส่งข้อความแชทไปหา Python หลังบ้าน
+function sendChatMessage() {
+    const inputEl = document.getElementById('chatInput');
+    const message = inputEl.value.trim();
+    if (!message) return;
+
+    const role = document.getElementById('botRole').value;
+    const knowledge = document.getElementById('botKnowledge').value;
+    const historyBox = document.getElementById('chatHistory');
+
+    // แสดงข้อความของผู้ใช้บนหน้าจอทันที
+    historyBox.innerHTML += `<div style="margin: 5px 0; text-align: right;"><b>คุณ:</b> ${message}</div>`;
+    inputEl.value = '';
+    historyBox.scrollTop = historyBox.scrollHeight;
+
+    // ยิง API ไปหาหลังบ้าน Python
+    fetch('/api/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message, role: role, knowledge: knowledge })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            let replyText = data.reply;
+
+// 🌟 ถ้าข้อมูลที่ส่งมาดันเป็น Object ไม่ใช่ข้อความปกติ ให้แปลงเป็นข้อความ JSON ให้เราอ่านออกก่อน
+if (typeof replyText === 'object' && replyText !== null) {
+    replyText = JSON.stringify(replyText, null, 2);
+}
+
+historyBox.innerHTML += `<div style="margin: 5px 0; color: #ffcc00;"><b>🤖 AI:</b> <pre style="white-space: pre-wrap; margin:0; font-family:inherit;">${replyText}</pre></div>`;
+        } else {
+            historyBox.innerHTML += `<div style="margin: 5px 0; color: #ff3333;"><b>❌ ข้อผิดพลาด:</b> ${data.message}</div>`;
+        }
+        historyBox.scrollTop = historyBox.scrollHeight;
+    })
+    .catch(err => {
+        historyBox.innerHTML += `<div style="margin: 5px 0; color: #ff3333;"><b>❌ เชื่อมต่อหลังบ้านล้มเหลว</b></div>`;
+    });
+}
+</script>
+<script>
+const $=id=>document.getElementById(id);
+let SOURCE_HASH=null, SOURCE_PROJECT=null;
+let STATE_HASH=null, CANVAS_W=1080, CANVAS_H=1920;
+// ---------- แถบสถานะ % + ตัวจับเวลา สำหรับงานที่ใช้เวลานาน ----------
+// ให้เปอร์เซ็นต์วิ่งเข้าใกล้ 95% แบบหน่วง (asymptotic) ตามเวลาโดยประมาณ estSec
+// แล้ว 'ดีดเป็น 100%' เมื่องานเสร็จจริง — พร้อมนาฬิกาจับเวลาเดินจริงทุก 0.1 วิ
+function makeProgress(box,title){
+ const t0=Date.now();box.innerHTML='<div class="progwrap"><b></b><div role="status" aria-live="polite"></div><small></small></div>';
+ const wrap=box.firstElementChild,st=wrap.children[1],tm=wrap.children[2];wrap.firstElementChild.textContent=title;
+ const timer=setInterval(()=>{tm.textContent='ใช้เวลา '+Math.floor((Date.now()-t0)/1000)+' วินาที';},1000);
+ return {stage:s=>{st.textContent=s},done:html=>{clearInterval(timer);if(html!=null)box.innerHTML=html;else st.textContent='เสร็จแล้ว'},fail:html=>{clearInterval(timer);if(html!=null)box.innerHTML=html;else st.textContent='ทำงานไม่สำเร็จ'},box};
+}
+function showTab(name,btn){
+  document.querySelectorAll('.tabsec').forEach(s=>s.classList.toggle('on', s.id==='tab_'+name));
+  document.querySelectorAll('.tabbar button').forEach(b=>b.classList.toggle('on', b===btn));
+  window.scrollTo({top:0,behavior:'smooth'});
+  // แท็บที่มีพรีวิว: วาดใหม่ให้ตรงค่าปัจจุบันหลังสลับแท็บ
+  if(name==='main'){ try{upd();}catch(e){} }
+  if(name==='super'){ try{supPrev();}catch(e){} }
+  if(name==='hist'){ try{loadSnapshots();}catch(e){} }
+  if(name==='ann_mgr'){ try{loadAnnouncements();}catch(e){} }
+}
+// ── ประกาศ (ann_mgr) ───────────────────────────────────────────────────────
+let _annEditId=null;
+function newAnnouncement(){
+  _annEditId=null;
+  $('ann_form_title').textContent='✏️ ประกาศใหม่';
+  $('ann_title').value=''; $('ann_body').value=''; $('ann_type').value='info';
+  $('ann_form').style.display='block';
+}
+async function loadAnnouncements(){
+  try{
+    const r=await fetch('/api/announcements'); const j=await r.json();
+    const box=$('ann_list'); box.innerHTML='';
+    if(!j.announcements||!j.announcements.length){
+      box.innerHTML='<div class="snaprow"><span style="color:var(--sub)">ยังไม่มีประกาศ</span></div>'; return;
+    }
+    j.announcements.forEach(a=>{
+      const row=document.createElement('div'); row.className='snaprow';
+      row.innerHTML=`<span><b>${a.title||'(ไม่มีหัวข้อ)'}</b><br><span style="color:var(--sub);font-size:12px">${(a.body||'').slice(0,80)}${(a.body||'').length>80?'…':''}</span></span>`;
+      const btnEdit=document.createElement('button'); btnEdit.className='ghost'; btnEdit.textContent='✏️ แก้ไข';
+      btnEdit.onclick=()=>{
+        _annEditId=a.id; $('ann_form_title').textContent='✏️ แก้ไขประกาศ';
+        $('ann_title').value=a.title||''; $('ann_body').value=a.body||''; $('ann_type').value=a.type||'info';
+        $('ann_form').style.display='block';
+      };
+      const btnDel=document.createElement('button'); btnDel.className='danger'; btnDel.textContent='🗑';
+      btnDel.onclick=async()=>{
+        if(!confirm('ลบประกาศ "'+a.title+'" ?')) return;
+        const rd=await fetch('/api/announcements/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:a.id})});
+        const jd=await rd.json();
+        if(jd.ok) loadAnnouncements(); else alert('❌ '+(jd.error||'ลบไม่สำเร็จ'));
+      };
+      const btnWrap=document.createElement('span'); btnWrap.style.display='flex'; btnWrap.style.gap='6px';
+      btnWrap.appendChild(btnEdit); btnWrap.appendChild(btnDel);
+      row.appendChild(btnWrap); box.appendChild(row);
+    });
+  }catch(e){ $('ann_list').innerHTML='<div class="snaprow"><span style="color:#dc2626">โหลดไม่ได้: '+e.message+'</span></div>'; }
+}
+async function saveAnnouncement(){
+  const payload={title:$('ann_title').value.trim(), body:$('ann_body').value.trim(), type:$('ann_type').value};
+  if(_annEditId) payload.id=_annEditId;
+  const r=await fetch('/api/announcements/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const j=await r.json();
+  if(j.ok){ $('ann_form').style.display='none'; loadAnnouncements(); } else alert('❌ '+(j.error||'บันทึกไม่สำเร็จ'));
+}
+// แสดงปุ่มแท็บ "ประกาศ" เฉพาะเมื่อผู้ใช้เป็น admin
+function showAnnTabIfAdmin(isAdmin){
+  const btn=document.getElementById('tabBtn_ann_mgr');
+  if(btn) btn.style.display=isAdmin?'':'none';
+}
+// ปุ่มเปิด/ปิดคำอธิบาย
+function toggleHint(btn){
+  const row=btn.parentElement.nextElementSibling;
+  if(!row||!row.classList.contains('hint-row'))return;
+  const hidden=row.classList.toggle('collapsed');
+  btn.textContent=hidden?'ℹ️ อธิบาย':'✕ ซ่อน';
+}
+// พับ/ขยายการ์ด: คลิกหัวข้อ (h2) ของการ์ดที่มีคลาส collapsible
+document.addEventListener('click',function(e){
+  const h2=e.target.closest('h2'); if(!h2) return;
+  const card=h2.parentElement;
+  if(card && card.classList.contains('collapsible')){ card.classList.toggle('collapsed'); }
+});
+function sync(a,b){ $(a).oninput=()=>{ $(b).value=$(a).value; upd(); };
+                   $(b).oninput=()=>{ let v=$(b).value; if(/^#?[0-9a-fA-F]{6}$/.test(v)){ if(v[0]!='#')v='#'+v; $(a).value=v; } upd(); }; }
+sync('hc','hchex'); sync('nc','nchex'); sync('sc','schex'); sync('bgc','bgchex'); sync('shcolor','shcolorhex');
+sync('spc','spchex'); sync('spsc','spschex'); sync('spbgc','spbgchex'); sync('spsub','spsubhex');
+sync('spshcolor','spshcolorhex');
+[['spshalpha','spshav'],['spshdist','spshdv'],['spshangle','spshanv'],['spshblur','spshbv']].forEach(([a,b])=>$(a).oninput=()=>{ $(b).textContent=$(a).value; supPrev(); });
+['hs','ns'].forEach(id=>$(id).oninput=()=>{ $(id+'v').textContent=$(id).value; upd(); });
+[['sw','swv'],['bga','bgav'],['bgr','bgrv'],['bgpw','bgpwv'],['bgph','bgphv'],['shalpha','shav'],['shdist','shdv'],['shangle','shanv'],['shblur','shbv']].forEach(([a,b])=>$(a).oninput=()=>{ $(b).textContent=$(a).value; upd(); });
+[['spsz','spszv'],['spscale','spscalev'],['sppop','sppopv'],['spsw','spswv'],['spbga','spbgav'],['spbgr','spbgrv'],['spsubr','spsubrv']]
+  .forEach(([a,b])=>$(a).oninput=()=>{ $(b).textContent=$(a).value; supPrev(); });
+['sp2line','spshadow','spstroke','spbg','splayer','spalign','spanim','spanimtype'].forEach(id=>{ const el=$(id); if(el){ el.addEventListener('input',supPrev); el.addEventListener('change',id==='spanimtype'?playSupAnim:supPrev);} });
+$('sp2line').addEventListener('change',()=>{ $('aiTwoLine').checked=$('sp2line').checked; });
+$('aiTwoLine').addEventListener('change',()=>{ $('sp2line').checked=$('aiTwoLine').checked; supPrev(); });
+[['spy','spyv'],['spx','spxv']].forEach(([a,b])=>$(a).oninput=()=>{ $(b).textContent=$(a).value; supPrev(); });
+[['stop','stopv'],['sbot','sbotv'],['sleft','sleftv'],['sright','srightv']].forEach(([a,b])=>$(a).oninput=()=>{ $(b).textContent=Math.round($(a).value*100)+'%'; supPrev(); });
+$('mc').oninput=()=>$('mcv').textContent=$('mc').value;
+$('timing_offset').oninput=()=>$('tofsv').textContent=$('timing_offset').value;
+$('reseg_words').oninput=()=>$('rswv').textContent=$('reseg_words').value;
+$('align_words').oninput=()=>$('alwv').textContent=$('align_words').value;
+['shadow','stroke','bg'].forEach(id=>$(id).onchange=upd);
+// เปลี่ยนรูปแบบไลน์เน้นแล้วปรับ UI ให้สอดคล้อง (โหมดกล่อง = เปิดกรอบทึบให้เห็นชัด)
+$('karaoke_style').addEventListener('change',()=>{
+  const v=$('karaoke_style').value;
+  const boxMode=(v==='box_travel'||v==='word_box');
+  if(boxMode){
+    $('bg').checked=true;
+    if($('token_mode')) $('token_mode').value='word';
+  }
+  upd();
+});
+['spshadow','spstroke','spbg'].forEach(id=>$(id).onchange=supPrev);
+$('font').onchange=()=>{ upd(); supPrev(); };
+// ดึง 'ตัวอย่างคำขยี้' สำหรับพรีวิว จากคำที่ AI เสนอไว้ (ถ้ามี) — แทนช่องพิมพ์คำเองที่ตัดออกแล้ว
+function sampleSuper(){
+  for(const k in SUPER_KW_MAP){ const v=SUPER_KW_MAP[k];
+    if(typeof v==='string' && v.trim()) return {emph:v.trim(), sub:''};
+    if(v && v.emph) return {emph:(v.emph||'').trim(), sub:(v.sub||'').trim()};
+  }
+  return {emph:'', sub:''};
+}
+let PREVIEW_FONT_PATH='',PREVIEW_FONT_LOADED='';
+function previewFont(){
+ const path=$('font').value;
+ if(path && PREVIEW_FONT_PATH!==path){
+  PREVIEW_FONT_PATH=path;
+  const name='SelectedPreview'+Date.now();
+  new FontFace(name,'url("/api/font_preview?path='+encodeURIComponent(path)+'")').load().then(face=>{
+   if(PREVIEW_FONT_PATH!==path)return;
+   document.fonts.add(face);PREVIEW_FONT_LOADED=name;supPrev();
+  }).catch(()=>{PREVIEW_FONT_LOADED='';});
+ }
+ return PREVIEW_FONT_LOADED? '"'+PREVIEW_FONT_LOADED+'"':'sans-serif';
+}
+function supPrev(){
+  const e=$('sprev');
+  const fam=previewFont();
+  const two=$('sp2line').checked;
+  $('sp2row').style.display = two? 'flex':'none';
+  $('sp2row2').style.display = two? 'flex':'none';
+  if($('spHideRow')) $('spHideRow').style.display = two? 'flex':'none';
+  const bigPx=Math.round($('spsz').value*$('spscale').value*1.6);
+  const shadow=$('spshadow').checked?'2px 2px 4px rgba(0,0,0,.75)':'none';
+  const stroke=$('spstroke').checked?('1px '+$('spschex').value):'0';
+  const smp=sampleSuper();
+  const kw=smp.emph;
+  e.style.fontFamily=fam;
+  e.style.flexDirection='column'; e.style.lineHeight='1.05';
+  if(two){
+    const emph=kw||'เรียนสาขานี้';
+    const sub=smp.sub||'ไปประกอบอาชีพได้จริง';
+    const subPx=bigPx*parseFloat($('spsubr').value);
+    const align=$('splayer').checked?$('spalign').value:'center';
+    e.style.alignItems = align==='left'?'flex-start':(align==='right'?'flex-end':'center');
+    e.innerHTML=`<span style="color:${$('spchex').value};font-size:${bigPx}px;text-shadow:${shadow};-webkit-text-stroke:${stroke}">${emph.replace(/</g,'&lt;')}</span>`+
+                `<span style="color:${$('spsubhex').value};font-size:${subPx}px;text-shadow:${shadow};-webkit-text-stroke:${stroke}">${sub.replace(/</g,'&lt;')}</span>`;
+  } else {
+    e.style.alignItems='center';
+    e.textContent=kw||'คำขยี้';
+    e.style.color=$('spchex').value; e.style.fontSize=bigPx+'px';
+    e.style.fontWeight='normal';
+    e.style.textShadow=shadow; e.style.webkitTextStroke=stroke;
+  }
+  if($('spbg').checked){ e.style.background=hexA($('spbgchex').value,parseFloat($('spbga').value)); }
+  else { e.style.background = PREV_BG.sprev==='auto'? oppBg($('spchex').value) : PREV_BG.sprev; }
+  e.style.borderRadius=(parseFloat($('spbgr').value)*22)+'px';
+  drawSafePreview();
+}
+function drawSafePreview(){
+  const top=parseFloat($('stop').value), bot=parseFloat($('sbot').value),
+        left=parseFloat($('sleft').value), right=parseFloat($('sright').value);
+  const sa=$('safearea');
+  sa.style.top=(top*100)+'%'; sa.style.bottom=(bot*100)+'%';
+  sa.style.left=(left*100)+'%'; sa.style.right=(right*100)+'%';
+  const spy=parseFloat($('spy').value), spx=parseFloat($('spx').value);
+  // แปลง normalized (-1..1, +y ขึ้นบน) เป็น % ตำแหน่งซ้ายบนของกล่องพรีวิว (y ลงล่าง)
+  const leftPct = 50 + spx*50;
+  const topPct = 50 - spy*50;
+  const dot=$('supdot');
+  dot.style.left=leftPct+'%'; dot.style.top=topPct+'%';
+  // เรนเดอร์คำขยี้ในจอจำลองให้ 'เหมือนของจริง': ฟอนต์/สี/ขนาด/เงา/เส้นขอบ/2 บรรทัด
+  const fam=previewFont();
+  const smp=sampleSuper();
+  const two=$('sp2line').checked;
+  const preview=$('safecanvas'),ratio=preview.clientHeight/CANVAS_H;
+  const size=parseFloat($('spsz').value),requested=parseFloat($('spscale').value);
+  const subRatio=parseFloat($('spsubr').value),cw=parseFloat($('spcharw')?.value)||.62,ch=1.25;
+  const animation=$('spanim').checked?$('spanimtype').value:'none';
+  const peak=animation==='zoom_blur'?1.28:animation==='pop'?1.15:1;
+  const emphText=smp.emph||'คำขยี้',subText=smp.sub||'ไปประกอบอาชีพได้จริง';
+  const count=Math.max(emphText.length,two?subText.length*subRatio:0);
+  const pixels=size*CANVAS_H/100;
+  const w=count*pixels*cw*requested*peak,h=pixels*ch*(two?1+subRatio+.1:1)*requested*peak;
+  const shrink=Math.min(1,CANVAS_W*(1-left-right)/w,CANVAS_H*(1-top-bot)/h);
+  const effective=requested*Math.max(0,shrink);
+  const boxW=w*shrink,boxH=h*shrink;
+  const x=Math.max(-CANVAS_W/2+CANVAS_W*left+boxW/2,Math.min(CANVAS_W/2-CANVAS_W*right-boxW/2,spx*CANVAS_W/2));
+  const y=Math.max(-CANVAS_H/2+CANVAS_H*top+boxH/2,Math.min(CANVAS_H/2-CANVAS_H*bot-boxH/2,-spy*CANVAS_H/2));
+  dot.style.left=(50+100*x/CANVAS_W)+'%';dot.style.top=(50+100*y/CANVAS_H)+'%';
+  dot.style.alignItems=two&&$('splayer').checked?({left:'flex-start',right:'flex-end',center:'center'}[$('spalign').value]):'center';
+  dot.style.lineHeight='1.25';
+  const bigPx=pixels*effective*ratio;
+  const shadow=$('spshadow').checked?'2px 2px 4px rgba(0,0,0,.8)':'none';
+  const stroke=$('spstroke').checked?('0.7px '+$('spschex').value):'0';
+  dot.style.fontFamily=fam;
+  const anim=$('spanim').checked? ($('spanimtype').value||'pop') : 'none';
+  const acls=(anim && anim!=='none')?('supanim a_'+anim):'supanim';
+  const emph=(smp.emph||'คำขยี้').replace(/</g,'&lt;');
+  if(two){
+    const sub=(smp.sub||'ไปประกอบอาชีพได้จริง').replace(/</g,'&lt;');
+    const subPx=bigPx*parseFloat($('spsubr').value);
+    dot.innerHTML=`<span class="${acls}" style="color:${$('spchex').value};font-size:${bigPx}px;text-shadow:${shadow};-webkit-text-stroke:${stroke}">${emph}</span>`+
+                  `<span class="${acls}" style="color:${$('spsubhex').value};font-size:${subPx}px;text-shadow:${shadow};-webkit-text-stroke:${stroke}">${sub}</span>`;
+  } else {
+    dot.innerHTML=`<span class="${acls}" style="color:${$('spchex').value};font-size:${bigPx}px;text-shadow:${shadow};-webkit-text-stroke:${stroke}">${emph}</span>`;
+  }
+  if($('spbg').checked){ dot.style.background=hexA($('spbgchex').value,parseFloat($('spbga').value)); dot.style.padding='3px 7px'; dot.style.borderRadius=(parseFloat($('spbgr').value)*14)+'px'; }
+  else { dot.style.background='transparent'; dot.style.padding='0'; }
+  const land=CANVAS_W>CANVAS_H;
+  $('canvasInfo').textContent=CANVAS_W+'×'+CANVAS_H+(land?' · แนวนอน 16:9':' · แนวตั้ง 9:16');
+}
+// ปรับสัดส่วนจอจำลองให้ตรงกับ canvas จริงของโปรเจกต์ (รองรับทั้ง 9:16 และ 16:9)
+function applyCanvasAspect(){
+  const sc=$('safecanvas'); if(!sc) return;
+  const ratio=CANVAS_W/CANVAS_H; const MAX=320;
+  let w,h;
+  if(ratio>=1){ w=MAX; h=Math.round(MAX/ratio); }   // แนวนอน
+  else { h=MAX; w=Math.round(MAX*ratio); }           // แนวตั้ง
+  sc.style.width=w+'px'; sc.style.height=h+'px';
+}
+// ---------- 🔊 SFX ----------
+function sfxToggle(){ const on=$('sfxOn').checked; $('sfxBox').style.display=on?'block':'none'; }
+function sfxModeToggle(){
+  const m=$('sfxMode').value;
+  // โหมดไฟล์เดียวเท่านั้นที่ต้องเลือกไฟล์ — โหมดสุ่ม/AI ใช้ทั้งโฟลเดอร์
+  $('sfxFileRow').style.display = '';sfxAudition();
+  const h={single:'โหมด "ไฟล์เดียว" = ใช้เสียงเดียวทุกครั้งที่ Super Text เด้ง',
+    random:'🎲 ระบบจะสุ่มเสียงจากทั้งโฟลเดอร์ (รวมโฟลเดอร์ย่อย) สลับให้หลากหลาย ไม่ซ้ำติดกัน',
+    ai:'🤖 AI จะอ่านข้อความ Super Text แต่ละท่อน แล้วเลือกเสียงที่เข้ากับอารมณ์/จังหวะ (ต้องตั้งค่า AI ในแท็บ AI ก่อน) — ใช้เฉพาะเสียงที่ฟังแล้วบันทึกลักษณะไว้ ถ้าไม่เหมาะหรือ AI ล่มจะข้าม'};
+  $('sfxModeHint').textContent=h[m]||'';
+}
+let SFX_CATALOG={},SFX_ENTRIES={},SFX_PROVIDER='',SFX_FOLDER='';
+function sfxCatalog(){let old={};try{old=JSON.parse(localStorage.getItem('sfxCatalog:'+cleanPath($('sfxDir').value))||'{}')}catch(e){}return {...old,...(cleanPath($('sfxDir').value)===SFX_FOLDER?SFX_CATALOG:{})}}
+function sfxAudition(){
+ const file=$('sfxSuperFile').value,dir=cleanPath($('sfxDir').value);
+ $('sfxDescription').value=sfxCatalog()[file]||'';
+ $('sfxAudio').src=file?'/api/sfx_audio?dir='+encodeURIComponent(dir)+'&file='+encodeURIComponent(file):'';
+ const entry=cleanPath($('sfxDir').value)===SFX_FOLDER?SFX_ENTRIES[file]:null;
+ $('sfxEvidence').textContent=entry?(entry.source==='audio_ai'?'วิเคราะห์จากเสียงที่ส่งจริง · '+entry.provider+' · ตัวอย่างไม่เกิน 12 วินาที':'คำอธิบายจากผู้ใช้ — AI ยังไม่ได้รับไฟล์เสียงนี้'):'ยังไม่มีผลวิเคราะห์เสียงนี้';
+}
+async function sfxSaveDescription(){
+ const file=$('sfxSuperFile').value;if(!file)return;
+ try{const r=await fetch('/api/sfx_description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dir:cleanPath($('sfxDir').value),file,description:$('sfxDescription').value})});const j=await r.json();if(j.error||j.ok===false)throw Error(j.error);SFX_CATALOG=j.catalog;SFX_ENTRIES=j.entries;SFX_FOLDER=cleanPath($('sfxDir').value);sfxAudition();$('sfxStatus').textContent='บันทึกลักษณะเสียงในเครื่องแล้ว เปิดโปรแกรมใหม่ยังใช้ได้'}catch(e){$('sfxStatus').textContent=e.message}
+}
+window.sfxAnalysisDone=function(j){
+ if(cleanPath($('sfxDir').value)!==j.dir){$('sfxStatus').textContent='วิเคราะห์เสร็จในโฟลเดอร์เดิม กดโหลดรายชื่อของโฟลเดอร์นั้นเพื่อตรวจผล';return}
+ SFX_CATALOG=j.catalog||{};SFX_ENTRIES=j.entries||{};SFX_FOLDER=j.dir;sfxAudition();$('sfxStatus').textContent=j.cached?'ใช้ผลวิเคราะห์ที่บันทึกไว้ ไม่ส่งเสียงซ้ำ':'บันทึกผลวิเคราะห์จากเสียงจริงแล้ว · '+j.provider;
+};
+async function sfxAnalyze(){
+ const file=$('sfxSuperFile').value,dir=cleanPath($('sfxDir').value);if(!file){$('sfxStatus').textContent='โหลดรายชื่อและเลือกเสียงก่อน';return}
+ if(!SFX_PROVIDER){$('sfxStatus').textContent='ตั้งค่า AI งานเสียงในแท็บสมอง AI ก่อน: Gemini หรือ Webhook งานเสียงที่รับไฟล์ได้';return}
+
+ const button=$('sfxAnalyzeButton');button.disabled=true;$('sfxStatus').textContent='กำลังเตรียมไฟล์เสียงจริง / ติดตามได้ที่สถานะ AI ด้านข้าง';
+ try{const r=await fetch('/api/sfx_analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dir,file,send_audio:true})});const j=await r.json();if(j.error||j.ok===false)throw Error(j.error);sfxAnalysisDone(j)}catch(e){$('sfxStatus').textContent=e.message}finally{button.disabled=false}
+}
+async function sfxLoad(){
+  const dir=cleanPath($('sfxDir').value); $('sfxDir').value=dir;
+  if(!dir){ $('sfxStatus').innerHTML='<span style="color:#fbbf24">ใส่พาธโฟลเดอร์ก่อน</span>'; return; }
+  $('sfxStatus').textContent='กำลังโหลดรายชื่อไฟล์เสียง...';
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{
+    const r=await fetch('/api/sfx_list?dir='+encodeURIComponent(dir),{signal:controller.signal});
+    const j=await r.json();
+    if(j.error){ $('sfxStatus').innerHTML='<span style="color:#dc2626">❌ '+j.error+'</span>'; return; }
+    $('sfxDir').value=j.dir;
+    SFX_CATALOG=j.catalog||{};SFX_ENTRIES=j.entries||{};SFX_PROVIDER=j.audio_provider||'';SFX_FOLDER=j.dir;$('sfxAnalyzeButton').textContent=SFX_PROVIDER?'ส่งเสียงให้ '+SFX_PROVIDER+' วิเคราะห์':'ส่งเสียงให้ AI วิเคราะห์';
+    const sel=$('sfxSuperFile'); const cur=sel.value;
+    if(!j.files.length){ sel.innerHTML='<option value="">— ไม่พบไฟล์เสียงในโฟลเดอร์นี้ —</option>';
+      $('sfxStatus').innerHTML='<span style="color:#fbbf24">ไม่พบไฟล์เสียง (.mp3/.wav/…) ในโฟลเดอร์</span>'; return; }
+    sel.innerHTML=j.files.map(f=>'<option value="'+f.replace(/"/g,'&quot;')+'">'+f.replace(/</g,'&lt;')+'</option>').join('');
+    if(cur && j.files.includes(cur)) sel.value=cur;
+    sfxAudition();
+    // นับจำนวนโฟลเดอร์ย่อยที่มีไฟล์ (ดูจาก relative path ที่มี /)
+    const subs=new Set(); j.files.forEach(f=>{ const i=f.lastIndexOf('/'); if(i>0) subs.add(f.slice(0,i)); });
+    const subTxt=subs.size?(' · ครอบคลุม '+subs.size+' โฟลเดอร์ย่อย'):'';
+    $('sfxStatus').innerHTML='<span style="color:#8affab">✅ เจอ '+j.files.length+' ไฟล์'+subTxt+' · AI งานเสียง: '+(SFX_PROVIDER||'ยังไม่ได้ตั้งค่า')+'</span>';
+  }catch(e){ $('sfxStatus').textContent=e.name==='AbortError'?'โหลดเสียงใช้เวลานานเกิน 15 วินาที ตรวจสิทธิ์โฟลเดอร์หรือเลือกโฟลเดอร์ในเครื่องแล้วลองใหม่':'โหลดเสียงไม่สำเร็จ: '+e.message; }finally{clearTimeout(timer)}
+}
+// เล่นเอฟเฟกต์ 'เข้า' ของ Super Text ซ้ำในจอจำลอง (ตรงกับ spanimtype ที่เลือก)
+function playSupAnim(){
+  drawSafePreview();
+  document.querySelectorAll('#supdot .supanim').forEach(el=>{
+    const cl=el.className; el.className='supanim'; void el.offsetWidth; el.className=cl;
+  });
+}
+function upd(){
+  const fam=previewFont();
+  const p=$('prev'); p.style.fontFamily=fam;
+  updMotionModeLabel();
+  if(MOTION.on){ motionTick(); if($('font').value) $('fontpath').textContent='ที่อยู่: '+$('font').value; supPrev(); return; }
+  const bgOn=$('bg').checked;
+  // โหมดกล่องทึบ (word_box/box_travel) โชว์กล่องเฉพาะคำ ไม่ใช่พื้นทั้งบรรทัด
+  const boxMode=(($('karaoke_style').value==='box_travel')||($('karaoke_style').value==='word_box'));
+  if(bgOn && !boxMode){ p.style.background=hexA($('bgchex').value,parseFloat($('bga').value)); }
+  else { p.style.background = PREV_BG.prev==='auto'? oppBg($('hchex').value) : PREV_BG.prev; }
+  p.style.borderRadius=(parseFloat($('bgr').value)*22)+'px';
+  const weight='normal';
+  const shadow=$('shadow').checked?'2px 2px 3px rgba(0,0,0,.7)':'none';
+  [['p1','nchex','ns'],['p3','nchex','ns'],['p2','hchex','hs']].forEach(([id,col,sz])=>{
+    const e=$(id); e.style.color=$(col).value; e.style.fontSize=$(sz).value*2+'px';
+    e.style.fontWeight=weight; e.style.textShadow=shadow; e.style.opacity=1;
+    e.style.background='transparent'; e.style.borderRadius='6px';
+    e.style.webkitTextStroke=$('stroke').checked?('0.8px '+$('schex').value):'0';
+  });
+  if($('font').value) $('fontpath').textContent='ที่อยู่: '+$('font').value;
+  supPrev();
+}
+
+// ---------- พรีวิวเคลื่อนไหว (motion) — จำลองเอฟเฟกต์ตามรูปแบบไลน์เน้นที่เลือก ----------
+const MOTION={on:false, timer:null, ms:600, i:0};
+const MOTION_MODE_TH={line:'ไฮไลต์ไล่ทีละคำ', color_sweep:'ไล่สีซ้าย→ขวา',
+  box_travel:'กล่องทึบวิ่งทีละคำ', word_box:'กล่องหุ้มทีละคำ'};
+function updMotionModeLabel(){
+  const el=$('motionMode'); if(!el) return;
+  el.textContent='โหมด: '+(MOTION_MODE_TH[$('karaoke_style').value]||'—');
+}
+function setMotionSpeed(btn){
+  MOTION.ms=parseInt(btn.dataset.ms)||600;
+  btn.parentElement.querySelectorAll('.mspd').forEach(b=>b.classList.toggle('on',b===btn));
+  if(MOTION.on){ startMotionTimer(); }
+}
+function toggleMotion(){
+  MOTION.on=!MOTION.on;
+  const b=$('motionBtn');
+  if(MOTION.on){ b.textContent='⏸ หยุดพรีวิว'; b.classList.add('playing'); MOTION.i=0; startMotionTimer(); }
+  else { b.textContent='▶ เล่นตัวอย่างเคลื่อนไหว'; b.classList.remove('playing');
+         if(MOTION.timer) clearInterval(MOTION.timer); MOTION.timer=null; upd(); }
+}
+function startMotionTimer(){
+  if(MOTION.timer) clearInterval(MOTION.timer);
+  motionTick();
+  MOTION.timer=setInterval(()=>{ MOTION.i=(MOTION.i+1)%4; motionTick(); }, MOTION.ms);
+}
+function paintChip(e,o){
+  e.style.color=o.color;
+  e.style.fontSize=(o.size*2)+'px';
+  e.style.fontWeight=o.weight;
+  e.style.textShadow=o.shadow;
+  e.style.webkitTextStroke=o.stroke;
+  e.style.opacity=(o.hide?0:1);
+  e.style.background=o.box? o.boxColor : 'transparent';
+  e.style.borderRadius=(o.boxRadius||6)+'px';
+  e.classList.remove('pop');
+  if(o.pop){ void e.offsetWidth; e.classList.add('pop'); }   // retrigger animation
+}
+function motionTick(){
+  const ids=['p1','p2','p3']; const active=MOTION.i;   // 0..2 = คำที่กำลังพูด, 3 = พัก
+  const nc=$('nchex').value, hc=$('hchex').value, ns=parseFloat($('ns').value), hs=parseFloat($('hs').value);
+  const weight='normal';
+  const shadow=$('shadow').checked?'2px 2px 3px rgba(0,0,0,.7)':'none';
+  const stroke=$('stroke').checked?('0.8px '+$('schex').value):'0';
+  const pop=$('karaoke_pop').checked;
+  const mode=$('karaoke_style').value;
+  const bgc=hexA($('bgchex').value,parseFloat($('bga').value));
+  const boxR=parseFloat($('bgr').value)*18;
+  const p=$('prev');
+  // พื้นหลังของกล่องพรีวิว: โหมดกล่องทึบให้พื้นโปร่ง (กล่องอยู่ที่คำ), โหมดอื่นใช้ bg ปกติ
+  const boxMode=(mode==='box_travel'||mode==='word_box');
+  if($('bg').checked && !boxMode){ p.style.background=hexA($('bgchex').value,parseFloat($('bga').value)); }
+  else { p.style.background = PREV_BG.prev==='auto'? oppBg(hc) : PREV_BG.prev; }
+  p.style.borderRadius=(parseFloat($('bgr').value)*22)+'px';
+
+  ids.forEach((id,idx)=>{
+    const e=$(id);
+    let o={color:nc,size:ns,weight:weight,shadow:shadow,stroke:stroke,pop:false,box:false,boxColor:bgc,boxRadius:boxR,hide:false};
+    const isActive=(idx===active);
+    if(mode==='color_sweep'){
+      // คำที่ไล่ผ่านแล้ว (idx<=active) เปลี่ยนเป็นสีไฮไลต์ค้างไว้ ขนาดคงที่
+      o.color=(active<3 && idx<=active)? hc : nc;
+    } else if(mode==='word_box'){
+      // โชว์เฉพาะคำที่กำลังพูด เป็นตัวไฮไลต์ในกล่องทึบ คำอื่นซ่อน
+      if(isActive && active<3){ o.color=hc; o.size=hs; o.box=true; o.pop=true; }
+      else { o.hide=true; }
+    } else if(mode==='box_travel'){
+      // ทั้งบรรทัดค้างสีปกติ + กล่องทึบวิ่งครอบคำที่พูด (คำในกล่องเป็นสีไฮไลต์)
+      if(isActive && active<3){ o.color=hc; o.box=true; o.pop=pop; }
+      else { o.color=nc; }
+    } else {
+      // line (คลาสสิก): คำที่กำลังพูด = ไฮไลต์ + ตัวใหญ่ (+เด้งถ้าเปิด) ที่เหลือปกติ
+      if(isActive && active<3){ o.color=hc; o.size=hs; o.pop=pop; }
+    }
+    paintChip(e,o);
+  });
+}
+function hexA(h,a){ h=h.replace('#',''); const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+a+')'; }
+function lumin(h){ h=h.replace('#',''); const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  return (0.2126*r+0.7152*g+0.0722*b)/255; }
+function oppBg(hex){ return lumin(hex)>0.55 ? '#20242e' : '#f2f3f6'; }
+let PREV_BG={prev:'auto', sprev:'auto'};
+function setPrevBg(id,btn){ PREV_BG[id]=btn.dataset.bg;
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===btn));
+  if(id==='sprev') supPrev(); else upd(); }
+
+// ---------- presets ----------
+const PRESETS=[
+ {id:'karaoke_gold', n:'Karaoke ทอง', d:'คลาสสิก ทั้งบรรทัด ไฮไลต์ทองไล่ทีละคำ',
+  s:{nc:'#ffffff',hc:'#febe00',ns:12,hs:16,bold:1,shadow:1,stroke:0,bg:0,pop:0,kstyle:'line'},
+  pv:{bg:'#000',t:'#febe00'}},
+ {id:'box_word', n:'⬛ Box ทึบ ไล่ทีละคำ', d:'ตัวขาว กรอบทึบดำ หุ้มเฉพาะคำที่พูด',
+  s:{nc:'#ffffff',hc:'#ffffff',ns:14,hs:14,bold:1,shadow:0,stroke:0,
+     bg:1,bgc:'#000000',bga:1,bgr:0.25,pop:1,kstyle:'word_box',tmode:'word'},
+  pv:{bg:'#000',t:'#ffffff'}},
+ {id:'box_travel', n:'🟨 กล่องทึบวิ่งทีละคำ', d:'ทั้งบรรทัดค้าง สีขาว + กล่องทึบวิ่งครอบคำที่กำลังพูด',
+  s:{nc:'#ffffff',hc:'#ffde00',ns:14,hs:14,bold:1,shadow:1,stroke:0,
+     bg:1,bgc:'#000000',bga:1,bgr:0.25,pop:1,kstyle:'box_travel',tmode:'word'},
+  pv:{bg:'#000',t:'#ffde00'}},
+ {id:'sweep_gold', n:'🌈 ไล่สีทีละคำ', d:'ทั้งประโยคสีขาว ไล่สีเหลืองซ้าย→ขวา ค้างไว้',
+  s:{nc:'#ffffff',hc:'#ffde00',ns:14,hs:14,bold:1,shadow:1,stroke:0,
+     bg:0,pop:0,kstyle:'color_sweep',tmode:'word'},
+  pv:{bg:'#000',t:'#ffde00'}},
+ {id:'bold_outline', n:'Bold Outline', d:'ตัวขาวหนา ขอบดำ ไฮไลต์ทอง (สไตล์ Reels)',
+  s:{nc:'#ffffff',hc:'#febe00',ns:13,hs:17,bold:1,shadow:0,stroke:1,sc:'#000000',sw:0.08,bg:0,pop:0,kstyle:'line'},
+  pv:{bg:'#3a3a3a',t:'#fff',stroke:1}},
+ {id:'yellow_box', n:'Yellow Box', d:'ตัวขาว ไฮไลต์เหลือง บนกรอบทึบดำ อ่านง่ายสุด',
+  s:{nc:'#ffffff',hc:'#ffe000',ns:12,hs:16,bold:1,shadow:0,stroke:0,bg:1,bgc:'#000000',bga:0.85,bgr:0.25,pop:0,kstyle:'line'},
+  pv:{bg:'#000',t:'#ffe000'}},
+ {id:'neon_pop', n:'Neon Pop', d:'คำเน้นเขียวนีออน ตัวใหญ่ + ขอบเข้ม',
+  s:{nc:'#ffffff',hc:'#00e676',ns:12,hs:20,bold:1,shadow:1,stroke:1,sc:'#003314',sw:0.06,bg:0,pop:1,kstyle:'line'},
+  pv:{bg:'#111',t:'#00e676',stroke:1}},
+ {id:'brand_bar', n:'Brand Bar', d:'ตัวขาว บนแถบกรอบทึบสีแบรนด์ ดูโปร',
+  s:{nc:'#ffffff',hc:'#ffffff',ns:13,hs:16,bold:1,shadow:0,stroke:0,bg:1,bgc:'#7c3aed',bga:0.9,bgr:0.15,pop:0,kstyle:'line'},
+  pv:{bg:'#7c3aed',t:'#fff'}},
+ {id:'clean_min', n:'Minimal', d:'เรียบ สะอาด ไฮไลต์เหลืองนวล + เงาบาง',
+  s:{nc:'#ffffff',hc:'#ffd54a',ns:11,hs:14,bold:0,shadow:1,stroke:0,bg:0,pop:0,kstyle:'line'},
+  pv:{bg:'#222',t:'#ffd54a'}},
+ // ---------- โทนธุรกิจ/ทางการ เรียบหรู เน้นอ่านตามง่าย ไม่ลายตา (Corporate) ----------
+ {id:'corp_navy', n:'🏢 Corporate Navy', d:'ตัวขาว ไฮไลต์ทอง บนแถบน้ำเงินแบรนด์ เรียบหรู อ่านง่าย ทางการ',
+  s:{nc:'#ffffff',hc:'#f0d98c',ns:12,hs:15,shadow:0,stroke:0,bg:1,bgc:'#2e3192',bga:0.92,bgr:0.12,pop:0,kstyle:'line',tmode:'word'},
+  pv:{bg:'#2e3192',t:'#f0d98c'}},
+ {id:'exec_clean', n:'💼 Executive Clean', d:'ไม่มีกรอบ ตัวขาว ไฮไลต์ทองพรีเมียม เงานุ่มบาง มินิมอลหรู',
+  s:{nc:'#ffffff',hc:'#e8c56a',ns:12,hs:15,shadow:1,stroke:0,bg:0,pop:0,kstyle:'line',tmode:'word'},
+  pv:{bg:'#20242c',t:'#e8c56a'}},
+ {id:'biz_slate', n:'📊 Business Slate', d:'กรอบทึบเทากราไฟต์ ตัวขาว ไฮไลต์ฟ้าแบรนด์ สุขุม ดูโปร',
+  s:{nc:'#ffffff',hc:'#00b1eb',ns:12,hs:15,shadow:0,stroke:0,bg:1,bgc:'#263042',bga:0.9,bgr:0.1,pop:0,kstyle:'line',tmode:'word'},
+  pv:{bg:'#263042',t:'#00b1eb'}},
+ {id:'gold_line', n:'✨ Elegant Gold', d:'ตัวขาว ไฮไลต์ทอง เส้นขอบบางคม อ่านชัดทุกพื้นหลัง ไม่มีกรอบ',
+  s:{nc:'#ffffff',hc:'#d4af37',ns:12,hs:15,shadow:0,stroke:1,sc:'#1a1a1a',sw:0.05,bg:0,pop:0,kstyle:'line',tmode:'word'},
+  pv:{bg:'#2b2b2b',t:'#d4af37',stroke:1}},
+ {id:'white_box', n:'⬜ Minimal White', d:'กรอบทึบขาว ตัวน้ำเงินเข้ม ไฮไลต์ทองเข้ม สะอาดตา พรีเมียม',
+  s:{nc:'#20264a',hc:'#a9791b',ns:12,hs:15,shadow:0,stroke:0,bg:1,bgc:'#ffffff',bga:0.93,bgr:0.12,pop:0,kstyle:'line',tmode:'word'},
+  pv:{bg:'#ffffff',t:'#a9791b'}},
+ {id:'soft_sweep', n:'🥂 Soft Sweep', d:'ทั้งประโยคขาว ไล่สีทองแชมเปญนุ่มๆ ซ้าย→ขวา อ่านตามสบายตา',
+  s:{nc:'#ffffff',hc:'#e8c56a',ns:13,hs:13,shadow:1,stroke:0,bg:0,pop:0,kstyle:'color_sweep',tmode:'word'},
+  pv:{bg:'#1f2430',t:'#e8c56a'}},
+// ---------- แบบธรรมดา / ซับนิ่ง ไม่ไล่สี ไม่เด้ง (อ่านง่าย เป็นทางการ) — ข้อ 3 ----------
+{id:'plain_white', n:'🔤 ซับธรรมดา (ขาว)', d:'ซับขาวนิ่ง ขอบดำคม ไม่ไล่สี ไม่เด้ง — อ่านง่ายสุด เป็นกลาง',
+ s:{nc:'#ffffff',hc:'#ffffff',ns:12,hs:12,shadow:1,stroke:1,sc:'#000000',sw:0.06,bg:0,pop:0,kstyle:'line',tmode:'line'},
+ pv:{bg:'#333',t:'#fff',stroke:1}},
+{id:'plain_box', n:'▢ ซับธรรมดา (กล่องดำ)', d:'ซับขาวนิ่งบนแถบดำโปร่ง ไม่ไล่สี — คลีน อ่านชัดทุกพื้นหลัง',
+ s:{nc:'#ffffff',hc:'#ffffff',ns:12,hs:12,shadow:0,stroke:0,bg:1,bgc:'#000000',bga:0.82,bgr:0.2,pop:0,kstyle:'line',tmode:'line'},
+ pv:{bg:'#000',t:'#fff'}},
+{id:'plain_yellow', n:'🟡 ซับธรรมดา (เหลือง)', d:'ซับเหลืองนิ่ง ขอบดำ สไตล์ซับหนัง ไม่ไล่สี ไม่เด้ง',
+ s:{nc:'#ffe000',hc:'#ffe000',ns:12,hs:12,shadow:1,stroke:1,sc:'#000000',sw:0.07,bg:0,pop:0,kstyle:'line',tmode:'line'},
+ pv:{bg:'#222',t:'#ffe000',stroke:1}},
+// ---------- เทรนด์โซเชียล 2026: word-by-word เด้ง ตัวใหญ่จัดจ้าน (Hormozi/MrBeast) — ข้อ 4 ----------
+{id:'hormozi', n:'🔥 Hormozi Word', d:'เทรนด์ 2026: ทีละคำ ตัวใหญ่หนา ไฮไลต์เหลืองเด้งแรง จับสายตา (viral)',
+ s:{nc:'#ffffff',hc:'#ffe000',ns:13,hs:22,bold:1,shadow:1,stroke:1,sc:'#000000',sw:0.08,bg:0,pop:1,kstyle:'line',tmode:'word'},
+ pv:{bg:'#111',t:'#ffe000',stroke:1}},
+{id:'beast_green', n:'⚡ Beast Green', d:'เทรนด์ 2026: คำเด้งเขียวสะท้อนแสง ตัวใหญ่ ขอบเข้ม สาย TikTok/Shorts',
+ s:{nc:'#ffffff',hc:'#39ff14',ns:13,hs:21,bold:1,shadow:1,stroke:1,sc:'#062b03',sw:0.08,bg:0,pop:1,kstyle:'line',tmode:'word'},
+ pv:{bg:'#0a0a0a',t:'#39ff14',stroke:1}},
+{id:'knockout', n:'⬛ Knockout Bar', d:'เทรนด์ 2026: คำเด้งบนแถบทึบทีละคำ (word box) พื้นดำตัวขาว คมจัด',
+ s:{nc:'#ffffff',hc:'#ffffff',ns:13,hs:16,bold:1,shadow:0,stroke:0,bg:1,bgc:'#000000',bga:0.95,bgr:0.06,pop:1,kstyle:'word_box',tmode:'word'},
+ pv:{bg:'#000',t:'#fff'}},
+// ---------- Super Text (คำขยี้) + motion สำเร็จรูป — ข้อ 5 ----------
+{id:'sup_pop', n:'💥 ขยี้ เด้งเข้า', d:'Super Text 2 บรรทัด คำเน้นทองใหญ่ เด้งเข้าแบบ pop คลาสสิก',
+ s:{nc:'#ffffff',hc:'#ffe000',ns:12,hs:14,shadow:1,stroke:0,bg:0,pop:0,kstyle:'line',tmode:'word'},
+ sup:{on:1,two:1,color:'#ffe000',subcolor:'#ffffff',size:20,scale:2.2,anim:'pop',timing:'pop'},
+ pv:{bg:'#111',t:'#ffe000'}},
+{id:'sup_smooth', n:'🫧 ขยี้ Motion Smooth', d:'Super Text ขยายเข้านุ่มๆ เฟดยาว ดูพรีเมียมลื่นตา ไม่กระตุก',
+ s:{nc:'#ffffff',hc:'#e8c56a',ns:12,hs:14,shadow:1,stroke:0,bg:0,pop:0,kstyle:'line',tmode:'word'},
+ sup:{on:1,two:1,color:'#e8c56a',subcolor:'#ffffff',size:20,scale:2.0,anim:'pop_smooth',timing:'pop'},
+ pv:{bg:'#1c1f2b',t:'#e8c56a'}},
+{id:'sup_blur', n:'🌀 ขยี้ Zoom-Blur', d:'Super Text ซูมจากใหญ่→พอดี + เฟดเร็ว ให้ฟีล motion blur / pop-in',
+ s:{nc:'#ffffff',hc:'#00e5ff',ns:12,hs:14,shadow:1,stroke:1,sc:'#012a33',sw:0.05,bg:0,pop:0,kstyle:'line',tmode:'word'},
+ sup:{on:1,two:1,color:'#00e5ff',subcolor:'#ffffff',size:21,scale:2.4,anim:'zoom_blur',timing:'pop'},
+ pv:{bg:'#04141a',t:'#00e5ff',stroke:1}},
+{id:'sup_rise', n:'🎈 ขยี้ ลอยขึ้น', d:'Super Text ขยายจากเล็กลอยขึ้นนุ่มๆ เฟดช้า อ่อนโยน สายไลฟ์สไตล์',
+ s:{nc:'#ffffff',hc:'#ff7ab6',ns:12,hs:14,shadow:1,stroke:0,bg:0,pop:0,kstyle:'line',tmode:'word'},
+ sup:{on:1,two:1,color:'#ff7ab6',subcolor:'#ffffff',size:19,scale:2.0,anim:'rise',timing:'pop'},
+ pv:{bg:'#241820',t:'#ff7ab6'}},
+];
+const selectedPresets={presets:'custom',superPresets:'custom'};
+function selectPresetState(group,id){
+ selectedPresets[group]=id;
+ document.querySelectorAll('#'+group+' .pst').forEach(e=>{const on=e.dataset.id===id;e.classList.toggle('on',on);e.setAttribute('aria-pressed',String(on));});
+ const status=$(group+'Status');if(status){const p=PRESETS.find(p=>p.id===id);status.textContent=p?'เลือกอยู่: '+p.n:id==='off'?'ไม่สร้าง'+(group==='presets'?'ไลน์เน้น':' Super Text'):'ตั้งค่าเอง · เลือกสีและรูปแบบได้';}
+}
+function presetChoice(group,id,title,description){
+ const e=document.createElement('button');e.type='button';e.className='pst preset-choice';e.dataset.id=id;
+ e.innerHTML='<div class="pn">'+title+'</div><div class="pd">'+description+'</div>';
+ e.onclick=()=>{selectPresetState(group,id);if(id==='off'||id==='custom'){const input=$(group==='presets'?'karaoke_on':'super_on');input.checked=id==='custom';input.dispatchEvent(new Event('change',{bubbles:true}));if(group==='presets')upd();else if(typeof supPrev==='function')supPrev();}};return e;
+}
+function presetCard(p){
+  const el=document.createElement('div'); el.className='pst'; el.dataset.id=p.id;
+  el.innerHTML=`<div class="pv" style="background:${p.pv.bg};color:${p.pv.t};${p.pv.stroke?'-webkit-text-stroke:.7px #000;':''}">Aa</div>
+    <div class="pn">${p.n}</div><div class="pd">${p.d}</div>`;
+  el.onclick=()=>applyPreset(p);
+  return el;
+}
+function renderPresets(){
+  // พรีเซ็ตซับ (ไม่มี .sup) เข้าการ์ดซับ / พรีเซ็ต Super Text (มี .sup) เข้าการ์ด Super Text
+  const box=$('presets'); if(box){ box.innerHTML='';box.append(presetChoice('presets','custom','ตั้งค่าเอง','ตั้งค่าสีและรูปแบบเอง'),presetChoice('presets','off','ไม่สร้างไลน์เน้น','ปิดการสร้างไลน์เน้น · คงซับเดิม')); PRESETS.filter(p=>!p.sup).forEach(p=>box.appendChild(presetCard(p))); }
+  const sbox=$('superPresets'); if(sbox){ sbox.innerHTML='';sbox.append(presetChoice('superPresets','custom','ตั้งค่าเอง','ตั้งค่ารูปแบบเอง'),presetChoice('superPresets','off','ไม่สร้าง Super Text','ปิดการสร้างข้อความขึ้นจอ')); PRESETS.filter(p=>p.sup).forEach(p=>sbox.appendChild(presetCard(p))); }
+ for(const group of ['presets','superPresets'])selectPresetState(group,selectedPresets[group]);
+}
+function setChk(id,v){ $(id).checked=!!v; }
+function setColor(id,v){ if(v){ $(id).value=v; $(id+'hex').value=v; } }
+// แยกการใช้พรีเซ็ตเป็น 2 สาย ไม่ให้ 'ซับ' กับ 'Super Text' แก้ค่าทับกันจนเอฟเฟกต์ตีกัน:
+//  • พรีเซ็ตซับ (ไม่มี .sup)  -> แตะเฉพาะคอนโทรลไลน์เน้น/ซับ ไม่ยุ่งกับ Super Text
+//  • พรีเซ็ต Super Text (มี .sup) -> แตะเฉพาะคอนโทรล Super Text ไม่ยุ่งกับซับ
+function applyPreset(p){ if(p.sup) applySuperPreset(p); else applySubPreset(p); }
+function applySubPreset(p){
+  const s=p.s;
+  setColor('nc',s.nc); setColor('hc',s.hc);
+  $('ns').value=s.ns; $('nsv').textContent=s.ns; $('hs').value=s.hs; $('hsv').textContent=s.hs;
+  setChk('shadow',s.shadow); setChk('stroke',s.stroke); setChk('bg',s.bg);
+  if(s.sc){ setColor('sc',s.sc); } if(s.sw!=null){ $('sw').value=s.sw; $('swv').textContent=s.sw; }
+  if(s.bgc){ setColor('bgc',s.bgc); }
+  if(s.bga!=null){ $('bga').value=s.bga; $('bgav').textContent=s.bga; }
+  if(s.bgr!=null){ $('bgr').value=s.bgr; $('bgrv').textContent=s.bgr; }
+  setChk('karaoke_pop', s.pop!=null ? s.pop : 0);   // รีเซ็ต 'เด้งทีละคำ' ทุกครั้งกันค้างค่าเก่า
+  $('karaoke_style').value = s.kstyle || 'line';
+  if(s.tmode){ $('token_mode').value = s.tmode; }
+  // โหมดกล่องทึบต้องเปิดพื้นหลังให้ชัดเสมอ (ให้ UI ตรงกับผลจริง)
+  if(s.kstyle==='box_travel' || s.kstyle==='word_box'){ setChk('bg',1); }
+  // เปิด 'ไลน์เน้นไล่สี' เสมอเมื่อเลือกพรีเซ็ตซับ (พรีเซ็ตธรรมดาใช้ nc=hc = ซับนิ่งไม่ไล่สี)
+  setChk('karaoke_on', s.kon!=null ? s.kon : 1);
+  // ไฮไลต์เฉพาะการ์ดพรีเซ็ตซับ
+  selectPresetState('presets',p.id);
+  upd();
+}
+function applySuperPreset(p){
+  const u=p.sup||{};
+  setChk('super_on', u.on!=null?u.on:1);
+  if(u.two!=null){ setChk('sp2line',u.two); if($('aiTwoLine')) $('aiTwoLine').checked=u.two; }
+  if(u.color){ setColor('spc',u.color); }
+  if(u.subcolor){ setColor('spsub',u.subcolor); }
+  if(u.size!=null){ $('spsz').value=u.size; $('spszv').textContent=u.size; }
+  if(u.scale!=null){ $('spscale').value=u.scale; $('spscalev').textContent=u.scale; }
+  if(u.timing){ $('sptiming').value=u.timing; }
+  if(u.anim){ $('spanimtype').value=u.anim; setChk('spanim', u.anim!=='none'); }
+  if(u.bg!=null){ setChk('spbg',u.bg); }
+  if(u.bgc){ setColor('spbgc',u.bgc); }
+  if(u.align){ $('spalign').value=u.align; }
+  // ไฮไลต์เฉพาะการ์ดพรีเซ็ต Super Text
+  selectPresetState('superPresets',p.id);
+  if(typeof supPrev==='function') supPrev();
+}
+function msg(t,ok){ const m=$('msg'); m.textContent=t; m.className=ok?'ok':'err'; m.style.display='block'; }
+let FONTS=[];
+function renderFonts(q){
+  const sel=$('font'); const cur=sel.value; sel.innerHTML='';
+  q=(q||'').trim().toLowerCase();
+  const list=q? FONTS.filter(f=>f.name.toLowerCase().includes(q)) : FONTS;
+  list.forEach(f=>{ const o=document.createElement('option'); o.value=f.path; o.textContent=f.name; sel.appendChild(o); });
+  if(list.some(f=>f.path===cur)) sel.value=cur;
+  else if(list.length) sel.selectedIndex=0;
+  upd();
+}
+// ฟอนต์ตั้งต้นของทีม: DB Heavent Blk v3.2.1 — เลือกให้อัตโนมัติถ้ามีในเครื่อง
+// ไล่ความเจาะจงจากมาก->น้อย เผื่อชื่อไฟล์ในแต่ละเครื่องต่างกันเล็กน้อย
+const FONT_DEFAULT_PREFS=[
+  /DB\s*Heavent\s*Blk\s*v?3\.?2\.?1/i,   // ตรงเป๊ะสุด: DB Heavent Blk v3.2.1
+  /Heavent\s*Blk/i,                      // Heavent ตัวหนา (Black) รุ่นอื่น
+  /DB\s*Heavent/i,                       // ตระกูล DB Heavent ทั่วไป
+  /Heavent/i
+];
+function pickDefaultFont(){
+  for(const re of FONT_DEFAULT_PREFS){
+    const f=FONTS.find(x=>re.test(x.name));
+    if(f) return f;
+  }
+  return null;
+}
+async function loadFontsList(){
+  const r=await fetch('/api/fonts'); const j=await r.json(); FONTS=j.fonts;
+  renderFonts('');
+  const pref=pickDefaultFont();
+  if(pref){ $('font').value=pref.path; }
+  else { $('fontpath').innerHTML='<span style="color:#dc2626">⚠ ไม่พบฟอนต์ DB Heavent Blk v3.2.1 ในเครื่อง — ติดตั้งฟอนต์ก่อนเพื่อใช้เป็นค่าเริ่มต้น หรือเลือกฟอนต์อื่นด้านบน</span>'; }
+  upd();
+}
+$('fontsearch').oninput=e=>renderFonts(e.target.value);
+let CAPS=[];
+let CAPS_CURRENT=false;
+let CAP_SELECTION_TOUCHED=false;
+async function loadCaps(quiet,current=CAPS_CURRENT){
+  try{
+    // ต่อ ?t=timestamp กัน browser ใช้ผลลัพธ์เก่าจากแคช (ซับไม่ตรงโปรเจกต์ปัจจุบัน)
+    const r=await fetch('/api/captions?t='+Date.now()+(current?'&current=1':''),{cache:'no-store'}); const j=await r.json();
+    if(!r.ok || j.error)throw Error(j.error||'อ่านซับไม่สำเร็จ');
+    if(STATE_HASH && (STATE_HASH!==j.state_hash || SOURCE_PROJECT!==j.source_project)){SUPER_KW_MAP={};if($('aiResults'))$('aiResults').innerHTML='';}
+    if(SOURCE_PROJECT&&SOURCE_PROJECT!==j.source_project)CAP_SELECTION_TOUCHED=false;
+    CAPS=j.captions; STATE_HASH=j.state_hash; SOURCE_HASH=j.source_hash; SOURCE_PROJECT=j.source_project; CAPS_CURRENT=current;
+    try{showLoanwordReport(JSON.parse(localStorage.getItem('ksLoanwordReport:'+SOURCE_PROJECT)||'{}'))}catch(e){}
+    // คงคำ Super Text ที่ AI คิด/ผู้ใช้แก้ไว้ (SUPER_KW_MAP) ให้โชว์เป็นช่องแยกต่อท้ายแต่ละซับ
+    // แต่ต้อง 'ตัดค่าที่ค้างของ index ที่ไม่มีอยู่ในซับล่าสุดแล้ว' ทิ้ง — กันซับถูกจัดใหม่/ลบ
+    // ท่อน แล้วคำ Super Text เก่ายังค้างไปเกาะผิดท่อน (อาการ 'ค้างค่าเดิม' หลังโหลดซับใหม่)
+    const _valid=new Set(CAPS.map(c=>String(c.index)));
+    Object.keys(SUPER_KW_MAP||{}).forEach(k=>{ if(!_valid.has(String(k))) delete SUPER_KW_MAP[k]; });
+    CANVAS_W=j.canvas_w||1080; CANVAS_H=j.canvas_h||1920;
+    applyCanvasAspect();   // ปรับจอจำลองตามสัดส่วนจริง (9:16 หรือ 16:9)
+    const box=$('caps'); box.innerHTML='';
+    CAPS.forEach(c=>{
+      const d=document.createElement('div'); d.className='cap capml'+(c.eligible?'':' skip');
+      const rec=SUPER_KW_MAP[c.index];
+      const emphV=rec? (typeof rec==='string'?rec:(rec.emph||'')):'';
+      const subV=(rec && typeof rec==='object')? (rec.sub||''):'';
+      const esc=t=>(t||'').replace(/"/g,'&quot;');
+      d.innerHTML=`<div class="caprow1"><input type="checkbox" data-i="${c.index}" ${c.eligible?'checked':''}>
+        <span class="idx">#${c.index}</span><span class="w">${c.words} คำ</span>
+        <span class="t">${(c.text||'(ว่าง)').replace(/</g,'&lt;')}</span></div>
+        <div class="capsuper">
+          <span class="kwl">💥 Super Text</span>
+          <input type="text" class="spEmph" data-i="${c.index}" value="${esc(emphV)}" placeholder="คำเน้น (บน) — ว่าง=ไม่ใส่">
+          <input type="text" class="spSub" data-i="${c.index}" value="${esc(subV)}" placeholder="บรรทัดล่าง (ขยาย) — เฉพาะแบบ 2 บรรทัด">
+        </div>`;
+      box.appendChild(d);
+    });
+    // ผูก event: แก้ช่อง Super Text ในลิสต์ -> อัปเดต SUPER_KW_MAP + พรีวิว
+    box.querySelectorAll('.spEmph,.spSub').forEach(inp=>{
+      inp.addEventListener('input',()=>syncCapSuper(inp.dataset.i));
+    });
+    box.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{CAP_SELECTION_TOUCHED=true});
+    $('capcount').textContent='('+CAPS.length+' ท่อน)';
+    try{ drawSafePreview(); }catch(e){}
+    try{ await loadSnapshots(); }catch(e){}
+    // เคลียร์ข้อความ 'กำลังโหลด...' ที่ค้างอยู่ ให้รู้ว่าโหลดซับเสร็จจริง (ไม่ค้าง)
+    if(!quiet) msg('✅ โหลดซับล่าสุดแล้ว ('+CAPS.length+' ท่อน)',true);
+    return j;
+  }catch(e){
+    // ถ้าเชื่อมต่อไม่ได้/เซิร์ฟเวอร์ error จะไม่ปล่อยให้ปุ่มค้างเงียบ แต่แจ้งเตือนชัดเจน
+    msg('❌ โหลดซับไม่สำเร็จ: '+(e&&e.message?e.message:e),false);
+    return null;
+  }
+}
+// Refresh once per action. Map selections by stable segment identity, never row number.
+async function ensureCapsLatest(current=CAPS_CURRENT){
+ const before=CAPS.slice(), chosen=new Set(selected());
+ const selectedIds=new Set(before.filter(c=>chosen.has(c.index)).map(c=>c.segment_id));
+ const r=await fetch('/api/captions?t='+Date.now()+(current?'&current=1':''),{cache:'no-store'});
+ const j=await r.json();if(!r.ok||j.error)throw Error(j.error||'อ่านซับล่าสุดไม่สำเร็จ');
+ if(j.state_hash===STATE_HASH&&j.source_project===SOURCE_PROJECT){SOURCE_HASH=j.source_hash;CAPS_CURRENT=current;return;}
+ const updated=await loadCaps(true,current);if(!updated)throw Error('อ่านซับล่าสุดไม่สำเร็จ');
+ if(before.length&&CAP_SELECTION_TOUCHED){
+  document.querySelectorAll('#caps input[type=checkbox]').forEach(cb=>{const c=CAPS.find(c=>c.index===Number(cb.dataset.i));cb.checked=!!c&&selectedIds.has(c.segment_id)});
+  if(chosen.size&&!CAPS.some(c=>selectedIds.has(c.segment_id)))throw Error('ช่วงซับที่เลือกถูกเปลี่ยนหรือลบแล้ว เลือกช่วงใหม่จากรายการที่อัปเดตให้แล้ว');
+ }
+}
+function pick(mode){
+  CAP_SELECTION_TOUCHED=true;
+  document.querySelectorAll('#caps input[type=checkbox]').forEach((cb,i)=>{
+    if(mode==1)cb.checked=true; else if(mode==0)cb.checked=false;
+    else cb.checked=CAPS[i].eligible;
+  });
+}
+function selected(){
+  const arr=[]; document.querySelectorAll('#caps input[type=checkbox]').forEach(cb=>{
+    if(cb.checked)arr.push(parseInt(cb.dataset.i)); }); return arr;
+}
+// แก้ช่อง Super Text ในลิสต์ซับ -> เขียนกลับเข้า SUPER_KW_MAP (ให้ตรงกับที่จะเอาไปทำจริง)
+function syncCapSuper(idx){
+  const emphEl=document.querySelector('#caps .spEmph[data-i="'+idx+'"]');
+  const subEl=document.querySelector('#caps .spSub[data-i="'+idx+'"]');
+  const emph=emphEl?emphEl.value.trim():''; const sub=subEl?subEl.value.trim():'';
+  if(!emph && !sub){ delete SUPER_KW_MAP[idx]; }
+  else if(sub){ SUPER_KW_MAP[idx]={emph:emph, sub:sub}; if($('sp2line'))$('sp2line').checked=true; }
+  else { SUPER_KW_MAP[idx]=emph; }
+  if(emph||sub){ $('super_on').checked=true; }
+  try{ supPrev(); }catch(e){}
+}
+// ล้างคำ Super Text ทั้งหมด (ทั้งที่ AI คิด และที่ผู้ใช้พิมพ์เอง) — ไม่แตะไฟล์โปรเจกต์
+function clearSuperText(){
+  const n=Object.keys(SUPER_KW_MAP||{}).length;
+  SUPER_KW_MAP={};
+  // ล้างช่องกรอกในลิสต์ซับให้ว่างจริง (กันค่าค้างบนหน้าจอ)
+  document.querySelectorAll('#caps .spEmph,#caps .spSub').forEach(inp=>{ inp.value=''; });
+  // ล้างช่องคำที่ AI เสนอไว้ในการ์ด AI (ถ้าเพิ่งกดคิดคำมา) กันค่าค้างบนหน้าจอ
+  document.querySelectorAll('#aiResults .aicap input[type=text]').forEach(inp=>{ inp.value=''; });
+  try{ supPrev(); }catch(e){}
+  msg('🧹 ล้างคำ Super Text แล้ว ('+n+' ท่อน) — กด "ลงมือทำ" เพื่อให้มีผลกับไฟล์',true);
+}
+// อัปเดตช่อง Super Text ในลิสต์ให้ตรงกับ SUPER_KW_MAP (ใช้หลัง AI คิดคำเสร็จ)
+function refreshCapSuperFields(){
+  Object.keys(SUPER_KW_MAP||{}).forEach(idx=>{
+    const rec=SUPER_KW_MAP[idx];
+    const emphEl=document.querySelector('#caps .spEmph[data-i="'+idx+'"]');
+    const subEl=document.querySelector('#caps .spSub[data-i="'+idx+'"]');
+    if(emphEl) emphEl.value = typeof rec==='string'?rec:(rec.emph||'');
+    if(subEl) subEl.value = (rec && typeof rec==='object')?(rec.sub||''):'';
+  });
+}
+let SUPER_KW_MAP={};
+function buildCfg(){
+  const only=selected();
+  return { font:$('font').value, highlight_color:$('hchex').value, normal_color:$('nchex').value,
+    highlight_size:parseFloat($('hs').value), normal_size:parseFloat($('ns').value),
+    use_shadow:$('shadow').checked,
+    shadow_color:$('shcolorhex').value, shadow_alpha:parseFloat($('shalpha').value),
+    shadow_distance:parseFloat($('shdist').value), shadow_angle:parseFloat($('shangle').value),
+    shadow_blur:parseFloat($('shblur').value),
+    stroke:$('stroke').checked, stroke_color:$('schex').value, stroke_width:parseFloat($('sw').value),
+    bg:$('bg').checked, bg_color:$('bgchex').value, bg_alpha:parseFloat($('bga').value), bg_radius:parseFloat($('bgr').value),
+    bg_pad_w:parseFloat($('bgpw').value), bg_pad_h:parseFloat($('bgph').value),
+    max_chars:parseInt($('mc').value), min_words:1,
+    timing:$('timing').value, timing_offset_ms:parseInt($('timing_offset').value),
+    only:only, karaoke_on:$('karaoke_on').checked,
+    karaoke_pop:$('karaoke_pop').checked,
+    karaoke_style:$('karaoke_style').value, token_mode:$('token_mode').value,
+    super_on:$('super_on').checked,
+    super_two_line:$('sp2line').checked,
+    super_layer_split:$('splayer').checked, super_emph_align:$('spalign').value,
+    super_sub_color:$('spsubhex').value, super_sub_ratio:parseFloat($('spsubr').value),
+    super_keywords:[],
+    super_keyword_map:SUPER_KW_MAP,
+    super_auto:true,   // ไม่เจอคำที่ AI กำหนด -> ดึง 'คำที่ยาวสุด' ในซับนั้นมาแทนอัตโนมัติ
+    super_color:$('spchex').value, super_size:parseFloat($('spsz').value), super_scale:parseFloat($('spscale').value),
+    super_y:parseFloat($('spy').value), super_x:parseFloat($('spx').value),
+    super_timing:$('sptiming').value, super_pop_ms:parseInt($('sppop').value),
+    super_pop_anim:$('spanim').checked, super_anim_type:$('spanimtype').value,
+    super_shadow:$('spshadow').checked,
+    super_stroke:$('spstroke').checked, super_stroke_color:$('spschex').value, super_stroke_width:parseFloat($('spsw').value),
+    super_bg:$('spbg').checked, super_bg_color:$('spbgchex').value, super_bg_alpha:parseFloat($('spbga').value), super_bg_radius:parseFloat($('spbgr').value),
+    super_shadow_color:$('spshcolorhex').value, super_shadow_alpha:parseFloat($('spshalpha').value),
+    super_shadow_distance:parseFloat($('spshdist').value), super_shadow_angle:parseFloat($('spshangle').value),
+    super_shadow_blur:parseFloat($('spshblur').value),
+    super_hide_caption:($('spHideCap')?$('spHideCap').checked:true),
+    sub_pos_on:($('subPosOn')?$('subPosOn').checked:true),
+    sub_pos_x:($('subPosX')?parseFloat($('subPosX').value)||0:0),
+    sub_pos_y:($('subPosY')?parseFloat($('subPosY').value)||0:-1207),
+    sfx_on:($('sfxOn')?$('sfxOn').checked:false),
+    sfx_dir:($('sfxDir')?cleanPath($('sfxDir').value):''),
+    sfx_super_file:($('sfxSuperFile')?$('sfxSuperFile').value:''),
+    sfx_super_gain:($('sfxGain')?parseFloat($('sfxGain').value):0.8),
+    sfx_catalog:sfxCatalog(),
+    sfx_mode:($('sfxMode')?$('sfxMode').value:'single'),
+    safe_top:parseFloat($('stop').value), safe_bottom:parseFloat($('sbot').value),
+    safe_left:parseFloat($('sleft').value), safe_right:parseFloat($('sright').value),
+    state_hash: STATE_HASH, source_hash: SOURCE_HASH, source_project: SOURCE_PROJECT };
+}
+let APPLY_BUSY=false;
+async function apply(){
+  if(APPLY_BUSY)return;
+  try{await ensureCapsLatest(false)}catch(e){msg(e.message,false);return;}
+  if(!selected().length){msg('ยังไม่ได้เลือกซับสักท่อน',false);return;}
+  if(!$('karaoke_on').checked&&!$('super_on').checked){msg('เลือกงานที่จะสร้างก่อน',false);return;}
+  APPLY_BUSY=true;syncApplyButtons();msg('กำลังตรวจไทม์ไลน์ล่าสุดและสร้างผล กรุณารอ…',true);
+  try{
+    const r=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildCfg())});
+    const j=await r.json();
+    if(j.ok){msg('✅ '+j.msg,true);await loadCaps(true);}else msg('❌ '+(j.error||'สร้างไม่สำเร็จ'),false);
+  }catch(e){msg('❌ ติดต่อโปรแกรมไม่ได้ กรุณาตรวจการเชื่อมต่อและโหลดซับล่าสุดก่อนลองใหม่',false);}
+  finally{APPLY_BUSY=false;syncApplyButtons();}
+}
+function syncApplyButtons(){
+ const k=$('karaoke_on').checked,s=$('super_on').checked;
+ const text=APPLY_BUSY?'กำลังสร้าง…':k&&s?'สร้างไลน์เน้น + Super Text':k?'สร้างไลน์เน้น':s?'สร้าง Super Text':'เลือกงานที่จะสร้าง';
+ document.querySelectorAll('button[onclick="apply()"]').forEach(b=>{b.textContent='▶ '+text;b.disabled=APPLY_BUSY||(!k&&!s);b.title='ตรวจไทม์ไลน์ล่าสุดและสำรองก่อนสร้างทุกครั้ง';});
+}
+async function restore(){
+  if(!confirm('จะย้อนกลับไปจุดก่อนใช้เครื่องมือครั้งแรก (ไม่ใช่สถานะล่าสุด) — ถ้าต้องการย้อนแค่บางจุด ใช้ "ประวัติ/กู้คืน" ด้านล่างแทนจะปลอดภัยกว่า ดำเนินการต่อ?')) return;
+  const r=await fetch('/api/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); const j=await r.json();
+  if(j.ok){ msg('✅ '+j.msg,true); loadCaps(true); } else msg('❌ '+(j.error||'error'),false);
+}
+async function checkpoint(){
+  const r=await fetch('/api/checkpoint',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); const j=await r.json();
+  if(j.ok){ msg('✅ '+j.msg,true); loadSnapshots(); } else msg('❌ '+(j.error||'error'),false);
+}
+// แปลง label ท้ายชื่อไฟล์ snapshot เป็น 'ภาษาคน' ให้อ่านรู้เรื่องว่าจุดนี้เกิดตอนไหน
+const SNAP_LABEL_TH={
+  before_apply:'📌 ก่อนกด "ลงมือทำ" (ใส่ซับ/Super Text)',
+  before_restore:'⟲ ก่อนกู้คืนต้นฉบับ',
+  before_snap_restore:'🕘 ก่อนย้อนไปจุดประวัติก่อนหน้า',
+  before_resegment:'🎯 ก่อนจัด/รวมซับใหม่',
+  before_audio_align:'🎵 ก่อนจับจังหวะจากไฟล์เสียง',
+  checkpoint:'📌 ตั้งจุดกู้คืนเอง (จุดกู้คืนต้นฉบับใหม่)'
+};
+function snapDesc(s){
+  // ใช้ label ที่ backend แยกไว้ให้ (รองรับชื่อไฟล์ที่มีเลขลำดับนำหน้า)
+  const lb=(s && typeof s==='object') ? (s.label||'') : '';
+  if(lb && SNAP_LABEL_TH[lb]) return SNAP_LABEL_TH[lb];
+  return 'สำเนาอัตโนมัติ';
+}
+async function loadSnapshots(){
+  const r=await fetch('/api/snapshots'); const j=await r.json();
+  const box=$('snaplist'); box.innerHTML='';
+  if(!j.snapshots || !j.snapshots.length){ box.innerHTML='<div class="snaprow"><span>ยังไม่มีประวัติ (จะเริ่มมีหลังกด "ลงมือทำ" ครั้งแรก)</span></div>'; return; }
+  j.snapshots.forEach((s,i)=>{
+    const row=document.createElement('div'); row.className='snaprow';
+    const dt=new Date(s.mtime*1000).toLocaleString('th-TH');
+    const tag=i===0?' <span class="badge">ล่าสุด</span>':'';
+    // เลขลำดับ #N = ยิ่งมากยิ่งใหม่ (กดทีหลัง) — ใช้ ord ที่ backend ออกให้แบบต่อเนื่อง
+    // 1..N ตามเวลาจริงเสมอ (ไม่ค้างที่ #0 แม้ไฟล์เก่าจะไม่มีเลขในชื่อ)
+    const seq=(s.ord!=null)?s.ord:(j.snapshots.length-i);
+    row.innerHTML=`<span><span class="badge" style="background:#233;color:var(--acc)">ลำดับที่ #${seq}</span> 🕘 <b>${dt}</b><br><span style="color:var(--sub)">${snapDesc(s)}</span>${tag}</span>`;
+    const btn=document.createElement('button'); btn.className='ghost'; btn.textContent='↩ กู้คืนจุดนี้';
+    btn.onclick=async()=>{
+      if(!confirm('กู้คืนไปยัง "ลำดับที่ #'+seq+'" — '+dt+' ('+snapDesc(s)+')\nสถานะปัจจุบันจะถูกเก็บเป็นจุดใหม่ก่อนย้อนกลับ ดำเนินการต่อ?')) return;
+      const r2=await fetch('/api/restore_snapshot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:s.name})});
+      const j2=await r2.json();
+      if(j2.ok){ msg('✅ '+j2.msg,true); loadCaps(true); } else msg('❌ '+(j2.error||'error'),false);
+    };
+    row.appendChild(btn); box.appendChild(row);
+  });
+}
+async function clearSnaps(){
+  if(!confirm('ล้างจุดประวัติทั้งหมดออกจากรายการ?\n\n• ไฟล์ต้นฉบับ (draft_info_original) และจุดกู้คืนต้นฉบับ (backup) จะยังอยู่ครบ — ปุ่ม "กู้คืนต้นฉบับ" ยังใช้ได้\n• เหมาะเวลาประวัติรกจนสับสน อยากเริ่มนับ #1 ใหม่')) return;
+  const r=await fetch('/api/clear_snapshots',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); const j=await r.json();
+  if(j.ok){ msg('✅ '+j.msg,true); loadSnapshots(); } else msg('❌ '+(j.error||'error'),false);
+}
+
+// ---------- Gemini AI ----------
+let DEFAULT_PERSONA='';
+async function loadKeyStatus(){
+  const r=await fetch('/api/gemini_status'); const j=await r.json();
+  $('keyStatus').textContent = j.has_key? ('— บันทึกไว้แล้ว ('+j.masked+')') : '— ยังไม่ได้ตั้งค่า';
+  renderSavedKeys(j.keys||[], j.active_key||'');
+  renderTokStatus(j.thai_tokenizer||{});
+  $('geminiModel').value = j.model || 'gemini-flash-latest';
+  DEFAULT_PERSONA = j.default_persona || '';
+  if(!$('geminiPersona').value) $('geminiPersona').value = j.persona || DEFAULT_PERSONA;
+  // สมอง AI (gemini/webhook)
+  $('aiBackend').value = j.ai_backend || 'gemini';
+  $('webhookUrl').value = j.webhook_url || '';
+  $('webhookHeaders').value = '';$('webhookHeaders').placeholder=j.has_webhook_headers?'ตั้งค่าแล้ว · เว้นว่างเพื่อเก็บค่าเดิม':'Key: Value';
+  $('webhookAudio').checked = !!j.webhook_audio;
+  $('whStatus').textContent = j.webhook_url ? ('— ตั้งค่าแล้ว') : '— ยังไม่ได้ตั้งค่า';
+  onBackendChange();
+  // สมองงานเสียง (แยกอิสระ)
+  if($('audioBackend')){
+    $('audioBackend').value = j.audio_backend || 'gemini';
+    $('audioWebhookUrl').value = j.audio_webhook_url || '';
+    $('audioWebhookHeaders').value = '';$('audioWebhookHeaders').placeholder=j.has_audio_webhook_headers?'ตั้งค่าแล้ว · เว้นว่างเพื่อเก็บค่าเดิม':'Key: Value';
+    if($('audioWebhookMode')) $('audioWebhookMode').value = j.audio_webhook_mode || 'auto';
+    $('audioKeyStatus').textContent = j.audio_has_key ? ('— คีย์แยกบันทึกไว้แล้ว ('+(j.audio_masked||'')+')') : '— ยังไม่มีคีย์แยก (จะใช้คีย์หลัก)';
+    $('audioWhStatus').textContent = j.audio_webhook_url ? ('— ตั้งค่าแล้ว') : '— ยังไม่ได้ตั้งค่า';
+    onAudioBackendChange();
+    onAudioModeChange();
+  }
+}
+function onBackendChange(){
+  const b=$('aiBackend').value;
+  const isWh = (b==='webhook' || b==='webhook_utcc');
+  $('geminiBox').style.display = b==='gemini' ? 'block':'none';
+  $('webhookBox').style.display = isWh ? 'block':'none';
+  // แถบช่วยเหลือ + ตัวอย่าง URL เฉพาะโหมด UTCC
+  if($('utccHint')) $('utccHint').style.display = (b==='webhook_utcc') ? 'block':'none';
+  if($('webhookUrl')){
+    $('webhookUrl').placeholder = (b==='webhook_utcc')
+      ? 'https://webhub.utcc.ac.th/api/agentflow/webhooks/xxxx  (รับ POST)'
+      : 'https://your-endpoint.com/ai  (รับ POST JSON)';
+  }
+}
+function onAudioBackendChange(){
+  const b=$('audioBackend').value;
+  $('audioGeminiBox').style.display = b==='gemini' ? 'block':'none';
+  $('audioWebhookBox').style.display = b==='webhook' ? 'block':'none';
+}
+function onAudioModeChange(){
+  if(!$('audioWebhookMode')) return;
+  const m=$('audioWebhookMode').value;
+  if($('audioModeHintAuto')) $('audioModeHintAuto').style.display = m==='auto' ? 'block':'none';
+  $('audioModeHintJson').style.display = m==='json' ? 'block':'none';
+  $('audioModeHintMp').style.display = m==='multipart' ? 'block':'none';
+}
+async function saveAudioBackend(){
+  const key=$('audioGeminiKey').value.trim();
+  const body={audio_backend:$('audioBackend').value,
+    audio_webhook_url:$('audioWebhookUrl').value.trim(),
+    audio_webhook_headers:$('audioWebhookHeaders').value,
+    audio_webhook_mode:$('audioWebhookMode')?$('audioWebhookMode').value:'auto',
+    audio_api_key: (key!==''? key : null)};   // null = ไม่แตะคีย์เดิม
+  const r=await fetch('/api/audio_backend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json();
+  if(j.ok){ msg('✅ บันทึกสมองงานเสียงแล้ว'+(j.warn?(' — ⚠️ '+j.warn):''), !j.warn); $('audioGeminiKey').value=''; loadKeyStatus(); }
+  else msg('❌ '+(j.error||'error'),false);
+}
+async function testAudioWebhook(){
+  $('audioWhResult').textContent='🧪 กำลังทดสอบ...';
+  const r=await fetch('/api/test_webhook',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({webhook_url:$('audioWebhookUrl').value.trim(), webhook_headers:$('audioWebhookHeaders').value})});
+  const j=await r.json();
+  $('audioWhResult').innerHTML = j.ok ? ('✅ เชื่อมต่อสำเร็จ — ตอบกลับ: <code>'+(j.reply||'').replace(/</g,'&lt;')+'</code>')
+                               : ('<span style="color:#dc2626">❌ '+(j.error||'error')+'</span>');
+}
+async function saveBackend(){
+  const body={ai_backend:$('aiBackend').value, webhook_url:$('webhookUrl').value.trim(),
+    webhook_headers:$('webhookHeaders').value, webhook_audio:$('webhookAudio').checked};
+  const r=await fetch('/api/ai_backend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json();
+  if(j.ok){ msg('✅ บันทึกสมอง AI แล้ว'+(j.warn?(' — ⚠️ '+j.warn):''), !j.warn); loadKeyStatus(); }
+  else msg('❌ '+(j.error||'error'),false);
+}
+async function testWebhook(){
+  $('whResult').textContent='🧪 กำลังทดสอบ...';
+  const r=await fetch('/api/test_webhook',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({webhook_url:$('webhookUrl').value.trim(), webhook_headers:$('webhookHeaders').value})});
+  const j=await r.json();
+  $('whResult').innerHTML = j.ok ? ('✅ เชื่อมต่อสำเร็จ — ตอบกลับ: <code>'+(j.reply||'').replace(/</g,'&lt;')+'</code>')
+                                 : ('<span style="color:#dc2626">❌ '+(j.error||'error')+'</span>');
+}
+// เปลี่ยนสมอง AI ทันทีเมื่อผู้ใช้เลือก dropdown (บันทึกให้เลย)
+document.addEventListener('DOMContentLoaded',()=>{ const b=$('aiBackend'); if(b) b.addEventListener('change',saveBackend);
+  const ab=$('audioBackend'); if(ab) ab.addEventListener('change',saveAudioBackend);
+  const am=$('audioWebhookMode'); if(am) am.addEventListener('change',saveAudioBackend); });
+function renderTokStatus(t){
+  const s=$('tokStatus'), w=$('tokWarn');
+  if(!s) return;
+  if(t.pythainlp){
+    s.innerHTML='<span style="color:#16a34a">● pythainlp ทำงาน (ตัดคำเต็มได้'+(t.engine?(' · engine: '+t.engine):'')+')</span>';
+    if(w){ w.style.display='none'; w.textContent=''; }
+  } else {
+    s.innerHTML='<span style="color:#d97706">● ไม่พบ/ใช้ pythainlp ไม่ได้ — ใช้ตัวตัด "พยางค์" แทน (ซับอาจไล่ทีละพยางค์)</span>';
+    if(w){ w.style.display='block';
+      w.innerHTML='⚠️ ลง pythainlp ให้ <b>Python ตัวเดียวกับที่รันแอปนี้</b>: <code>pip3 install pythainlp</code> '
+        + '(บน .app ให้ลงใน environment ที่ build) แล้วรีสตาร์ทแอป · ระบบลองหลาย engine ให้อัตโนมัติแล้ว'
+        + (t.error? ('<br><span style="color:#8a99ad">รายละเอียดข้อผิดพลาดจริง: '+String(t.error).replace(/</g,'&lt;')+'</span>') : ''); }
+  }
+}
+function renderSavedKeys(keys, active){
+  const row=$('savedKeysRow'), sel=$('savedKeys');
+  if(!sel) return;
+  if(!keys.length){ row.style.display='none'; sel.innerHTML=''; return; }
+  row.style.display='flex';
+  sel.innerHTML = keys.map(n=>`<option value="${(n||'').replace(/"/g,'&quot;')}"${n===active?' selected':''}>${(n||'').replace(/</g,'&lt;')}</option>`).join('');
+}
+async function saveKey(){
+  const key=$('geminiKey').value.trim();
+  const name=$('keyName').value.trim();
+  const model=$('geminiModel').value.trim() || 'gemini-flash-latest';
+  if(!key){ msg('ใส่ API key ก่อน',false); return; }
+  const r=await fetch('/api/gemini_key',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key, name:name||null, model, persona:$('geminiPersona').value})});
+  const j=await r.json();
+  if(j.ok){ msg('✅ บันทึกคีย์แล้ว',true); $('geminiKey').value=''; $('keyName').value=''; loadKeyStatus(); } else msg('❌ '+(j.error||'error'),false);
+}
+async function selectKey(){
+  const name=$('savedKeys').value;
+  const r=await fetch('/api/gemini_key',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'select', select:name})});
+  const j=await r.json();
+  if(j.ok){ msg('✅ สลับไปใช้ '+name+' แล้ว',true); loadKeyStatus(); } else msg('❌ '+(j.error||'error'),false);
+}
+async function deleteKey(){
+  const name=$('savedKeys').value;
+  if(!name){ return; }
+  if(!confirm('ลบคีย์ "'+name+'" ?')) return;
+  const r=await fetch('/api/gemini_key',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'delete', delete:name})});
+  const j=await r.json();
+  if(j.ok){ msg('🗑️ ลบคีย์ '+name+' แล้ว',true); loadKeyStatus(); } else msg('❌ '+(j.error||'error'),false);
+}
+async function savePersona(){
+  const r=await fetch('/api/gemini_key',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:null, model:$('geminiModel').value.trim()||'gemini-flash-latest', persona:$('geminiPersona').value})});
+  const j=await r.json();
+  if(j.ok){ msg('✅ บันทึกบทบาทของบอทแล้ว',true); } else msg('❌ '+(j.error||'error'),false);
+}
+function resetPersona(){ $('geminiPersona').value=DEFAULT_PERSONA; msg('คืนค่าบทบาทเริ่มต้นแล้ว (อย่าลืมกดบันทึก)',true); }
+function togglePersona(){
+  const b=$('personaBox'), t=$('personaToggle');
+  const open=b.style.display==='none';
+  b.style.display=open?'block':'none';
+  t.innerHTML='🎭 บทบาท/บุคลิกของบอท (System Instruction) &nbsp;'+(open?'▾ <small style="color:var(--sub)">กดเพื่อซ่อน</small>':'▸ <small style="color:var(--sub)">กดเพื่อแก้ไข</small>');
+}
+async function aiSuggest(){
+  try{await ensureCapsLatest(false)}catch(e){msg(e.message,false);return;}
+  const only=selected();
+  const two=$('aiTwoLine').checked;
+  const pr=makeProgress($('aiResults'),'🤖 AI คิดคำ Super Text', 22);
+  pr.stage('กำลังให้ AI อ่านบริบทและเลือกจังหวะ Super Text...');
+  let j;
+  try{
+    const r=await fetch('/api/ai_suggest',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({only:only.length?only:null, instruction:$('aiInstruction').value,
+        persona:$('geminiPersona').value, two_line:two,
+        extra_info:($('ksExtraInfo')?$('ksExtraInfo').value.trim():'')})});
+    j=await r.json();
+  }catch(e){ pr.fail('<div class="hint" style="color:#dc2626">❌ เชื่อมต่อไม่สำเร็จ: '+e+'</div>'); return; }
+  if(j.error){ pr.fail('<div class="hint" style="color:#dc2626">❌ '+j.error+(j.raw?'<br><code>'+j.raw.replace(/</g,'&lt;')+'</code>':'')+'</div>'); return; }
+  pr.done('');
+  renderSuperSuggestions(j);
+}
+function renderSuperSuggestions(j){
+  const box=$('aiResults'); box.innerHTML='<div class="hint" style="margin-bottom:8px">รีวิว/แก้คำที่ AI เสนอได้ก่อนกดใช้งานจริง:</div>';
+  j.suggestions.forEach(s=>{
+    const row=document.createElement('div'); row.className='aicap'; row.style.flexWrap='wrap';
+    const esc=t=>(t||'').replace(/</g,'&lt;'); const escv=t=>(t||'').replace(/"/g,'&quot;');
+    if(j.two_line){
+      row.innerHTML=`<span class="idx">#${s.index}</span>
+        <span class="hint" style="flex:1 1 100%;margin-bottom:4px">🎬 ${esc(s.text)}</span>
+        <label class="kwf" style="flex:1;min-width:130px"><span class="kwl">✨ คำเน้น (บน)</span>
+          <input type="text" value="${escv(s.emph)}" data-i="${s.index}" data-k="emph" placeholder="คำเน้นตัวใหญ่"></label>
+        <label class="kwf" style="flex:1;min-width:130px"><span class="kwl">บรรทัดล่าง (ขยาย)</span>
+          <input type="text" value="${escv(s.sub)}" data-i="${s.index}" data-k="sub" placeholder="ประโยคขยาย"></label>`;
+    } else {
+      row.innerHTML=`<span class="idx">#${s.index}</span>
+        <span class="hint" style="flex:1 1 100%;margin-bottom:4px">🎬 ${esc(s.text)}</span>
+        <label class="kwf" style="flex:1 1 100%"><span class="kwl">✨ คำเน้น (แก้ไขได้)</span>
+          <input type="text" value="${escv(s.emph)}" data-i="${s.index}" data-k="emph" placeholder="พิมพ์คำเน้นที่จะโชว์ตัวใหญ่"></label>`;
+    }
+    box.appendChild(row);
+  });
+  const useBtn=document.createElement('button'); useBtn.className='primary'; useBtn.style.marginTop='10px';
+  useBtn.textContent='✓ ใช้คำแนะนำเหล่านี้กับ Super Text';
+  useBtn.onclick=()=>{
+    SUPER_KW_MAP={};
+    box.querySelectorAll('.aicap').forEach(row=>{
+      const inps=row.querySelectorAll('input[type=text]'); if(!inps.length) return;
+      const idx=inps[0].dataset.i; const rec={};
+      inps.forEach(inp=>{ rec[inp.dataset.k]=inp.value.trim(); });
+      if(!rec.emph) return;
+      SUPER_KW_MAP[idx] = j.two_line ? {emph:rec.emph, sub:rec.sub||''} : rec.emph;
+    });
+    $('super_on').checked=true;
+    if(j.two_line){ $('sp2line').checked=true; }
+    supPrev();
+    document.querySelectorAll('#caps input[type=checkbox]').forEach(cb=>{
+      if(Object.prototype.hasOwnProperty.call(SUPER_KW_MAP,cb.dataset.i)) cb.checked=true;
+    });
+    refreshCapSuperFields();   // โชว์คำที่ AI คิดในช่องแยกของแต่ละซับ ให้ตรวจ/แก้ต่อได้
+    msg('✅ ตั้งคำเน้นตาม AI แล้ว ('+Object.keys(SUPER_KW_MAP).length+' ท่อน) — ตรวจ/แก้ในช่อง Super Text ของแต่ละซับได้ แล้วกด "ลงมือทำ"',true);
+  };
+  box.appendChild(useBtn);
+}
+
+async function aiCaption(){
+  try{await ensureCapsLatest(false)}catch(e){msg(e.message,false);return;}
+  const only=selected();
+  const pr=makeProgress($('capResult'),'📝 AI เขียนแคปชัน', 20);
+  pr.stage('กำลังให้ AI เรียบเรียงแคปชัน...');
+  let j;
+  try{
+    const r=await fetch('/api/ai_caption',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({only:only.length?only:null, instruction:$('capBrief').value,
+        persona:$('geminiPersona').value,
+        extra_info:($('ksExtraInfo')?$('ksExtraInfo').value.trim():'')})});
+    j=await r.json();
+  }catch(e){ pr.fail('<div class="hint" style="color:#dc2626">❌ เชื่อมต่อไม่สำเร็จ: '+e+'</div>'); return; }
+  if(j.error){ pr.fail('<div class="hint" style="color:#dc2626">❌ '+j.error+'</div>'); return; }
+  pr.done('');
+  renderCaptionResult(j);
+}
+function renderCaptionResult(j){
+  const esc=j.caption.replace(/</g,'&lt;');
+  const aiUsedCap = j.ai_used ? '<div class="kmini" style="margin-bottom:4px">🤖 เขียนด้วย: <b>'+j.ai_used+'</b></div>' : '';
+  $('capResult').innerHTML=aiUsedCap+'<textarea id="capText" style="min-height:190px;width:100%;line-height:1.5">'+esc+'</textarea>'+
+    '<small class="hint">แก้ข้อความได้ตามใจ แล้วกด "คัดลอกแคปชัน" เพื่อเอาไปวางในโพสต์</small>';
+}
+function copyCaption(){
+  const t=$('capText');
+  if(!t){ msg('ยังไม่มีแคปชันให้คัดลอก กด "ให้ AI เขียนแคปชัน" ก่อน',false); return; }
+  t.select(); t.setSelectionRange(0,999999);
+  navigator.clipboard.writeText(t.value).then(()=>msg('✅ คัดลอกแคปชันแล้ว',true))
+    .catch(()=>{ try{document.execCommand('copy'); msg('✅ คัดลอกแล้ว',true);}catch(e){ msg('คัดลอกไม่สำเร็จ ลองเลือกแล้ว Ctrl+C',false);} });
+}
+function showLoanwordReport(result){
+ let panel=$('loanwordReport');if(panel)panel.remove();
+ const rows=result.loanword_report||[];if(!rows.length)return;
+ panel=document.createElement('details');panel.id='loanwordReport';panel.open=true;
+ panel.style.cssText='padding:16px;margin-top:12px;border:1px solid var(--line);border-radius:12px';
+ const title=document.createElement('summary');title.textContent='คำที่คงเดิมและต้องตรวจ '+rows.length+' รายการ (จากงานจัดซับครั้งล่าสุด)';panel.append(title);
+ for(const row of rows){const card=document.createElement('div');card.style.cssText='padding:12px 0;border-bottom:1px solid var(--line)';
+ const seconds=Number(row.start)||0,time=new Date(seconds*1000).toISOString().slice(11,23);
+ for(const text of ['เวลา '+time+' · ซับต้นฉบับ '+row.index,'ข้อความเดิม: '+row.original,'AI อ้างคำ: '+(row.source??'ไม่ได้ระบุ')+' → '+(row.english??'ไม่ได้ระบุ'),'เหตุผล: '+row.reason+(row.occurrence!=null?' · AI ระบุครั้งที่ '+row.occurrence+' แต่พบจริง '+row.matches+' ครั้ง':'')]){const p=document.createElement('p');p.textContent=text;card.append(p)}panel.append(card)}
+ $('resegResult').after(panel);
+}
+let resegJob=null,resegBusy=false;
+function resegControls(on){document.querySelectorAll('button[onclick="aiReseg()"],button[onclick="captionStyleOnly()"],#reseg_words,#resegPersona,#resegEnglish').forEach(el=>el.disabled=on);const cancel=$('studioResegCancel');if(cancel)cancel.disabled=!on||!resegJob}
+async function watchReseg(){
+ if(resegBusy)return;resegBusy=true;resegControls(true);
+ const box=$('resegResult');
+ try{
+  while(resegJob){
+   const r=await fetch('/api/event_clip/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:resegJob})});
+   const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'เชื่อมต่อสถานะไม่สำเร็จ');
+   if($('studioResegCancel'))$('studioResegCancel').disabled=!!j.commit_started||!['queued','running'].includes(j.state);
+   window.studioJobUpdate?.(j);box.textContent='กำลังจัดซับ… ดูรายละเอียดที่สถานะ AI ในแถบข้าง';
+   if(j.state==='done'){
+    const result=j.result;resegJob=null;sessionStorage.removeItem('resegJob');
+    await loadCaps();
+    try{localStorage.setItem('ksLoanwordReport:'+result.source_project,JSON.stringify({loanword_report:result.loanword_report||[]}))}catch(e){}
+    showLoanwordReport(result);
+    box.textContent='✅ '+result.msg+(result.backup_name?' | มี backup ก่อนจัดซับ กู้คืนได้ในประวัติ / กู้คืน':'')+' | '+(result.timing_note||'');break;
+   }
+   if(j.state==='failed'||j.state==='cancelled'){
+    resegJob=null;sessionStorage.removeItem('resegJob');throw Error(j.error||j.message);
+   }
+   await new Promise(r=>setTimeout(r,2000));
+  }
+ }catch(e){box.textContent='❌ '+e.message+(resegJob?' — โหลดหน้าใหม่เพื่อตรวจสถานะงานเดิม':'');}
+ finally{resegBusy=false;resegControls(false);}
+}
+async function captionStyleOnly(){
+ if(resegBusy||resegJob)return;
+ try{await ensureCapsLatest(true)}catch(e){msg(e.message,false);return;}
+ try{
+  const only=selected(),homeConfirmed=$('captionHomeConfirmed').checked;
+  $('captionHomeConfirmed').checked=false;
+  const r=await fetch('/api/event_clip/resegment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({style_only:true,capcut_home_confirmed:homeConfirmed,state_hash:STATE_HASH,only:only.length?only:null,font:$('font').value,normal_size:parseFloat($('ns').value),highlight_size:parseFloat($('hs').value)})});
+  const j=await r.json();if(!j.ok)throw Error(j.error||'เริ่มงานไม่ได้');
+  resegJob=j.job_id;sessionStorage.setItem('resegJob',resegJob);await watchReseg();
+ }catch(e){msg('❌ '+e.message,false);}
+}
+async function aiReseg(){
+ if(resegBusy||resegJob)return;
+ try{await ensureCapsLatest(true)}catch(e){$('resegResult').textContent=e.message;return;}
+ const only=selected();resegControls(true);$('resegResult').textContent='กำลังเริ่มจัดซับ…';
+ try{
+  const r=await fetch('/api/event_clip/resegment',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({only:only.length?only:null,state_hash:STATE_HASH,
+    english_loanwords:!!$('resegEnglish')?.checked,persona:($('resegPersona')?.value||''),max_words:parseInt($('reseg_words').value)})});
+  const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'เริ่มงานไม่ได้');
+  resegJob=j.job_id;sessionStorage.setItem('resegJob',resegJob);await watchReseg();
+ }catch(e){$('resegResult').textContent='❌ '+e.message;resegControls(false);}
+}
+window.addEventListener('DOMContentLoaded',()=>{const id=sessionStorage.getItem('resegJob');if(id){resegJob=id;watchReseg()}});
+function _readFileB64(file){
+  return new Promise((res,rej)=>{
+    const rd=new FileReader();
+    rd.onload=()=>{ const s=String(rd.result||''); const i=s.indexOf(','); res(i>=0?s.slice(i+1):s); };
+    rd.onerror=()=>rej(rd.error||new Error('อ่านไฟล์ไม่สำเร็จ'));
+    rd.readAsDataURL(file);
+  });
+}
+async function aiAlignAudio(){
+  try{await ensureCapsLatest(true)}catch(e){msg(e.message,false);return;}
+  const inp=$('alignAudio'); const f=inp&&inp.files&&inp.files[0];
+  const box=$('alignResult');
+  if(!f){ box.innerHTML='<div class="hint" style="color:#dc2626">❌ ยังไม่ได้เลือกไฟล์เสียง (mp3 / m4a / wav)</div>'; return; }
+  if(f.size>25*1024*1024){ box.innerHTML='<div class="hint" style="color:#dc2626">❌ ไฟล์ใหญ่เกิน ~25MB — ตัดช่วง/บีบไฟล์ให้เล็กลงก่อน</div>'; return; }
+  const estSec=Math.max(20, Math.round(f.size/(1024*1024)*8));   // ประมาณเวลาตามขนาดไฟล์
+  const pr=makeProgress(box,'🎵 AI ฟังเสียง & จับจังหวะ', estSec);
+  pr.stage('กำลังอ่าน/เข้ารหัสไฟล์เสียง...');
+  let b64; try{ b64=await _readFileB64(f); }catch(e){ pr.fail('<div class="hint" style="color:#dc2626">❌ อ่านไฟล์ไม่สำเร็จ</div>'); return; }
+  const mime=f.type||(f.name.toLowerCase().endsWith('.wav')?'audio/wav':(f.name.toLowerCase().endsWith('.m4a')?'audio/mp4':'audio/mpeg'));
+  const only=selected();
+  pr.stage('กำลังอัปโหลด & ให้ AI ฟังเสียงถอดจังหวะ... (ไฟล์ยาวใช้เวลาหลายสิบวินาที)');
+  try{
+    const r=await fetch('/api/ai_align_audio',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({audio_b64:b64, audio_mime:mime, only:only.length?only:null,
+        persona:$('geminiPersona').value, max_words:parseInt($('align_words').value),
+        max_chars:parseInt($('mc').value), min_words:1})});
+    const j=await r.json();
+    if(j.error){ pr.fail('<div class="hint" style="color:#dc2626">❌ '+j.error+'</div>'); return; }
+    pr.done('<div class="hint" style="color:#8affab">✅ '+j.msg+'</div>');
+    await loadCaps();
+  }catch(e){ pr.fail('<div class="hint" style="color:#dc2626">❌ ส่งไฟล์ไม่สำเร็จ: '+e+'</div>'); }
+}
+async function loadProjectInfo(){
+  const r=await fetch('/api/project_info'); const j=await r.json();
+  $('projPath').textContent='โปรเจกต์: '+(j.path||'-');
+}
+// ---------- แม่แบบสี UTCC (อ้างอิง Brand Identity Guidelines) ----------
+// ช่องแรกของแต่ละชุด = Primary, ที่เหลือ = Secondary
+const UTCC_PALETTES=[
+ {n:'🎓 สีแบรนด์มหาวิทยาลัย (UTCC)', c:['#2e3192','#00b1eb','#fad43d','#ffffff']},
+ {n:'1. คณะบริหารธุรกิจ', c:['#ffc700','#ff7a00','#00c9f3','#2e3192']},
+ {n:'2. คณะบัญชี', c:['#782695','#efd700','#f58efa','#2e3192']},
+ {n:'3. คณะเศรษฐศาสตร์', c:['#ff4ca2','#68daf7','#f8208e','#2e3192']},
+ {n:'4. คณะมนุษยศาสตร์', c:['#ff0006','#006b67','#ffecc3','#2e3192']},
+ {n:'5. คณะวิทยาศาสตร์และเทคโนโลยี', c:['#007c43','#9cd628','#00b3f0','#2e3192']},
+ {n:'6. คณะนิเทศศาสตร์', c:['#00408c','#00e2ae','#f7df5b','#00b3f0']},
+ {n:'7. คณะวิศวกรรมศาสตร์', c:['#980432','#bbbbbb','#f4ed00','#2e3192']},
+ {n:'8. คณะนิติศาสตร์', c:['#003fcf','#ffffff','#ebeaec','#2e3192']},
+ {n:'9. คณะการท่องเที่ยวและอุตสาหกรรมบริการ', c:['#ffb700','#7a0649','#008ae2','#2e3192']},
+ {n:'10. คณะการศึกษาปฐมวัย', c:['#c70074','#f8d200','#00ddf3','#2e3192']},
+ {n:'11. คณะดิจิทัลอาร์ตและดีไซน์', c:['#009490','#ff7b74','#2ee200','#2e3192']},
+ {n:'12. คณะพยาบาลศาสตร์', c:['#a093f8','#ffffff','#00b3f0','#2e3192']},
+ {n:'13. คณะวิทยพัฒน์', c:['#272382','#ffaa00','#00b3f0','#ff9500']},
+ {n:'14. คณะการสร้างเจ้าของธุรกิจสร้างสรรค์', c:['#d48d00','#0062b1','#ffdba5','#2e3192']},
+ {n:'15. วิทยาลัยการศึกษาต่อเนื่อง', c:['#2e3192','#0eaada','#b7b7b7','#596e79']},
+ {n:'16. บัณฑิตวิทยาลัย', c:['#2e3192','#f3e071','#ff6900','#8ce9f6']},
+ {n:'17. วิทยาลัยนานาชาติเพื่อการจัดการ', c:['#00b3f0','#fff4a9','#011061','#ffd500']},
+ {n:'18. วิทยาลัยนานาชาติไทย-จีนเพื่อการจัดการ', c:['#2e3192','#ffffff','#ef3900','#da961a']},
+];
+function palTextColor(hex){ return lumin(hex)>0.6 ? '#111' : '#fff'; }
+function renderPalettes(){
+  const sel=$('palSel'); sel.innerHTML='';
+  UTCC_PALETTES.forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.n; sel.appendChild(o); });
+  sel.onchange=()=>{ renderSwatches(); renderAccentOptions(); refreshPaletteDots(); };
+  renderSwatches(); renderAccentOptions(); refreshPaletteDots();
+}
+// เพิ่ม 'จุดสีคณะ' เล็กๆ ต่อท้ายทุกช่องเลือกสี — คลิกจุดเพื่อหยิบสีของคณะ/หน่วยงาน
+// ที่เลือกไว้ (สีหลัก+สีรอง) มาใส่ช่องนั้นได้ทันที (ใช้ง่ายเวลาปรับสีทีละช่อง)
+function refreshPaletteDots(){
+  const p=UTCC_PALETTES[$('palSel').value||0]; if(!p) return;
+  document.querySelectorAll('.colorbox').forEach(box=>{
+    const ci=box.querySelector('input[type=color]'); if(!ci) return;
+    let dots=box.querySelector('.accdots');
+    if(!dots){ dots=document.createElement('span'); dots.className='accdots'; box.appendChild(dots); }
+    dots.innerHTML='';
+    p.c.forEach((hex,idx)=>{
+      const d=document.createElement('span'); d.className='accdot';
+      d.style.background=hex;
+      d.title=(idx===0?'สีหลัก':'สีรอง')+' '+p.n+' → คลิกเพื่อใส่สีนี้ลงช่องนี้ ('+hex+')';
+      d.onclick=()=>{ setColor(ci.id,hex); upd(); supPrev(); msg('✅ ใส่สีคณะ '+hex+' ลงช่องนี้แล้ว',true); };
+      dots.appendChild(d);
+    });
+  });
+}
+function renderAccentOptions(){
+  const p=UTCC_PALETTES[$('palSel').value||0];
+  const sel=$('palAccent'); const prev=sel.value; sel.innerHTML='';
+  p.c.forEach((hex,idx)=>{
+    const role=idx===0?'สีหลัก':'สีรอง';
+    const o=document.createElement('option'); o.value=hex; o.textContent=role+' '+hex;
+    sel.appendChild(o);
+  });
+  // ค่าเริ่มต้น: ใช้ 'สีหลัก' เป็นสีเน้น (แต่ถ้าสีหลักเป็นขาว/อ่อนมาก เลือกสีรองที่เข้มกว่าแทน)
+  let def=p.c[0];
+  if(lumin(p.c[0])>0.75){ const alt=p.c.find(c=>lumin(c)<0.6); if(alt) def=alt; }
+  sel.value = p.c.includes(prev)? prev : def;
+}
+function renderSwatches(){
+  const p=UTCC_PALETTES[$('palSel').value||0];
+  const box=$('palSwatches'); box.innerHTML='';
+  p.c.forEach((hex,idx)=>{
+    const role = idx===0?'Primary':'Secondary';
+    const w=document.createElement('div');
+    w.style.cssText='cursor:pointer;text-align:center;font-size:10px;color:var(--sub)';
+    w.innerHTML=`<div style="width:64px;height:48px;border-radius:10px;border:1px solid var(--line);
+       background:${hex};color:${palTextColor(hex)};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${role}</div>
+      <div style="margin-top:4px;color:var(--txt)">${hex}</div>`;
+    w.title='คลิกเพื่อใช้สีนี้ (ตามช่อง "นำไปใช้เป็น" ในโหมดกำหนดเอง)';
+    w.onclick=()=>applySwatch(hex);
+    box.appendChild(w);
+  });
+}
+function applySwatch(hex){
+  const t=$('palTarget').value;
+  setColor(t,hex);
+  upd(); supPrev();
+  msg('✅ ตั้งสี '+hex+' เป็น "'+$('palTarget').selectedOptions[0].textContent+'" แล้ว',true);
+}
+// แมทสีคณะเข้ากับ 'ทุกอย่างที่เปิดใช้อยู่' ในคลิปเดียว
+function applyPaletteWholeClip(){
+  const p=UTCC_PALETTES[$('palSel').value||0];
+  const accent=$('palAccent').value||p.c[0];
+  const dark=p.c.find(c=>lumin(c)<0.30) || (lumin(accent)<0.4?accent:'#2e3192');
+  const applied=[];
+  // สีเน้น/ไฮไลต์ + Super Text = สีเน้นที่เลือก
+  setColor('hc',accent); applied.push('คำเน้น');
+  setColor('spc',accent); applied.push('Super Text');
+  // ตัวปกติ = ขาว (อ่านง่ายบนวิดีโอ)
+  setColor('nc','#ffffff');
+  // บรรทัดล่าง Super Text = ขาว
+  setColor('spsub','#ffffff');
+  // ถ้ากล่อง/กรอบเปิดใช้อยู่ → ใส่สีเข้มให้ตัดกับตัวอักษร
+  if($('bg').checked){ setColor('bgc',dark); applied.push('กรอบพื้นหลัง'); }
+  if($('spbg').checked){ setColor('spbgc',dark); applied.push('กรอบ Super Text'); }
+  // ถ้าเส้นขอบเปิดอยู่ → ใช้สีเข้มเป็นขอบ
+  if($('stroke').checked){ setColor('sc',dark); applied.push('เส้นขอบ'); }
+  if($('spstroke').checked){ setColor('spsc',dark); applied.push('ขอบ Super Text'); }
+  upd(); supPrev();
+  msg('✅ แมทสี "'+p.n+'" เข้าทั้งคลิปแล้ว (สีเน้น '+accent+') → '+applied.join(' · ')+
+      ' | ตัวปกติ=ขาว — ปรับต่อได้ตามใจ',true);
+}
+// ---------- ✂️ AUTOCLIP ----------
+let AC_KEEP=null;  // ช่วงที่จะเก็บ (วินาที) จากการวางแผนล่าสุด
+[['acMinSil','acMinSilV'],['acNoise','acNoiseV'],['acPad','acPadV']].forEach(([a,b])=>{
+  const el=$(a); if(el) el.oninput=()=>{ $(b).textContent=el.value; };
+});
+function acToggleMode(){
+  const m=$('acMode').value;
+  $('acDeadair').style.display = m==='deadair'?'block':'none';
+  $('acHighlight').style.display = m==='highlight'?'block':'none';
+}
+function acToggleCustomDur(){
+  const isCustom = $('acPreset').value === 'custom';
+  const row = $('acCustomDurRow');
+  if(row) row.style.display = isCustom ? 'flex' : 'none';
+  if(isCustom) acUpdateCustomHint();
+}
+function acUpdateCustomHint(){
+  const mins = parseInt($('acCustomMin').value)||0;
+  const secs = parseInt($('acCustomSec').value)||0;
+  const total = mins*60 + secs;
+  const tol = Math.max(Math.round(total*0.12), 15);
+  const lo = Math.max(5, total-tol), hi = total+tol;
+  let label = mins>0 && secs>0 ? `${mins} นาที ${secs} วินาที`
+            : mins>0 ? `${mins} นาที` : `${secs} วินาที`;
+  const hint = $('acCustomHint');
+  if(hint) hint.innerHTML = `AI จะเลือกช่วงให้ได้ราวๆ <b>${label}</b> (${lo}–${hi} วิ)`;
+}
+function acFmt(segs){
+  return segs.map(([s,e])=>s.toFixed(1)+'-'+e.toFixed(1)+' วิ').join('  ·  ');
+}
+function cleanPath(s){ // ตัด " ' และ \ ที่ติดมาจาก Finder/เทอร์มินัล
+  s=(s||'').trim().replace(/^["']+|["']+$/g,'').trim().replace(/\\ /g,' ');
+  if(s.startsWith('file://')){ try{ s=decodeURIComponent(s.slice(7)); }catch(e){ s=s.slice(7); } }
+  return s.trim();
+}
+async function acPlan(){
+  const video=cleanPath($('acVideo').value);
+  $('acVideo').value=video;
+  const box=$('acResult');
+  if(!video){ box.innerHTML='<div class="hint" style="color:#dc2626">❌ ยังไม่ได้ใส่ path ไฟล์วิดีโอ</div>'; return; }
+  const mode=$('acMode').value;
+  const body={video, mode};
+  if(mode==='deadair'){
+    body.min_silence_s=parseFloat($('acMinSil').value);
+    body.noise_db=parseFloat($('acNoise').value);
+    body.pad_s=parseFloat($('acPad').value);
+  }else{
+    const preset=$('acPreset').value;
+    body.preset=preset;
+    if(preset==='custom'){
+      const mins=parseInt($('acCustomMin').value)||0;
+      const secs=parseInt($('acCustomSec').value)||0;
+      const total=mins*60+secs;
+      if(total<10){ box.innerHTML='<div class="hint" style="color:#dc2626">❌ ความยาวเป้าต้องมากกว่า 10 วินาที</div>'; return; }
+      body.target_sec=total;
+    }
+    body.focus=$('acFocus').value.trim();
+    body.trim_silence=$('acTrimSil').checked;
+    body.noise_db=parseFloat($('acNoise').value);
+    body.min_gap_s=parseFloat($('acMinSil').value);
+    body.pad_s=parseFloat($('acPad').value);
+  }
+  const pr=makeProgress(box, '✂️ วางแผนตัดคลิป', mode==='highlight'?55:25, true);
+  pr.stage(mode==='highlight'?'เริ่มจากถอดเสียงไฟล์ทั้งหมดด้วย Whisper ในเครื่อง แล้วจึงเรียก AI เลือกไฮไลต์ — คลิปยาวอาจใช้เวลามาก หากมี Auto Caption แล้วให้ใช้แท็บ Event':'สแกนหาช่วงเงียบด้วย ffmpeg...');
+  $('acActions').style.display='none'; AC_KEEP=null;
+  try{
+    const r=await fetch('/api/autoclip_plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const j=await r.json();
+    if(j.error){ pr.fail('<div class="hint" style="color:#dc2626">❌ '+j.error+'</div>'); return; }
+    AC_KEEP=j.kept; AC_PLAN_META=j;
+    let html='<div style="background:var(--inp);border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.7">';
+    html+='<b style="color:#16a34a">✅ วางแผนเสร็จ</b> — ความยาวเดิม <b>'+j.duration+' วิ</b>';
+    if(mode==='deadair'){
+      html+=' → เหลือ <b style="color:var(--acc)">'+j.kept_total+' วิ</b> (ตัดออก '+j.removed_total+' วิ จาก '+j.silence_count+' ช่วงเงียบ)';
+    }else{
+      html+=' → คลิปสั้น <b style="color:var(--acc)">'+j.kept_total+' วิ</b> ('+j.preset+', เป้า '+(j.target||'')+' วิ, ถอดเสียงด้วย '+j.transcript_source+')';
+      if(j.trimmed_silence>0){ html+=' <span class="hint">· เก็บกวาด dead air ออกอีก '+j.trimmed_silence+' วิ ('+(j.segments_count||'')+' ท่อน)</span>'; }
+    }
+    html+='<br><span class="hint">ช่วงที่เก็บ ('+j.kept.length+' ช่วง): '+acFmt(j.kept)+'</span>';
+    if(j.warn){ html+='<br><span style="color:#fbbf24">⚠️ '+j.warn+'</span>'; }
+    html+='</div>';
+    pr.done(html);
+    $('acActions').style.display='block';
+    acLoadBackups();
+  }catch(e){ pr.fail('<div class="hint" style="color:#dc2626">❌ วางแผนไม่สำเร็จ: '+e+'</div>'); }
+}
+async function acApplyInplace(){
+  if(!AC_KEEP){ msg('กด "วางแผนตัด" ก่อน',false); return; }
+  if(!confirm('จะสำรองไฟล์เดิมทั้งหมดในโปรเจกต์นี้ แล้วแทนที่ไทม์ไลน์ด้วยคลิปที่ตัดแล้ว\n(ปิด CapCut ก่อนกดตกลง) ดำเนินการต่อ?')) return;
+  msg('✂️ กำลังสำรอง+แทนที่ไทม์ไลน์ในโปรเจกต์นี้...',true);
+  try{
+    const r=await fetch('/api/autoclip_apply_inplace',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...AC_PLAN_META,video:cleanPath($('acVideo').value),segments:AC_KEEP, unit:'sec', name:$('acName').value.trim()})});
+    const j=await r.json();
+    if(j.error){ msg('❌ '+j.error,false); return; }
+    msg('✅ '+j.msg,true);
+    acRenderBackups(j.backups); loadProjectInfo(); loadCaps();
+  }catch(e){ msg('❌ แทนที่ไทม์ไลน์ไม่สำเร็จ: '+e,false); }
+}
+async function acRestore(name){
+  if(!confirm('กู้คืนไทม์ไลน์เดิมจากจุดสำรอง'+(name?" '"+name+"'":'ล่าสุด')+'? (ปิด CapCut ก่อน)')) return;
+  msg('⟲ กำลังกู้คืนไทม์ไลน์เดิม...',true);
+  try{
+    const r=await fetch('/api/autoclip_restore_timeline',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(name?{backup_name:name}:{})});
+    const j=await r.json();
+    if(j.error){ msg('❌ '+j.error,false); return; }
+    msg('✅ '+j.msg,true); loadProjectInfo();
+  }catch(e){ msg('❌ กู้คืนไม่สำเร็จ: '+e,false); }
+}
+async function acLoadBackups(){
+  try{
+    const r=await fetch('/api/autoclip_restore_timeline',{method:'POST',headers:{'Content-Type':'application/json'},body:'{"__list__":1}'});
+    const j=await r.json(); if(j.backups) acRenderBackups(j.backups);
+  }catch(e){}
+}
+function acRenderBackups(list){
+  const el=$('acBackups'); if(!el) return;
+  if(!list||!list.length){ el.innerHTML=''; return; }
+  let h='<div class="hint" style="margin-top:6px">🗄️ จุดสำรองไทม์ไลน์ ('+list.length+'):</div>';
+  list.slice(0,6).forEach(b=>{ h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:4px;font-size:12px"><span>'+b.name+'</span><button class="ghost" style="padding:3px 10px" onclick="acRestore(\''+b.name.replace(/'/g,"\\'")+'\')">⟲ กู้คืนอันนี้</button></div>'; });
+  el.innerHTML=h;
+}
+async function acMakeDraft(){
+  if(!AC_KEEP){ msg('กด "วางแผนตัด" ก่อน',false); return; }
+  msg('🎬 กำลังสร้าง CapCut draft แยก...',true);
+  try{
+    const r=await fetch('/api/autoclip_make_draft',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...AC_PLAN_META,video:cleanPath($('acVideo').value),segments:AC_KEEP, unit:'sec', name:$('acName').value.trim()})});
+    const j=await r.json();
+    if(j.error){ msg('❌ '+j.error,false); return; }
+    msg('✅ '+j.msg,true);
+  }catch(e){ msg('❌ สร้าง draft ไม่สำเร็จ: '+e,false); }
+}
+async function acRender(){
+  if(!AC_KEEP){ msg('กด "วางแผนตัด" ก่อน',false); return; }
+  msg('📤 กำลังเรนเดอร์ mp4... (อาจใช้เวลาสักครู่ ขึ้นกับความยาวคลิป)',true);
+  try{
+    const r=await fetch('/api/autoclip_render',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...AC_PLAN_META,video:cleanPath($('acVideo').value), segments:AC_KEEP, name:$('acName').value.trim()})});
+    const j=await r.json();
+    if(j.error){ msg('❌ '+j.error,false); return; }
+    msg('✅ '+j.msg,true);
+  }catch(e){ msg('❌ เรนเดอร์ไม่สำเร็จ: '+e,false); }
+}
+document.addEventListener("DOMContentLoaded",()=>requestAnimationFrame(syncApplyButtons)); renderPresets(); syncApplyButtons(); document.addEventListener("change",syncApplyButtons); document.addEventListener("input",syncApplyButtons); document.addEventListener("click",()=>requestAnimationFrame(syncApplyButtons)); renderPalettes(); loadFontsList(); loadCaps(true); loadKeyStatus(); loadProjectInfo();
+// ตรวจสถานะ admin แล้วแสดง/ซ่อนแท็บ "ประกาศ"
+(async function(){
+  try{
+    const r=await fetch('/api/user_info'); const j=await r.json();
+    if(j && (j.role==='admin' || j.is_admin)) showAnnTabIfAdmin(true);
+  }catch(e){}
+})();
+try{ sfxModeToggle(); }catch(e){}
+
+// ─── UPDATE SYSTEM ────────────────────────────────────────────────
+(function(){
+  let _poll = null, _last = null, _manual = false, _doneKey = null, _hideTimer = null;
+  const _dismissed = new Set();
+  function _key(d){return d.state+':'+(d.info?.latest_version||d.info?.current_version||'')+':'+(d.error||'');}
+  function _isDismissed(key){
+    if(_dismissed.has(key)) return true;
+    try{return localStorage.getItem('studio-update-dismissed:'+key)==='1';}catch(e){return false;}
+  }
+  function _forget(key){_dismissed.delete(key);try{localStorage.removeItem('studio-update-dismissed:'+key);}catch(e){}}
+  window.updDismiss=function(){
+    if(_last){const key=_key(_last);_dismissed.add(key);try{localStorage.setItem('studio-update-dismissed:'+key,'1');}catch(e){}}
+    _manual=false;_showBanner(false);
+    if(_hideTimer){clearTimeout(_hideTimer);_hideTimer=null;}
+  };
+
+  function _banner(){ return document.getElementById('update-banner'); }
+  function _showBanner(show){
+    const b = _banner();
+    if(!b) return;
+    b.style.display = show ? 'flex' : 'none';
+  }
+
+  function updHandle(d){
+    const title = document.getElementById('upd-title');
+    const notes = document.getElementById('upd-notes');
+    const btn   = document.getElementById('upd-btn');
+    const pw    = document.getElementById('upd-prog-wrap');
+    const pb    = document.getElementById('upd-prog-bar');
+    const pl    = document.getElementById('upd-prog-lbl');
+    if(!title) return;
+    _last=d;
+    const active=d.state==='downloading'||d.state==='applying';
+    const dismiss=document.getElementById('upd-dismiss');
+    if(dismiss) dismiss.style.display=active?'none':'inline-block';
+    if(!active&&_isDismissed(_key(d))){_showBanner(false);return;}
+
+    if(d.state==='update_available'){
+      _showBanner(true);
+      title.textContent = '🆕 เวอร์ชัน '+d.info.latest_version+' พร้อมแล้ว!';
+      notes.textContent = d.info.release_notes||'';
+      btn.style.display='inline-block'; btn.disabled=false; btn.textContent=d.info.install_supported===false?'📦 ดาวน์โหลดไฟล์ .app':'⬇️ อัปเดตเลย';
+      pw.style.display='none';
+    } else if(d.state==='downloading'){
+      _showBanner(true);
+      title.textContent='⬇️ กำลังดาวน์โหลดอัปเดต';
+      btn.style.display='none'; pw.style.display='block';
+      const pct=d.bytes_total?Math.floor(d.bytes_downloaded/d.bytes_total*100):null;pb.style.width=(pct===null?100:pct)+'%';
+      pl.textContent=pct===null?'กำลังดาวน์โหลด…':('ดาวน์โหลด '+pct+'% · '+(d.bytes_downloaded/1048576).toFixed(1)+' / '+(d.bytes_total/1048576).toFixed(1)+' MB');
+    } else if(d.state==='applying'){
+      _showBanner(true);
+      title.textContent='🔄 กำลังติดตั้ง — แอปจะรีสตาร์ทอัตโนมัติ';
+      btn.style.display='none'; pw.style.display='block';
+      pb.style.width='98%'; pl.textContent='กำลังติดตั้งเวอร์ชันใหม่...';
+    } else if(d.state==='error'&&d.error){
+      _showBanner(true);
+      title.textContent='⚠️ อัปเดตล้มเหลว: '+d.error;
+      btn.style.display='inline-block'; btn.disabled=false; btn.textContent='🔄 ลองใหม่';
+      pw.style.display='none';
+    } else if(d.state==='checking'){_showBanner(true);title.textContent='กำลังตรวจอัปเดต…';btn.style.display='none';pw.style.display='none';}
+    else if(d.state==='up_to_date'){
+      if(!_manual){_showBanner(false);return;}
+      _showBanner(true);title.textContent='✅ ใช้รุ่นล่าสุดแล้ว ('+d.info.current_version+')';notes.textContent='';btn.style.display='none';pw.style.display='none';
+      const key=_key(d);
+      if(_doneKey!==key){
+        _doneKey=key;
+        _hideTimer=setTimeout(()=>{_manual=false;if(_last?.state==='up_to_date')_showBanner(false);_hideTimer=null;},4000);
+      }
+    }
+    else {_showBanner(false);}
+  }
+
+  async function updPoll(){
+    try{
+      const r=await fetch('/api/update/status');
+      if(r.ok) updHandle(await r.json());
+    }catch(e){}
+  }
+
+  window.updStart=async function(){
+    const status=await (await fetch('/api/update/status')).json();
+    if(status.state==='error'){await fetch('/api/update/check',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});await updPoll();return;}
+    if(status.info?.install_supported===false&&status.info.download_url){window.open(status.info.download_url,'_blank','noopener');return;}
+    const btn=document.getElementById('upd-btn');
+    if(btn){btn.disabled=true;btn.textContent='กำลังเริ่ม...';}
+    try{
+      const r=await fetch('/api/update/apply',{method:'POST',
+        headers:{'Content-Type':'application/json'},body:'{}'});
+      const d=await r.json();
+      if(!d.ok){
+        alert('อัปเดตไม่สำเร็จ: '+(d.message||''));
+        if(btn){btn.disabled=false;btn.textContent='⬇️ อัปเดตเลย';}
+      }
+      // ถ้า ok → poll จะรับ state 'downloading' เอง
+    }catch(e){
+      alert('เชื่อมต่อไม่ได้: '+e.message);
+      if(btn){btn.disabled=false;btn.textContent='⬇️ อัปเดตเลย';}
+    }
+  };
+
+  window.updCheck=async function(){
+    _manual=true;_doneKey=null;
+    if(_hideTimer){clearTimeout(_hideTimer);_hideTimer=null;}
+    if(_last)_forget(_key(_last));
+    try{await fetch('/api/update/check',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});await updPoll();}catch(e){_manual=false;}
+  };
+  // เริ่ม poll ทุก 3 วินาที
+  _poll=setInterval(updPoll,3000);
+  updPoll(); // เช็คทันทีตอนโหลดหน้า
+})();
+// ─── END UPDATE SYSTEM ───────────────────────────────────────────
+</script></body></html>

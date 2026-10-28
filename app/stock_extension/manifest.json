@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "ช่วยด้วยจ้า · Stock Bridge",
+  "version": "0.1.6",
+  "description": "เชื่อมงานค้นและดาวน์โหลดสื่อจากบัญชีของคุณกับแอปช่วยด้วยจ้าในเครื่อง",
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "downloads",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://artlist.io/*",
+    "https://app.envato.com/*",
+    "https://elements.envato.com/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

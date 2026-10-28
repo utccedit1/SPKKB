@@ -1,0 +1,39 @@
+# Local accounts, credentials and sessions
+.env
+.env.*
+!.env.example
+**/firebase_web_config.json
+**/admin_config.json
+**/serviceAccount*.json
+**/config.json
+**/user_keys/
+**/stock_private/
+**/job_receipts/
+**/*token*.txt
+**/*session*.json
+**/cookies*
+**/Login Data*
+# Generated runtime, packages and caches
+app/tools/
+app/build/
+app/build-*/
+app/dist/
+app/dist-*/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+.DS_Store
+# User projects and media
+media_library/
+outputs/
+app/update-install-test/
+*.app/
+*.zip
+*.mp4
+*.mov
+*.wav
+*.m4a
+*.mp3
+.cleanup_trash/

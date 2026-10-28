@@ -1,0 +1,19 @@
+# ── Core (จำเป็น) ──────────────────────────────────────────────────────────
+pywebview>=5.0
+requests>=2.25.0
+pyinstaller>=6.0
+
+# ── Thai NLP (ตัดคำภาษาไทย) ──────────────────────────────────────────────
+pythainlp>=5.0
+marisa-trie
+
+# ── FFmpeg (ฝัง ffmpeg binary มากับ pip — ไม่ต้องติดตั้งแยก)
+imageio-ffmpeg>=0.5.1
+
+# ── Firebase (ล็อกอิน + จัดการผู้ใช้/โควต้า) ──────────────────────────────
+firebase-admin>=6.0
+
+# ── Optional: ถอดเสียง Auto-clip offline (ติดตั้งแยกถ้าต้องการ) ─────────────
+# ติดตั้งด้วย: pip install faster-whisper
+# ถ้าไม่ติดตั้ง ระบบจะใช้ Gemini Audio แทน (ต้องมี API Key)
+faster-whisper>=1.0.3
