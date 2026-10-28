@@ -1,7 +1,7 @@
 {
-  "version": "1.5.52",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.52/SPKKB.app.zip",
-  "release_notes": "แก้งาน B-roll หลายภาพถูกหยุดเมื่อครบ 30 นาทีทั้งที่ยังทำงานอยู่ ใช้ขอบเขตรอ AI และดาวน์โหลดรายขั้นตอนแทน พร้อมหยุดงานสื่อค้างเมื่อยกเลิกงานหลัก แสดงจำนวนภาพที่เตรียมได้ โดยคงการตัดต่อเดิมและขั้นตอนตรวจผลก่อนนำเข้า",
+  "version": "1.5.53",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.53/SPKKB.app.zip",
+  "release_notes": "แก้ B-roll อย่างเดียวหาไฟล์ต้นฉบับไม่พบเมื่อ CapCut บันทึกตำแหน่งเป็น draftpath placeholder ตรวจไฟล์จริงจากโปรเจกต์ก่อนเรียก AI โดยคงค่าเส้นทางและการตัดต่อเดิม ตรวจไฟล์ซ้ำก่อนนำเข้า รองรับโปรเจกต์ที่มี Timelines",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "51eb588ba71d4b5982028b17f4d3d3fbdd6adef1d968a08abd9fe7c8aa46783e",
-  "size": 157136124,
+  "sha256": "1089cd72d04d5d93ac85ed332664258e10525fdf089da44581fe993420708252",
+  "size": 157133139,
   "platform": "macos",
   "architecture": "arm64"
 }
