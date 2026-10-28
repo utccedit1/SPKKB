@@ -138,3 +138,5 @@
 | 2026-10-28 | P1.4 / P4 / P5.4 — Release 1.5.51 | Python 415 tests + JS 13 ชุดผ่าน; bundle self-test/signature/credential exclusion/ZIP/public hash/manifest ผ่าน; เผยแพร่และติดตั้งผ่าน updater เดิมแล้ว หน้า B-roll จริงแสดงใน 1.5.51; `audits/release-1.5.51/report.md` | ยังไม่ยืนยัน live Artlist/CapCut playback/export หรือเครื่องอื่น; retention หยุดตาม guard เพราะ metadata โปรเจกต์อื่นอ่านไม่ได้ |
 
 | 2026-10-28 | P1.4 timeout fix — 1.5.52 | พบงานจริงถูกตัดที่ 1801 วินาทีทั้งที่ stock ยังทำงาน; สำเร็จ 16 downloads, no_match 39 และ download_controls 1 ก่อนจบงาน; แยก B-roll batch ออกจาก total CLI deadline โดยคง per-step bounds และปิด stock เมื่อ parent หยุด; เพิ่ม 5 regression | ตรวจ bundle/public/update และไม่เริ่มงานจริงซ้ำอัตโนมัติ |
+
+| 2026-10-28 | P1.4 — 1.5.52 เผยแพร่/ติดตั้ง | 420 tests + JS 13 ชุด, bundle/ZIP/public hash/manifest ผ่าน ติดตั้งผ่าน updater และเปิดโปรเจกต์เดิมหน้า B-roll ใน 1.5.52 แล้ว; `audits/release-1.5.52/` | ผู้ใช้เริ่มใหม่ได้ คลังไฟล์เดิมยังอยู่; ยังไม่รัน batch จริงหรือ import ซ้ำโดยเอเจนต์ |

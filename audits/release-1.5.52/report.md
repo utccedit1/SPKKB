@@ -10,3 +10,5 @@
 - Release: https://github.com/utccedit1/SPKKB/releases/tag/v1.5.52
 
 ยังไม่เริ่ม AI/stock batch จริงซ้ำหรือ import เข้า CapCut อัตโนมัติ ผลทดสอบใช้ข้อมูลจำลอง ไม่ยืนยัน live batch 20 ภาพหรือ playback/export จากโหมดนี้แล้ว
+
+Public download/hash ผ่านและ manifest main commit `a51f44828acdac1005ee59e5219ca05ee00f161a`; updater รุ่น 1.5.51 เห็น 1.5.52 ติดตั้งสำเร็จ receipt=installed และเปิดโปรเจกต์เดิมหน้า B-roll ใน native window 1.5.52 แล้ว
