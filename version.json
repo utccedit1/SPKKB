@@ -1,7 +1,7 @@
 {
-  "version": "1.5.48",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.48/SPKKB.app.zip",
-  "release_notes": "ยกเลิกเวลาหมดอายุ 10 นาทีของการนำผลตัดต่อเข้าโปรเจกต์ เก็บรายการเตรียมนำเข้าให้ใช้ต่อหลังเปิดแอปใหม่ ตรวจโปรเจกต์ ผลตัดต่อ และไฟล์สื่อก่อนแทนทุกครั้ง พร้อมปุ่มเตรียมนำเข้าอีกครั้งเมื่อรายการเดิมใช้ไม่ได้ โดยไม่ต้องตัดใหม่",
+  "version": "1.5.49",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.49/SPKKB.app.zip",
+  "release_notes": "ปรับคำค้น B-roll ให้เป็นภาพจริงที่ค้นหาได้ ใช้ไฟล์ที่ตรวจแล้วจากคำสำคัญตรงกันและกันภาพซ้ำ แสดงคำเตือนหากไม่มี B-roll ปรับเสียงพูดพีกเป้าหมาย −4 dBFS (ช่วง −6 ถึง −2) และเพลง −18 dBFS จากการวัดไฟล์จริง ไม่ลดเพลงซ้ำด้วย sidechain",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "194d12ab804e70cc0bc0e8804171324c41627cfd0dd1e6fd5143a46c7422a655",
-  "size": 157107064,
+  "sha256": "2a54877ca4cfcde3b26c23fbfdaf61acd3c599c9e2534b0c038c70a56bf8d994",
+  "size": 157112552,
   "platform": "macos",
   "architecture": "arm64"
 }
