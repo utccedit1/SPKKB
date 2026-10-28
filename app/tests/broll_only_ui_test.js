@@ -20,6 +20,8 @@ const settle=async()=>{for(let i=0;i<50;i++)await Promise.resolve();};
  const key='brollOnlyJob:one';
  const gone=page(()=>({ok:false,code:'job_not_found',error:'gone'}),new Map([[key,JSON.stringify({id:'gone'})]]));await settle();assert(!gone.store.has(key));assert(gone.element('brollOnlyApply').hidden);
  const offline=page(()=>{throw Error('offline');},new Map([[key,JSON.stringify({id:'keep'})]]));await settle();assert(offline.store.has(key));assert(!offline.element('brollOnlyResume').hidden);
+ const logs=page(b=>({ok:true,state:'failed',error:'test stop',progress_log:[{time:1000,message:'พร้อม 3/10 ภาพ · ดาวน์โหลด 50%'}]}),new Map([[key,JSON.stringify({id:'logs'})]]));await settle();assert(logs.element('brollOnlyLog').textContent.includes('3/10'));assert(logs.element('brollOnlyLog').textContent.includes('50%'));
+ const folder=page(b=>({ok:true,message:b.action}));await settle();await folder.element('brollOnlyFolder').onclick();assert.equal(folder.calls[0].action,'broll_media_folder');
  const failed=page(b=>b.action==='start'?{ok:true,job_id:'failed'}:{ok:true,state:'failed',error:'no stock'});await settle();await failed.element('brollOnlyStart').onclick();assert(!failed.calls.some(b=>b.action==='install_commit'));assert(failed.element('brollOnlyApply').hidden);
  console.log('B-roll only UI: isolated mode, explicit import, validation, missing job, offline recovery and failure guards passed');
 })().catch(e=>{console.error(e);process.exit(1);});

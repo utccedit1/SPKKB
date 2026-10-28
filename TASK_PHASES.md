@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.53 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.54 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -146,3 +146,7 @@
 | 2026-10-28 | P1.4 — placeholder 1.5.53 | แก้ remember/preview ใช้ resolved copy เพื่อ stat สื่อ B-roll-only โดยคง output paths เดิม; preflight ก่อน AI; regression plain/nested build-review-commit, missing media และ changed media ผ่าน | แพ็ก/ตรวจ public/update; ยังไม่ยืนยันเครื่องปลายทาง |
 
 | 2026-10-28 | P1.4 — 1.5.53 เผยแพร่ | 423 tests + JS 13 ชุด, bundle/signature/ZIP/public download/hash ผ่าน main manifest 47e8184842425bdfa7b7ba3d955b7e341b0c41ac; เครื่องปลายทางกดอัปเดตได้ | เครื่องพัฒนาหน้าจอล็อก ยังไม่ติดตั้งหรือยืนยัน native UI/live project รอบนี้ |
+
+| 2026-10-28 | P1.4 — log / missing media 1.5.54 | เพิ่ม structured counts/log UI, ลด no_match ซ้ำ/หยุด keyword fallback เมื่อ infrastructure ล้มเหลว; copy+hash B-roll เข้าโปรเจกต์และ merge media registry/local_material_id ใน transaction เดิม; native folder action และซ่อม B-roll เดิมผ่าน review/commit contract | full tests/bundle/public release; ยังต้อง live CapCut playback และเครื่องปลายทาง |
+
+| 2026-10-28 | P1.4 — 1.5.54 เผยแพร่ | 431 Python tests + JS 13 ชุด, bundle/signature/credential exclusion/ZIP/public size/hash ผ่าน manifest c0f01fc24d899fd35ad0566e39ad358c0cae2be9; เครื่องอื่นกดอัปเดตได้ | ยังไม่ติดตั้งเครื่องพัฒนาเพราะหน้าจอล็อก และยังไม่ CapCut live playback/export บนเครื่องที่รายงาน |

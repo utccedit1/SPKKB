@@ -74,19 +74,27 @@ def build(owner, project, cfg, progress):
     if cfg.get('provider','artlist')!='artlist':raise ValueError('โหมดนี้รองรับ Artlist เท่านั้น')
     maximum=cfg.get('max_shots',8)
     if isinstance(maximum,bool) or not isinstance(maximum,int) or not 1<=maximum<=30:raise ValueError('เลือกจำนวนภาพได้ 1–30 ช็อต')
+    notify=progress
+    stats=dict(stage='preflight',prepared=0,downloaded=0,requested=maximum,attempted=0,skipped=0)
+    def progress(message):
+        prefix=f'พร้อม {stats["prepared"]}/{maximum} ภาพ · ดาวน์โหลดแล้ว {stats["downloaded"]} · ยังขาดจากเป้าสูงสุด {maximum-stats["prepared"]}'
+        notify(dict(stats,message=prefix+' · '+str(message)))
+    progress('ตรวจโปรเจกต์และไฟล์สื่อต้นฉบับ')
     path=Path(project).resolve();raw=(path/'draft_info.json').read_bytes();original=json.loads(raw)
     duration=original.get('duration',0)/1e6
     if not math.isfinite(duration) or duration<=0:raise ValueError('ความยาวไทม์ไลน์ไม่ถูกต้อง')
     layer=layer_index(original)
     # Verify saved paths against the real source before AI/downloads. Keep raw values.
     S.resolve_media_paths(original,path)
+    stats['stage']='connection'
     A.ensure_ready(owner,'artlist',progress)
     destination=P.settings(owner,path)['destination']
-    report=[]
+    report=[];no_matches=set()
     with tempfile.TemporaryDirectory(prefix='ks-broll-only-') as folder:
         work=Path(folder).resolve();(work/'draft_info.json').write_bytes(raw)
         previous=getattr(E._CONTEXT,'progress',None)
         E._CONTEXT.progress=lambda **v:progress(v.get('message','กำลังเตรียม B-roll'))
+        stats['stage']='ai'
         try:ideas=broll.api_broll(str(work),dict(cfg,media_kind='footage',stock_auto=True))
         finally:
             if previous is None:E._CONTEXT.__dict__.pop('progress',None)
@@ -94,7 +102,12 @@ def build(owner, project, cfg, progress):
         if not ideas.get('ok'):raise ValueError(ideas.get('error','ยังไม่มีคำค้น B-roll'))
         if (path/'draft_info.json').read_bytes()!=raw:raise ValueError('ไทม์ไลน์เปลี่ยนระหว่างหาไอเดีย กรุณาเริ่มใหม่')
         edited=copy.deepcopy(original);last_end=-3
-        for item in ideas.get('items',[])[:maximum*2]:
+        candidates=ideas.get('items',[])
+        if len(candidates)>maximum*2:
+            candidates=[candidates[round(i*(len(candidates)-1)/(maximum*2-1))] for i in range(maximum*2)]
+        progress(f'AI เสนอ {len(ideas.get("items",[]))} ช่วง · ตรวจได้สูงสุด {len(candidates)} ช่วง')
+        for item in candidates:
+            stats['stage']='search'
             if sum(r.get('state')=='inserted' for r in report)>=maximum:break
             progress(f'เตรียม B-roll {sum(r.get("state")=="inserted" for r in report)}/{maximum} ภาพ · '+str(item.get('query','')))
             a,b=item.get('start'),item.get('end')
@@ -107,16 +120,27 @@ def build(owner, project, cfg, progress):
             searches=list(dict.fromkeys(q for q in searches if broll.english_query(q)))[:3]
             record=None
             for query in searches:
+                if query.lower() in no_matches:
+                    progress('ข้ามคำค้นที่ตรวจแล้วไม่พบสื่อ: '+query);continue
                 request=dict(kind='broll',query=query,required_terms=[],exclude_urls=[r['url'] for r in report if r.get('url')],exclude_hashes=[r['sha256'] for r in report if r.get('sha256')])
+                stats['attempted']+=1
+                progress(f'ค้นครั้งที่ {stats["attempted"]}: {query}')
                 try:record=A.wait_download(owner,'artlist',request,progress)
                 except A.StockDownloadError as exc:
-                    if exc.code not in ('no_match','page_not_ready','search_failed','timeout','download_failed','download_controls','file_access_timeout'):raise
-                    report.append(dict(state='failed_search',query=query,reason=str(exc)));record=None
+                    # Retrying another keyword cannot repair browser/download failures.
+                    raise A.StockDownloadError(str(exc)+' · หยุดค้นคำสำรองเพื่อไม่ให้รอซ้ำ ตรวจ Chrome/ส่วนขยายแล้วลองใหม่',exc.code)
                 if record:break
+                no_matches.add(query.lower())
+                progress('ไม่พบสื่อตรงคำค้น: '+query)
             if record is None:
+                stats['skipped']+=1
+                progress('ข้ามช่วงนี้: ไม่พบไฟล์ที่ดาวน์โหลดและตรวจได้')
                 report.append(dict(state='skipped',query=item['query'],reason='ไม่พบไฟล์ที่ดาวน์โหลดและตรวจได้'));continue
             if any(record.get('sha256')==r.get('sha256') or record.get('url')==r.get('url') for r in report if r.get('state')=='inserted'):
                 report.append(dict(state='skipped',query=item['query'],reason='ไฟล์ซ้ำ'));continue
+            stats['downloaded']+=1
+            stats['stage']='framing'
+            progress('รับไฟล์แล้ว กำลังจัดภาพให้พอดีเฟรม')
             length=min(end-start,float(record['duration']))
             if not math.isfinite(length) or length<.5:continue
             media=P.store(record['path'],destination,'B-roll',record.get('title','B-roll'))
@@ -148,9 +172,13 @@ def build(owner, project, cfg, progress):
                 if values:edited['materials'].setdefault(kind,[]).extend(values)
             validate_additions(original,edited)
             report.append(dict(state='inserted',query=item['query'],start=start,duration=length,url=record.get('url'),sha256=record.get('sha256'),framing=framing))
+            stats['prepared']+=1
+            stats['skipped']=sum(r.get('state')=='skipped' for r in report)
+            progress('เตรียมและตรวจไฟล์ภาพนี้สำเร็จ')
             last_end=start+length
         count=sum(r.get('state')=='inserted' for r in report)
         if not count:raise ValueError('ยังไม่มี B-roll ที่ใส่ได้ จึงไม่สร้างผลหรือแก้โปรเจกต์ ลองคำค้น/บัญชีหรือช่วงอื่น')
+        stats['stage']='publishing'
         progress('ตรวจว่าการตัดต่อเดิมทั้งหมดคงเดิมก่อนบันทึกผล')
         if (path/'draft_info.json').read_bytes()!=raw:raise ValueError('โปรเจกต์เปลี่ยนระหว่างหา B-roll ยังไม่แก้โปรเจกต์')
         validate_additions(original,edited)

@@ -1,6 +1,6 @@
 # โครงสร้างและแบบระบบ — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานซอร์ส/Release: **1.5.53**
+อัปเดต: 28 ตุลาคม 2026 · ฐานซอร์ส/Release: **1.5.54**
 
 เอกสารนี้อธิบายระบบที่มีอยู่จริงและหลักการที่ต้องรักษา อ่านคู่กับ `TASK_PHASES.md` ก่อนเริ่มงาน หากโค้ดไม่ตรงเอกสาร ให้ตรวจหลักฐานและแก้เอกสารในงานเดียวกัน ไม่ใช้เอกสารเก่าเป็นข้อยืนยันว่าฟังก์ชันยังใช้ได้
 
@@ -120,6 +120,12 @@ receipt แยกตาม hash ของเจ้าของและชนิ
 ตั้งแต่ 1.5.53 B-roll preflight และการเก็บ/ตรวจ media fingerprints resolve placeholder/relative paths เทียบ source project ในสำเนาสำหรับตรวจเท่านั้น ไม่เปลี่ยน path ใน output JSON จึงคง add-only invariant; ตรวจ missing media ก่อนเรียก AI และไม่ผ่อน source/output/media guards
 
 ผลมี broll_only_report.json; preview ผูก contract=broll_only ใน ticket และตรวจซ้ำใน commit ทั้งก่อนและหลังจัดเก็บสื่อ ใช้ hash/media stamps/active timeline/backup/mirror transaction/rollback เดิม การเลือกผลผ่าน receipt บังคับ operation เดิมแม้ report หาย จึงไม่ผ่อนเป็นโหมดแก้ทั้งคลิปโดยเงียบ ๆ
+
+ตั้งแต่ 1.5.54 progress ของ B-roll มี structured counts/stage และ log สูงสุด 1,000 แถวใน receipt/UI; แสดงข้อมูลจริงจาก bridge รวม byte progress ไม่เดาเวลาที่เหลือ ข้ามคำค้น no_match ที่เคยลองแล้วและกระจาย candidate ทั่วคลิป ไม่ลอง keyword สำรองเมื่อระบบเว็บ/ดาวน์โหลดล้มเหลว
+
+`broll_assets.py` ลงทะเบียนเฉพาะวัสดุ B-roll ใหม่กับ `draft_meta_info.json.draft_materials` และ `local_material_id` ก่อนเขียนผ่าน transaction เดิม โดยคัดลอกพร้อม hash ไป `cli_lab_assets/<batch>` ในโปรเจกต์ทั้งไฟล์ที่เคยอยู่ใน output และคลังภายนอก ไม่พึ่งคลังชั่วคราวหลังนำเข้า รวม metadata root ของ active timeline โดยรักษารายการเดิมไว้
+
+การซ่อม B-roll ที่นำเข้าแล้วใช้ prepare_repair → receipt operation=broll_repair → preview/contract=broll_repair → commit ตรวจ fingerprint เดิม validator ยอมเปลี่ยนเฉพาะ path/local_material_id ของวัสดุที่ใช้เฉพาะแทร็ก ks_role=broll_only ไม่เปลี่ยนแทร็ก/จำนวนช็อต หากไฟล์หายจริงจะหยุด ปุ่มเปิดโฟลเดอร์ใช้ native opener ที่ backend ตรวจ project ของ session ไม่ใช้ file:// หรือรับ path อิสระ
 
 ### 4.5 อัปเดตและแจกจ่าย
 

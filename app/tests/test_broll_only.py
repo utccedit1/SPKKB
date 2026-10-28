@@ -125,3 +125,92 @@ class BrollOnlyTests(unittest.TestCase):
         with self.assertRaises(ValueError):R.review('alice',self.proj,result['result_id'])
         with self.assertRaises(ValueError):C.commit('alice',self.proj,preview['install_id'])
         self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
+
+    def test_import_registers_added_media_and_survives_output_and_library_removal(self):
+        import shutil
+        old={'id':'old-entry','file_Path':str(self.video),'custom':'preserve'}
+        meta={'draft_id':'original','custom':{'keep':True},'draft_materials':[{'type':0,'value':[old]},{'type':7,'value':[]}]}
+        (self.proj/'draft_meta_info.json').write_text(json.dumps(meta))
+        result=self.build();review=R.review('alice',self.proj,result['result_id'])
+        C.commit('alice',self.proj,review['install_id'])
+        shutil.rmtree(result['destination']);shutil.rmtree(self.root/'media')
+        edited=json.loads((self.proj/'draft_info.json').read_bytes());B.validate_additions(self.draft,edited)
+        metadata=json.loads((self.proj/'draft_meta_info.json').read_bytes())
+        self.assertEqual(metadata['custom'],meta['custom']);self.assertEqual(metadata['draft_materials'][0]['value'][0],old)
+        new=edited['materials']['videos'][1];self.assertTrue(Path(new['path']).is_relative_to(self.proj.resolve()))
+        self.assertTrue(Path(new['path']).is_file())
+        entries=[e for g in metadata['draft_materials'] for e in g['value']]
+        entry=next(e for e in entries if e['id']==new['local_material_id'])
+        self.assertEqual(entry['file_Path'],new['path'])
+
+    def test_download_error_does_not_repeat_on_alternative_queries(self):
+        with patch.object(B.A,'wait_download',side_effect=B.A.StockDownloadError('Chrome unavailable','timeout')) as fetch,self.assertRaises(B.A.StockDownloadError):
+            self.build()
+        self.assertEqual(fetch.call_count,1)
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
+
+    def test_progress_includes_real_counts_and_stages(self):
+        rows=[];B.build('alice',self.proj,{'max_shots':10},rows.append)
+        self.assertEqual(rows[-1]['prepared'],1);self.assertEqual(rows[-1]['downloaded'],1)
+        self.assertEqual(rows[-1]['requested'],10);self.assertEqual(rows[-1]['attempted'],1)
+        self.assertTrue(any(r['stage']=='framing' for r in rows))
+
+    def test_registered_metadata_rolls_back_after_partial_failure(self):
+        meta={'draft_id':'original','draft_materials':[{'type':0,'value':[]}]}
+        raw=json.dumps(meta).encode();(self.proj/'draft_meta_info.json').write_bytes(raw)
+        result=self.build();review=R.review('alice',self.proj,result['result_id'])
+        real=T.replace_files
+        def fail(proj,updates):
+            if not getattr(fail,'once',False):
+                fail.once=True;(self.proj/'draft_meta_info.json').write_bytes(updates['draft_meta_info.json']);raise OSError('fixture disk failure')
+            return real(proj,updates)
+        with patch.object(T,'replace_files',side_effect=fail),self.assertRaises(OSError):C.commit('alice',self.proj,review['install_id'])
+        self.assertEqual((self.proj/'draft_meta_info.json').read_bytes(),raw)
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
+
+    def test_reveal_folder_scoped_to_current_project(self):
+        from ks import cli_lab as L
+        with patch.object(L.subprocess,'run') as launch,self.assertRaises(ValueError):
+            L.handle('alice',self.proj,{'action':'broll_media_folder','path':'/untrusted'})
+        launch.assert_not_called()
+        assets=self.proj/'cli_lab_assets';assets.mkdir()
+        with patch.object(L.subprocess,'run') as launch:
+            L.handle('alice',self.proj,{'action':'broll_media_folder','path':'/untrusted'})
+        self.assertEqual(launch.call_args.args[0][-1],str(assets.resolve()))
+
+    def test_existing_import_can_repair_registry_without_adding_duplicate_shots(self):
+        from ks import broll_assets as A
+        result=self.build();review=R.review('alice',self.proj,result['result_id']);C.commit('alice',self.proj,review['install_id'])
+        d=json.loads((self.proj/'draft_info.json').read_bytes())
+        for m in A.repair_materials(d):m['local_material_id']=''
+        before=copy.deepcopy(d);(self.proj/'draft_info.json').write_text(json.dumps(d))
+        (self.proj/'draft_meta_info.json').write_text(json.dumps({'draft_id':d['id'],'draft_materials':[]}))
+        preview=A.prepare_repair('alice',self.proj)
+        C.commit('alice',self.proj,preview['install_id'])
+        final=json.loads((self.proj/'draft_info.json').read_bytes());A.validate_repair(before,final)
+        self.assertEqual(final['tracks'],before['tracks'])
+        meta=json.loads((self.proj/'draft_meta_info.json').read_bytes())
+        for m in A.repair_materials(final):
+            self.assertTrue(Path(m['path']).is_file());self.assertTrue(m['local_material_id'])
+            self.assertTrue(any(e['id']==m['local_material_id'] and e['file_Path']==m['path'] for g in meta['draft_materials'] for e in g['value']))
+        changed=copy.deepcopy(final);changed['tracks'][0]['segments'][0]['volume']=1
+        with self.assertRaises(ValueError):A.validate_repair(before,changed)
+
+    def test_nested_project_registers_broll_in_root_and_timeline_metadata(self):
+        root=self.proj;self.saved_paths(nested=True)
+        (root/'draft_info.json').write_bytes(self.raw)
+        (root/'draft_meta_info.json').write_text(json.dumps({'draft_id':'original','keep':'root','draft_materials':[]}))
+        result=self.build();review=R.review('alice',self.proj,result['result_id']);C.commit('alice',self.proj,review['install_id'])
+        final=json.loads((self.proj/'draft_info.json').read_bytes());new=final['materials']['videos'][1]
+        for folder in (root,self.proj):
+            meta=json.loads((folder/'draft_meta_info.json').read_bytes())
+            self.assertTrue(any(e['id']==new['local_material_id'] and e['file_Path']==new['path'] for g in meta['draft_materials'] for e in g['value']))
+        self.assertEqual(json.loads((root/'draft_meta_info.json').read_bytes())['keep'],'root')
+
+    def test_repair_with_existing_registry_id_preserves_old_entries(self):
+        from ks import broll_assets as A
+        result=self.build();preview=R.review('alice',self.proj,result['result_id']);C.commit('alice',self.proj,preview['install_id'])
+        old=json.loads((self.proj/'draft_meta_info.json').read_bytes())['draft_materials'][0]['value'][0]
+        preview=A.prepare_repair('alice',self.proj);C.commit('alice',self.proj,preview['install_id'])
+        entries=json.loads((self.proj/'draft_meta_info.json').read_bytes())['draft_materials'][0]['value']
+        self.assertEqual(entries[0],old);self.assertNotEqual(entries[-1]['id'],old['id'])

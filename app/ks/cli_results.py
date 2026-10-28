@@ -13,7 +13,7 @@ def remember(owner, project, folder, source_hash, operation):
     raw = (folder/'draft_info.json').read_bytes()
     media = {}
     media_draft=json.loads(raw)
-    if operation=='broll_only':
+    if operation in ('broll_only','broll_repair'):
         from .cli_lab_story import resolve_media_paths
         media_draft=resolve_media_paths(media_draft,project)
     for node in drafts(media_draft):

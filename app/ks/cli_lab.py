@@ -90,6 +90,10 @@ def start_job(owner, project, data):
             _jobs.pop(token,None)
             raise
     def progress(message):
+        details={}
+        if isinstance(message,dict):
+            details={k:message[k] for k in ('stage','prepared','downloaded','requested','attempted','skipped') if k in message}
+            message=str(message.get('message',''))
         with _jobs_lock:
             if _jobs[token].get('cancel'):raise InterruptedError('ยกเลิกงานแล้ว')
             # Stock batches have bounded AI/download/CLI steps, not a fixed total.
@@ -98,8 +102,8 @@ def start_job(owner, project, data):
             history=_jobs[token].setdefault('progress_log',[])
             if not history or history[-1]['message']!=message:
                 history.append(dict(message=str(message)[:700],time=time.time()))
-                del history[:-150]
-            _jobs[token].update(message=message, updated=time.time())
+                del history[:-(1000 if operation=='broll_only' else 150)]
+            _jobs[token].update(message=message, updated=time.time(), **details)
             job_store.save('cli',token,_jobs[token])
     def work():
         try:
@@ -118,6 +122,18 @@ def start_job(owner, project, data):
 
 def handle(owner, project, data, progress=lambda message: None):
     action = data.get('action')
+    if action == 'broll_repair_preview':
+        from .broll_assets import prepare_repair
+        return prepare_repair(owner,project)
+    if action == 'broll_media_folder':
+        import sys
+        from .stock_project import settings
+        folder=Path(project).resolve()/'cli_lab_assets'
+        if not folder.is_dir():folder=Path(settings(owner,project)['destination'])
+        if not folder.is_dir():raise ValueError('ยังไม่มีโฟลเดอร์สื่อ B-roll ที่สร้างในโปรเจกต์นี้')
+        command=['open',str(folder)] if sys.platform=='darwin' else (['explorer',str(folder)] if sys.platform=='win32' else ['xdg-open',str(folder)])
+        subprocess.run(command,check=True,timeout=15)
+        return dict(ok=True,message='เปิดโฟลเดอร์สื่อของโปรเจกต์นี้แล้ว')
     if action == 'broll_only':
         from .broll_auto import build
         return build(owner,project,data,progress)

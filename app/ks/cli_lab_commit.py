@@ -58,8 +58,12 @@ def preview(owner, project, folder, expected=None, result_id=None):
         if root.is_file() and json.loads(root.read_bytes()).get('id') != current.get('id'):
             raise ValueError('กรุณาเลือกไทม์ไลน์หลักของโปรเจกต์ก่อนแทนผล')
     broll_only = (result/'broll_only_report.json').is_file() or bool(expected and expected.get('operation')=='broll_only')
+    broll_repair=(result/'broll_repair_report.json').is_file() or bool(expected and expected.get('operation')=='broll_repair')
+    if broll_repair:
+        from .broll_assets import validate_repair
+        validate_repair(current,edited)
     media_draft=edited
-    if broll_only:
+    if broll_only or broll_repair:
         from .cli_lab_story import resolve_media_paths
         media_draft=resolve_media_paths(edited,target)
     stamps = {}
@@ -81,6 +85,7 @@ def preview(owner, project, folder, expected=None, result_id=None):
     ticket = dict(owner=owner, project=str(target), result=str(result),
         source_hash=digest(raw), output_hash=digest(edited_raw), media=stamps, created=time.time())
     if broll_only: ticket['contract'] = 'broll_only'
+    if broll_repair: ticket['contract']='broll_repair'
     if result_id: ticket['result_id'] = result_id
     job_store.save('installs',token,ticket)
     with _lock:
@@ -93,6 +98,7 @@ def preview(owner, project, folder, expected=None, result_id=None):
 
 def review_notes(folder):
     notes=[];folder=Path(folder)
+    if (folder/'broll_repair_report.json').is_file():notes.append('ตรวจไฟล์ B-roll แล้ว · ยืนยันเพื่อคัดลอกเข้าโปรเจกต์และซ่อมทะเบียนสื่อ โดยไม่เปลี่ยนรอยตัดหรือเพิ่มภาพซ้ำ')
     if (folder/'broll_only_report.json').is_file():
         report=json.loads((folder/'broll_only_report.json').read_bytes())
         notes.append(f"เพิ่มเฉพาะ B-roll {report['inserted']} ช็อต · รอยตัด ซับ เพลง เสียง โมชั่น และแทร็กเดิมคงเดิม")
@@ -144,6 +150,9 @@ def commit(owner, project, token):
         if ticket.get('contract') == 'broll_only':
             from .broll_auto import validate_additions
             validate_additions(current,edited)
+        if ticket.get('contract')=='broll_repair':
+            from .broll_assets import validate_repair
+            validate_repair(current,edited)
         # Keep the editor's original project/timeline identity and schema markers.
         for key in ('id', 'name', 'platform', 'last_modified_platform', 'version', 'create_time'):
             if key in current: edited[key] = copy.deepcopy(current[key])
@@ -158,23 +167,46 @@ def commit(owner, project, token):
                 raise ValueError('โปรเจกต์เปลี่ยนระหว่างสำรอง ยังไม่ได้แทนผล')
         # Imported assets must survive cleanup of the output folder.
         assets = target/'cli_lab_assets'/uuid.uuid4().hex
+        broll_materials=[]
+        if ticket.get('contract') == 'broll_only':
+            from .broll_assets import additions
+            broll_materials=additions(current,edited)
+        if ticket.get('contract')=='broll_repair':
+            from .broll_assets import repair_materials
+            broll_materials=repair_materials(edited)
         try:
             for kind in ('videos','audios'):
                 for material in (m for node in drafts(edited) for m in node.get('materials',{}).get(kind,[])):
                     path = Path(material.get('path', '')).resolve()
-                    if path.is_file() and path.is_relative_to(result):
+                    if path.is_file() and (path.is_relative_to(result) or any(material is m for m in broll_materials)):
                         assets.mkdir(parents=True, exist_ok=True)
                         dest = assets/(uuid.uuid4().hex[:8]+'_'+path.name)
-                        shutil.copyfile(path,dest); material['path'] = str(dest)
+                        shutil.copyfile(path,dest)
+                        if broll_materials:
+                            with path.open('rb') as incoming,dest.open('rb') as copied:
+                                if hashlib.file_digest(incoming,'sha256').digest()!=hashlib.file_digest(copied,'sha256').digest():raise ValueError('คัดลอกสื่อ B-roll ไม่ครบ ยังไม่แก้โปรเจกต์')
+                            expected_stamp=ticket['media'].get(str(path))
+                            if expected_stamp and (path.stat().st_size,path.stat().st_mtime_ns)!=tuple(expected_stamp):raise ValueError('สื่อ B-roll เปลี่ยนระหว่างคัดลอก')
+                        material['path'] = str(dest)
+            # Fresh catalog keys avoid retargeting or overwriting existing entries.
+            for material in broll_materials:material['local_material_id']=str(uuid.uuid4()).upper()
+            metadata_updates={}
+            for name in ('draft_meta_info.json','__project_draft_meta_info.json'):
+                if paths[name] is None:continue
+                if before[name] is None and not broll_materials:continue
+                meta=json.loads(before[name]) if before[name] is not None else dict(draft_id=current.get('id'),draft_name=current.get('name',''))
+                meta.update(tm_duration=edited['duration'],tm_draft_modified=int(time.time()*1e6))
+                if broll_materials:
+                    from .broll_assets import register
+                    meta=register(meta,broll_materials)
+                metadata_updates[name]=json.dumps(meta,ensure_ascii=False).encode('utf-8')
             if ticket.get('contract') == 'broll_only':validate_additions(current,edited)
+            if ticket.get('contract')=='broll_repair':validate_repair(current,edited)
             data = json.dumps(edited,ensure_ascii=False).encode('utf-8')
             updates = T.mirror_updates(before, data)
             updates.update({'draft_info_original.json':None,'.spinworld_state.json':None})
             if before['draft_info_backup.json'] is None: updates['draft_info_backup.json']=raw
-            for name in ('draft_meta_info.json','__project_draft_meta_info.json'):
-                if before[name] is not None:
-                    meta=json.loads(before[name]);meta.update(tm_duration=edited['duration'],tm_draft_modified=int(time.time()*1e6))
-                    updates[name]=json.dumps(meta,ensure_ascii=False).encode('utf-8')
+            updates.update(metadata_updates)
             T.ensure_closed()
             if any((p.read_bytes() if p is not None and p.is_file() else None) != before[name] for name,p in paths.items()):
                 raise ValueError('โปรเจกต์เปลี่ยนก่อนแทนผล ยังไม่ได้เขียน')
