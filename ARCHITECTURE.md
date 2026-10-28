@@ -1,6 +1,6 @@
 # โครงสร้างและแบบระบบ — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานซอร์ส/Release: **1.5.52**
+อัปเดต: 28 ตุลาคม 2026 · ฐานซอร์ส/Release: **1.5.53**
 
 เอกสารนี้อธิบายระบบที่มีอยู่จริงและหลักการที่ต้องรักษา อ่านคู่กับ `TASK_PHASES.md` ก่อนเริ่มงาน หากโค้ดไม่ตรงเอกสาร ให้ตรวจหลักฐานและแก้เอกสารในงานเดียวกัน ไม่ใช้เอกสารเก่าเป็นข้อยืนยันว่าฟังก์ชันยังใช้ได้
 
@@ -116,6 +116,8 @@ receipt แยกตาม hash ของเจ้าของและชนิ
 `validate_additions` ตรวจว่าค่าระดับโปรเจกต์/ความยาว แทร็กและวัสดุเดิมเหมือนเดิมทุกฟิลด์ อนุญาตเพิ่มเฉพาะวัสดุภาพและ companion ที่จำเป็น พร้อมตรวจ ID/ช่วงเวลา/ระดับแสดงภาพและ volume=0 หากลำดับภาพกับซับใน schema นั้นแยกไม่ได้จะหยุด ไม่ย้ายซับเดิมเพื่อให้ผ่าน guard
 
 ตั้งแต่ 1.5.52 โหมด broll_only ไม่ใช้เพดานรวม 30 นาทีของงาน CLI อื่น เพราะเป็น batch หลายภาพ แต่ยังจำกัด AI 300 วินาที/คำขอ, stock 480 วินาที/งาน และ CLI 120 วินาที/คำสั่ง เมื่อ progress ของงานหลักยกเลิกหรือล้มเหลว wait_download จะปิดงาน stock ที่ยัง queued/running และไม่รับ late receipt
+
+ตั้งแต่ 1.5.53 B-roll preflight และการเก็บ/ตรวจ media fingerprints resolve placeholder/relative paths เทียบ source project ในสำเนาสำหรับตรวจเท่านั้น ไม่เปลี่ยน path ใน output JSON จึงคง add-only invariant; ตรวจ missing media ก่อนเรียก AI และไม่ผ่อน source/output/media guards
 
 ผลมี broll_only_report.json; preview ผูก contract=broll_only ใน ticket และตรวจซ้ำใน commit ทั้งก่อนและหลังจัดเก็บสื่อ ใช้ hash/media stamps/active timeline/backup/mirror transaction/rollback เดิม การเลือกผลผ่าน receipt บังคับ operation เดิมแม้ report หาย จึงไม่ผ่อนเป็นโหมดแก้ทั้งคลิปโดยเงียบ ๆ
 

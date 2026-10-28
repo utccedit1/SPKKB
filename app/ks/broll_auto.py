@@ -78,6 +78,8 @@ def build(owner, project, cfg, progress):
     duration=original.get('duration',0)/1e6
     if not math.isfinite(duration) or duration<=0:raise ValueError('ความยาวไทม์ไลน์ไม่ถูกต้อง')
     layer=layer_index(original)
+    # Verify saved paths against the real source before AI/downloads. Keep raw values.
+    S.resolve_media_paths(original,path)
     A.ensure_ready(owner,'artlist',progress)
     destination=P.settings(owner,path)['destination']
     report=[]

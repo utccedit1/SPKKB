@@ -84,3 +84,44 @@ class BrollOnlyTests(unittest.TestCase):
         # The manual-folder path must enforce the same add-only invariant.
         with self.assertRaises(ValueError):C.preview('alice',self.proj,result['destination'])
         self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
+
+    def saved_paths(self, nested=False):
+        import shutil
+        root=self.proj
+        if nested:
+            self.proj=root/'Timelines'/'main';self.proj.mkdir(parents=True)
+        media=root/'materials/video/C6418.MP4';media.parent.mkdir(parents=True);shutil.copyfile(self.video,media)
+        placeholder='##_draftpath_placeholder_0E685133-18CE-45ED-8CB8-2904A212EC80_##/materials/video/C6418.MP4'
+        self.draft['materials']['videos'][0]['path']=placeholder
+        self.draft['materials']['audios'][0]['path']=placeholder
+        self.raw=json.dumps(self.draft).encode();(self.proj/'draft_info.json').write_bytes(self.raw)
+        return media,placeholder
+
+    def test_placeholder_survives_build_review_and_commit_unchanged(self):
+        for nested in (False,True):
+            with self.subTest(nested=nested):
+                if nested: self.proj=self.root/'nested';self.proj.mkdir()
+                media,placeholder=self.saved_paths(nested)
+                result=self.build()
+                output=json.loads((Path(result['destination'])/'draft_info.json').read_bytes())
+                self.assertEqual(output['materials']['videos'][0]['path'],placeholder)
+                self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
+                preview=R.review('alice',self.proj,result['result_id'])
+                self.assertTrue(C.commit('alice',self.proj,preview['install_id'])['ok'])
+                final=json.loads((self.proj/'draft_info.json').read_bytes());B.validate_additions(self.draft,final)
+                self.assertEqual(final['materials']['videos'][0]['path'],placeholder)
+
+    def test_missing_placeholder_fails_before_ai_or_stock(self):
+        media,_=self.saved_paths();media.unlink()
+        with patch.object(B.broll,'api_broll') as ai,patch.object(B.A,'wait_download') as fetch,self.assertRaisesRegex(ValueError,'ไม่พบสื่อ'):
+            self.build()
+        ai.assert_not_called();fetch.assert_not_called()
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
+
+    def test_placeholder_media_change_after_build_blocks_review_and_commit(self):
+        media,_=self.saved_paths();result=self.build()
+        preview=R.review('alice',self.proj,result['result_id'])
+        media.write_bytes(b'changed media')
+        with self.assertRaises(ValueError):R.review('alice',self.proj,result['result_id'])
+        with self.assertRaises(ValueError):C.commit('alice',self.proj,preview['install_id'])
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)

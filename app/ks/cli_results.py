@@ -12,7 +12,11 @@ def remember(owner, project, folder, source_hash, operation):
     folder = Path(folder).resolve()
     raw = (folder/'draft_info.json').read_bytes()
     media = {}
-    for node in drafts(json.loads(raw)):
+    media_draft=json.loads(raw)
+    if operation=='broll_only':
+        from .cli_lab_story import resolve_media_paths
+        media_draft=resolve_media_paths(media_draft,project)
+    for node in drafts(media_draft):
         for kind in ('videos', 'audios'):
             for material in node.get('materials', {}).get(kind, []):
                 if material.get('path'):

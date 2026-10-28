@@ -1,6 +1,6 @@
 # ช่วยด้วยจ้า — source branch
 
-ซอร์สรุ่น 1.5.52 พร้อมงานแก้ F01–F06 และโหมดเพิ่ม B-roll อย่างเดียว เผยแพร่เป็น Release วันที่ 28 ตุลาคม 2026 แล้ว
+ซอร์สรุ่น 1.5.53 พร้อมงานแก้ F01–F06 และโหมดเพิ่ม B-roll อย่างเดียว เผยแพร่เป็น Release วันที่ 28 ตุลาคม 2026 แล้ว
 
 Repository นี้ใช้ main สำหรับ manifest อัปเดตแอป ซอร์สรอบนี้อยู่บน branch `source/readiness-fixes-2026-10-28` โดยไฟล์ version.json ที่ root คงข้อมูล Release เดิม ส่วน app/version.json เป็นเวอร์ชันฐานของซอร์ส
 
@@ -21,4 +21,4 @@ KS_JOB_STATE_DIR="$(mktemp -d /tmp/chuaydai-tests.XXXXXX)" PYTHONPATH=app python
 
 รัน UI tests ใน app/tests/*test.js ด้วย Node runtime ที่เตรียมไว้ ใช้ตัวแปร PYTHON เมื่อ Python ไม่ได้อยู่ใน PATH
 
-ผลบนเครื่องพัฒนา: Python 420/420 และ JavaScript 13/13 ชุดผ่าน Runtime และข้อมูลบัญชีส่วนตัวไม่รวมใน branch นี้ จึงต้องเตรียมบนเครื่องใหม่ก่อนรันทดสอบที่เกี่ยวข้อง Release 1.5.52 ผ่านการอัปเดตจริงบนเครื่องพัฒนาแล้ว ยังต้องตรวจ CapCut playback/export และ fresh install บนเครื่องอื่น
+ผลบนเครื่องพัฒนา: Python 423/423 และ JavaScript 13/13 ชุดผ่าน Runtime และข้อมูลบัญชีส่วนตัวไม่รวมใน branch นี้ จึงต้องเตรียมบนเครื่องใหม่ก่อนรันทดสอบที่เกี่ยวข้อง Release 1.5.53 ผ่านการตรวจ bundle และไฟล์แจกแล้ว ยังไม่ได้ติดตั้งตรวจ UI รอบนี้เพราะหน้าจอล็อก ยังต้องตรวจ CapCut playback/export และ fresh install บนเครื่องอื่น

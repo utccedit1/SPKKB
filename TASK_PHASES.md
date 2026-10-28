@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.52 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.53 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -140,3 +140,7 @@
 | 2026-10-28 | P1.4 timeout fix — 1.5.52 | พบงานจริงถูกตัดที่ 1801 วินาทีทั้งที่ stock ยังทำงาน; สำเร็จ 16 downloads, no_match 39 และ download_controls 1 ก่อนจบงาน; แยก B-roll batch ออกจาก total CLI deadline โดยคง per-step bounds และปิด stock เมื่อ parent หยุด; เพิ่ม 5 regression | ตรวจ bundle/public/update และไม่เริ่มงานจริงซ้ำอัตโนมัติ |
 
 | 2026-10-28 | P1.4 — 1.5.52 เผยแพร่/ติดตั้ง | 420 tests + JS 13 ชุด, bundle/ZIP/public hash/manifest ผ่าน ติดตั้งผ่าน updater และเปิดโปรเจกต์เดิมหน้า B-roll ใน 1.5.52 แล้ว; `audits/release-1.5.52/` | ผู้ใช้เริ่มใหม่ได้ คลังไฟล์เดิมยังอยู่; ยังไม่รัน batch จริงหรือ import ซ้ำโดยเอเจนต์ |
+
+| 2026-10-28 | P1.4 / P4.4 — Chrome Save dialog | ผู้ใช้ยืนยัน dialog เลือกชื่อ/โฟลเดอร์ ตรวจ worker เส้นทางเว็บและ official Chrome docs: ต้องตรวจ Ask where to save each file ในโปรไฟล์ปลายทาง; `audits/chrome-save-dialog-1.5.52/report.md` | ให้ผู้ใช้เครื่องปลายทางปิดตัวเลือกและทดสอบ; ไม่เปลี่ยน settings เครื่องนี้หรือเผยแพร่รุ่นใหม่ |
+
+| 2026-10-28 | P1.4 — placeholder 1.5.53 | แก้ remember/preview ใช้ resolved copy เพื่อ stat สื่อ B-roll-only โดยคง output paths เดิม; preflight ก่อน AI; regression plain/nested build-review-commit, missing media และ changed media ผ่าน | แพ็ก/ตรวจ public/update; ยังไม่ยืนยันเครื่องปลายทาง |

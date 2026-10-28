@@ -57,9 +57,14 @@ def preview(owner, project, folder, expected=None, result_id=None):
         root = target.parent.parent/'draft_info.json'
         if root.is_file() and json.loads(root.read_bytes()).get('id') != current.get('id'):
             raise ValueError('กรุณาเลือกไทม์ไลน์หลักของโปรเจกต์ก่อนแทนผล')
+    broll_only = (result/'broll_only_report.json').is_file() or bool(expected and expected.get('operation')=='broll_only')
+    media_draft=edited
+    if broll_only:
+        from .cli_lab_story import resolve_media_paths
+        media_draft=resolve_media_paths(edited,target)
     stamps = {}
     for kind in ('videos', 'audios'):
-        for material in (m for node in drafts(edited) for m in node.get('materials',{}).get(kind,[])):
+        for material in (m for node in drafts(media_draft) for m in node.get('materials',{}).get(kind,[])):
             if not material.get('path'):
                 continue
             path = Path(material['path'])
@@ -69,7 +74,6 @@ def preview(owner, project, folder, expected=None, result_id=None):
     if expected is not None:
         if digest(raw) != expected['source_hash'] or digest(edited_raw) != expected['output_hash'] or stamps != {k:tuple(v) for k,v in expected['media'].items()}:
             raise ValueError('ต้นฉบับ ผลตัดต่อ หรือสื่อเปลี่ยนจากตอนสร้าง ยังไม่นำเข้า กรุณาตรวจผลและต้นฉบับก่อนเตรียมนำเข้าใหม่ด้วยตนเอง')
-    broll_only = (result/'broll_only_report.json').is_file() or bool(expected and expected.get('operation')=='broll_only')
     if broll_only:
         from .broll_auto import validate_additions
         validate_additions(current,edited)
