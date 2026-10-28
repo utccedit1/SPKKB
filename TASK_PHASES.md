@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.51 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.52 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -136,3 +136,5 @@
 | 2026-10-28 | P1.4 / P4 / P5.4 — 1.5.51 (กำลังทำ) | ผู้ใช้อนุญาตออกเวอร์ชันใหม่และติดตั้งโหมด B-roll อย่างเดียวให้ลองใช้จริง; ตรวจซอร์ส/แพ็กก่อน Release และใช้ updater เดิมตรวจงานค้าง | tests/bundle/ZIP/hash/public manifest/install/native UI; ยังไม่เริ่มค้นหรือเขียนโปรเจกต์ผู้ใช้ |
 
 | 2026-10-28 | P1.4 / P4 / P5.4 — Release 1.5.51 | Python 415 tests + JS 13 ชุดผ่าน; bundle self-test/signature/credential exclusion/ZIP/public hash/manifest ผ่าน; เผยแพร่และติดตั้งผ่าน updater เดิมแล้ว หน้า B-roll จริงแสดงใน 1.5.51; `audits/release-1.5.51/report.md` | ยังไม่ยืนยัน live Artlist/CapCut playback/export หรือเครื่องอื่น; retention หยุดตาม guard เพราะ metadata โปรเจกต์อื่นอ่านไม่ได้ |
+
+| 2026-10-28 | P1.4 timeout fix — 1.5.52 | พบงานจริงถูกตัดที่ 1801 วินาทีทั้งที่ stock ยังทำงาน; สำเร็จ 16 downloads, no_match 39 และ download_controls 1 ก่อนจบงาน; แยก B-roll batch ออกจาก total CLI deadline โดยคง per-step bounds และปิด stock เมื่อ parent หยุด; เพิ่ม 5 regression | ตรวจ bundle/public/update และไม่เริ่มงานจริงซ้ำอัตโนมัติ |

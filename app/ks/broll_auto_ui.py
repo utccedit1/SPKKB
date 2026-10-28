@@ -12,7 +12,7 @@ UI=r'''
  <p><button type="button" onclick="ksSide('clilab')">ตรวจการเชื่อม Artlist / โฟลเดอร์สื่อ</button></p>
  <pre id="brollOnlyStatus" role="status" style="white-space:pre-wrap"></pre>
  <div id="brollOnlySaved"></div>
- <small>หากมีภาพเดิมทับช่วงนั้นจะข้าม หากหาไม่ได้จะรายงานตามจริง ไม่ตัดคลิปหรือปรับส่วนอื่นชดเชย</small>
+ <small>งานหลายภาพอาจใช้เกิน 30 นาที โดยตรวจเวลารอ AI และดาวน์โหลดแยกแต่ละขั้น หากมีภาพเดิมทับช่วงนั้นจะข้าม หากหาไม่ได้จะรายงานตามจริง ไม่ตัดคลิปหรือปรับส่วนอื่นชดเชย</small>
 </section>
 '''
 JS=r'''

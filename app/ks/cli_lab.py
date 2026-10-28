@@ -92,7 +92,8 @@ def start_job(owner, project, data):
     def progress(message):
         with _jobs_lock:
             if _jobs[token].get('cancel'):raise InterruptedError('ยกเลิกงานแล้ว')
-            if time.time()-_jobs[token]['created']>1800:raise TimeoutError('งานเกิน 30 นาที กรุณาเริ่มใหม่')
+            # Stock batches have bounded AI/download/CLI steps, not a fixed total.
+            if operation!='broll_only' and time.time()-_jobs[token]['created']>1800:raise TimeoutError('งานเกิน 30 นาที กรุณาเริ่มใหม่')
             if _jobs[token].get('message')==message and time.time()-_jobs[token].get('updated',0)<2:return
             history=_jobs[token].setdefault('progress_log',[])
             if not history or history[-1]['message']!=message:

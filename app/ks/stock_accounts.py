@@ -184,17 +184,26 @@ def wait_download(owner,p,request,progress):
         progress('ใช้ไฟล์ที่ดาวน์โหลดและตรวจไว้แล้ว: '+cached.get('title',''))
         return cached
     token=submit(owner,p,request);deadline=time.monotonic()+JOB_TIMEOUT
-    while time.monotonic()<deadline:
-        job=status(owner,token);progress('คำค้น: '+request['query']+' · '+job['message'])
-        if job['state']=='done':return job['result']
-        if job['state']=='failed':
-            if job.get('error_code')=='no_match':return None
-            raise StockDownloadError(job['message'],job.get('error_code','unknown'))
-        time.sleep(.5)
-    with _lock:
-        _jobs[token].update(state='failed',message=timeout_message(_jobs[token]),error_code='timeout')
-        job_store.save('stock',token,_jobs[token])
-    raise StockDownloadError(_jobs[token]['message'],'timeout')
+    try:
+        while time.monotonic()<deadline:
+            job=status(owner,token);progress('คำค้น: '+request['query']+' · '+job['message'])
+            if job['state']=='done':return job['result']
+            if job['state']=='failed':
+                if job.get('error_code')=='no_match':return None
+                raise StockDownloadError(job['message'],job.get('error_code','unknown'))
+            time.sleep(.5)
+        with _lock:
+            _jobs[token].update(state='failed',message=timeout_message(_jobs[token]),error_code='timeout')
+            job_store.save('stock',token,_jobs[token])
+        raise StockDownloadError(_jobs[token]['message'],'timeout')
+    except BaseException:
+        # Parent cancellation/failure must stop the bridge too. Reject late receipts.
+        with _lock:
+            job=_jobs.get(token)
+            if job and job['state'] in ('queued','running'):
+                job.update(state='failed',message='งานหลักหยุดแล้ว ยกเลิกการรอสื่อนี้',error_code='cancelled')
+                job_store.save('stock',token,job)
+        raise
 
 
 def bridge(token,origin,data):

@@ -94,7 +94,7 @@ def build(owner, project, cfg, progress):
         edited=copy.deepcopy(original);last_end=-3
         for item in ideas.get('items',[])[:maximum*2]:
             if sum(r.get('state')=='inserted' for r in report)>=maximum:break
-            progress('เตรียม B-roll: '+str(item.get('query','')))
+            progress(f'เตรียม B-roll {sum(r.get("state")=="inserted" for r in report)}/{maximum} ภาพ · '+str(item.get('query','')))
             a,b=item.get('start'),item.get('end')
             if any(isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) for v in (a,b)) or not 0<=a<b<=duration:continue
             from .media_schedule import occupied
