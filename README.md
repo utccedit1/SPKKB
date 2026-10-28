@@ -1,6 +1,6 @@
 # ช่วยด้วยจ้า — source branch
 
-ซอร์สฐาน 1.5.49 พร้อมงานแก้ F01–F06 จากการตรวจวันที่ 28 ตุลาคม 2026 ยังไม่ได้แพ็กหรือเผยแพร่เป็นแอปรุ่นใหม่
+ซอร์สรุ่น 1.5.50 พร้อมงานแก้ F01–F06 เผยแพร่เป็น Release วันที่ 28 ตุลาคม 2026 แล้ว
 
 Repository นี้ใช้ main สำหรับ manifest อัปเดตแอป ซอร์สรอบนี้อยู่บน branch `source/readiness-fixes-2026-10-28` โดยไฟล์ version.json ที่ root คงข้อมูล Release เดิม ส่วน app/version.json เป็นเวอร์ชันฐานของซอร์ส
 
@@ -21,4 +21,4 @@ KS_JOB_STATE_DIR="$(mktemp -d /tmp/chuaydai-tests.XXXXXX)" PYTHONPATH=app python
 
 รัน UI tests ใน app/tests/*test.js ด้วย Node runtime ที่เตรียมไว้ ใช้ตัวแปร PYTHON เมื่อ Python ไม่ได้อยู่ใน PATH
 
-ผลบนเครื่องพัฒนา: Python 406/406 และ JavaScript 12/12 ชุดผ่าน Runtime และข้อมูลบัญชีส่วนตัวไม่รวมใน branch นี้ จึงต้องเตรียมบนเครื่องใหม่ก่อนรันทดสอบที่เกี่ยวข้อง ยังต้องตรวจ CapCut playback/export และ fresh install ก่อนปล่อยรุ่น
+ผลบนเครื่องพัฒนา: Python 406/406 และ JavaScript 12/12 ชุดผ่าน Runtime และข้อมูลบัญชีส่วนตัวไม่รวมใน branch นี้ จึงต้องเตรียมบนเครื่องใหม่ก่อนรันทดสอบที่เกี่ยวข้อง Release 1.5.50 ผ่านการอัปเดตจริงบนเครื่องพัฒนาแล้ว ยังต้องตรวจ CapCut playback/export และ fresh install บนเครื่องอื่น

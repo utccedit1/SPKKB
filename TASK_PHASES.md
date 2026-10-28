@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.49 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.50 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -23,7 +23,7 @@
 | P0.4 | PARTIAL | รักษาเพียง 5 เวอร์ชันล่าสุด | cleanup วันที่ 28 ต.ค. มี receipt แล้ว; ยังต้องออกแบบ retention หลัง release ที่ตรวจสื่ออ้างอิง/รุ่นที่รันอยู่ ไม่ล้าง Trash เอง |
 | P0.5 | DONE (audit) | ตรวจความพร้อมภาพรวมซอร์ส 1.5.49 และรายงานข้อผิดพลาด | `audits/full-readiness-1.5.49/report.md`; 393 Python tests ผ่าน, JS 11/12 (อีกชุด test harness เสีย), ยืนยัน F01–F06; DONE เฉพาะการตรวจ ไม่ใช่งานแก้หรือ acceptance ทุกเครื่อง |
 
-งานแก้จาก audit: **P0.6 PARTIAL (ซอร์สและ regression เสร็จ; ยังไม่แพ็ก/CapCut acceptance)** — แก้ F01–F06 ตาม `audits/readiness-fixes-1.5.49/report.md`; ไม่ใช่การอนุมัติ publish หรือติดตั้งทับแอปที่กำลังรัน
+งานแก้จาก audit: **P0.6 PARTIAL (เผยแพร่ 1.5.50 แล้ว; ยังไม่ CapCut playback/export acceptance)** — แก้ F01–F06 ตาม `audits/readiness-fixes-1.5.49/report.md`; ไม่ใช่การอนุมัติ publish หรือติดตั้งทับแอปที่กำลังรัน
 
 ## Phase 1 — เครือข่าย AI และคลังสื่อเสถียร
 
@@ -118,3 +118,7 @@
 | 2026-10-28 | P0.6 / F01–F06 | แก้ mirror ร่วม 5 เส้นทางและตรวจซ้ำก่อนเขียน, หยุด audio auto fallback หลัง timeout/ack, job_not_found ปลดงานค้าง, results receipts/UI recovery ตรวจ hash เดิม, retention 5 รุ่น/-final/ตรวจโปรเซส/Trash+undo, ซ่อม UI harness ใช้ runtime จริง; Python 406 tests และ JS 12 ชุดผ่าน; `audits/readiness-fixes-1.5.49/` | ซอร์สยัง version 1.5.49 ไม่ bump/build/install/publish; ต้องตรวจ CapCut playback/export และการติดตั้งจริงก่อนปล่อยรุ่น; ไม่ส่ง AI/stock จริงหรือเขียนโปรเจกต์ผู้ใช้ |
 
 | 2026-10-28 | P0.3 — source branch | ผู้ใช้เลือก SPKKB เดิมและอนุญาตอัปโหลดซอร์สบน branch ใหม่ `source/readiness-fixes-2026-10-28`; อัปโหลด source commit 6657acb บน branch ใหม่สำเร็จ ใช้ checkout แยกใน source_repository พร้อมรายการไฟล์อนุญาตและ .gitignore กันบัญชี/runtime/build/media; root version.json ของ release คงเดิม | ตรวจ branch ได้ที่ https://github.com/utccedit1/SPKKB/tree/source/readiness-fixes-2026-10-28; ยังไม่ publish Release หรือ merge main |
+
+| 2026-10-28 | P4/P5.4 — Release 1.5.50 (กำลังทำ) | ผู้ใช้อนุญาตแพ็ก เผยแพร่รุ่นใหม่ และเปลี่ยนแอปเป็นรุ่นล่าสุด รวม F01–F06; เริ่มตรวจ runtime/tests/source และงานค้างก่อนอัปเดต | self-test/signature/credential exclusion/ZIP/hash/public download/manifest และตรวจรุ่นที่ติดตั้งจริง |
+
+| 2026-10-28 | P4/P5.4 — Release 1.5.50 | แพ็กซอร์ส F01–F06 ด้วย Python 3.14.6; 406 tests + UI 12 ชุด, bundle self-test/signature/credential exclusion ผ่าน; ZIP 157119800 bytes SHA-256 df783b740b438a9a8c5a4e71441d0f46f18f9f1a467c231528d624fd371ad9a2; public download/manifest ผ่าน; updater รุ่น 1.5.49 เห็น 1.5.50; ติดตั้งผ่าน updater และเปิดโปรเจกต์เดิมใน 1.5.50 แล้ว; `audits/release-1.5.50/` | ยังไม่ playback/export ใหม่หรือ fresh install เครื่องอื่น; retention หยุดตาม guard เพราะ metadata อีกโปรเจกต์อ่านไม่ได้ จึงยังไม่ย้ายรุ่นเก่า |
