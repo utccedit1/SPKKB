@@ -1,7 +1,7 @@
 {
-  "version": "1.5.51",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.51/SPKKB.app.zip",
-  "release_notes": "เพิ่มโหมดหาและใส่ B-roll อัตโนมัติจาก Artlist ในหน้า B-roll เดิม เพิ่มเฉพาะภาพใหม่ปิดเสียงโดยคงรอยตัด ซับ เพลง เสียง โมชั่น และความยาวโปรเจกต์เดิม ตรวจผลก่อนนำเข้า มีสำรองและกู้ผลหลังเปิดหน้าใหม่ โหมดใหม่สำหรับเริ่มทดลองใช้จริง โดยคงเครื่องมือหาไอเดีย/คำค้นเดิม",
+  "version": "1.5.52",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.52/SPKKB.app.zip",
+  "release_notes": "แก้งาน B-roll หลายภาพถูกหยุดเมื่อครบ 30 นาทีทั้งที่ยังทำงานอยู่ ใช้ขอบเขตรอ AI และดาวน์โหลดรายขั้นตอนแทน พร้อมหยุดงานสื่อค้างเมื่อยกเลิกงานหลัก แสดงจำนวนภาพที่เตรียมได้ โดยคงการตัดต่อเดิมและขั้นตอนตรวจผลก่อนนำเข้า",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "7c3848fcfb4033b75f22be3596774c7ee3ac71c7ddb9f8a9ea24703040fbe95a",
-  "size": 157135838,
+  "sha256": "51eb588ba71d4b5982028b17f4d3d3fbdd6adef1d968a08abd9fe7c8aa46783e",
+  "size": 157136124,
   "platform": "macos",
   "architecture": "arm64"
 }
