@@ -1,7 +1,7 @@
 {
-  "version": "1.5.55",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.55/SPKKB.app.zip",
-  "release_notes": "แก้การซ่อม B-roll หลัง CapCut บันทึกแล้วลบแท็กภายใน ใช้ชื่อแทร็กเฉพาะของแอปและตรวจปิดเสียง/ไม่ใช้สื่อร่วมกับงานเดิมแทน ยังคงช่อง log จำนวนภาพ เปิดโฟลเดอร์จริง และเก็บไฟล์พร้อมทะเบียนในโปรเจกต์",
+  "version": "1.5.56",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.56/SPKKB.app.zip",
+  "release_notes": "รวมการแก้ความเสถียรและความปลอดภัย: ปิดช่องแทรกโค้ดผ่านประกาศ แก้ปุ่มจัดการบัญชีและประกาศก่อนล็อกอิน แยกคีย์ AI/ศัพท์ตามผู้ใช้ ลงทะเบียนสื่อใหม่และ timeline mirrors ให้ครบ ลดการคัดลอกต้นฉบับซ้ำ แก้งานซับค้าง และส่งออกวิดีโอไม่มีเสียง รองรับ Stock Bridge 0.1.7 (หลังอัปเดตให้กด Reload ส่วนขยายใน Chrome)",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "8ed291e847bb8f808bd8562fd6ba49b58c35d6edc48f24f7f0db3a2d92f29b6c",
-  "size": 157144209,
+  "sha256": "f61434cc006ed6cb3c5b7c96b6afeb8e0d4cf15d8f918c7f1e425e209991663f",
+  "size": 157151184,
   "platform": "macos",
   "architecture": "arm64"
 }
