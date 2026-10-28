@@ -1,7 +1,7 @@
 {
-  "version": "1.5.53",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.53/SPKKB.app.zip",
-  "release_notes": "แก้ B-roll อย่างเดียวหาไฟล์ต้นฉบับไม่พบเมื่อ CapCut บันทึกตำแหน่งเป็น draftpath placeholder ตรวจไฟล์จริงจากโปรเจกต์ก่อนเรียก AI โดยคงค่าเส้นทางและการตัดต่อเดิม ตรวจไฟล์ซ้ำก่อนนำเข้า รองรับโปรเจกต์ที่มี Timelines",
+  "version": "1.5.54",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.54/SPKKB.app.zip",
+  "release_notes": "เพิ่มช่อง log งาน B-roll พร้อมจำนวนภาพที่พร้อม ดาวน์โหลดแล้ว คำค้น และความคืบหน้าจริง หยุดรอซ้ำเมื่อ Chrome/ดาวน์โหลดผิดพลาด แก้สื่อหายใน CapCut ด้วยการคัดลอกเข้าโปรเจกต์และลงทะเบียน local_material_id พร้อมตรวจ hash เพิ่มปุ่มเปิดโฟลเดอร์และตรวจซ่อม B-roll เดิมโดยไม่เพิ่มภาพซ้ำ",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "1089cd72d04d5d93ac85ed332664258e10525fdf089da44581fe993420708252",
-  "size": 157133139,
+  "sha256": "b7402bca79446556c3c4ca8f5846b113ef014fae3bfcd09630f1bb042b6ddf21",
+  "size": 157142305,
   "platform": "macos",
   "architecture": "arm64"
 }
