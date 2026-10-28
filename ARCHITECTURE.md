@@ -1,6 +1,6 @@
 # โครงสร้างและแบบระบบ — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานซอร์ส/Release: **1.5.55**
+อัปเดต: 29 ตุลาคม 2026 · ฐานซอร์ส: **1.5.56** (สถานะเผยแพร่ดู TASK_PHASES.md)
 
 เอกสารนี้อธิบายระบบที่มีอยู่จริงและหลักการที่ต้องรักษา อ่านคู่กับ `TASK_PHASES.md` ก่อนเริ่มงาน หากโค้ดไม่ตรงเอกสาร ให้ตรวจหลักฐานและแก้เอกสารในงานเดียวกัน ไม่ใช้เอกสารเก่าเป็นข้อยืนยันว่าฟังก์ชันยังใช้ได้
 
@@ -152,3 +152,25 @@ receipt แยกตาม hash ของเจ้าของและชนิ
 ## 6. Definition of Done ของฟีเจอร์
 
 โค้ดและ UI ทำงานร่วมกัน → validation/ข้อผิดพลาดบอกทางไปต่อ → ทดสอบเส้นทางสำเร็จ ล้มเหลว ยกเลิก และกู้คืนตามความเสี่ยง → การเขียนงานจริงมีสำรองและ rollback → ตรวจผลใน CapCut เมื่อกระทบภาพ/เสียง → แพ็กและตรวจบนเครื่องเป้าหมายเมื่อกระทบการแจก → อัปเดตเอกสาร/หลักฐาน ห้ามเรียก “พร้อมทุกเครื่อง” จาก unit test หรือไฟล์ draft อย่างเดียว
+
+
+## การแก้ในซอร์สหลัง audit 1.5.55 — 29 ตุลาคม 2026 (ยังไม่แพ็ก)
+
+- Gemini quota fallback อ่านเฉพาะ config ที่กรอง current owner; ไม่มี uid ไม่ใช้ key pool สำรอง
+- CLI commit ลงทะเบียนสื่อใหม่/เปลี่ยนไฟล์ทุก contract รวม nested video/audio ผ่านการคัดลอกตรวจ hash และ media registry transaction; B-roll-only ยังคง add-only invariant เดิม
+- unified_history.commit_draft ใช้ mirror_updates ร่วม ตรวจไฟล์ก่อนเขียนและ rollback เดิม ครอบคลุม legacy restore/จัดแนวเสียง
+- resegment receipt แยก workspace/path; job_not_found ล้างได้ แต่ offline เก็บไว้
+- Stock Bridge มี timer ตรวจคิว 2 วินาทีขณะ worker ทำงานและมี pairing พร้อม alarm เดิมสำหรับ recovery; ไม่รับรองเวลาเมื่อ Chrome พัก worker และไม่ทำ download ซ้ำ
+- Export re-encode ตรวจ audio stream และรองรับ video-only
+- ศัพท์ proofread แยก owner hash ใต้ CONFIG_DIR/proofread_users และ cache แยก owner/project; ไฟล์ proofread_words.json เดิมไม่ถูกอ่านร่วม/ไม่ถูกลบหรือแจกโดยเดาเจ้าของ
+
+หลักฐาน `audits/readiness-fixes-1.5.55/report.md`: Python 438 + JavaScript 14 ผ่าน ยังไม่ native/live acceptance หลังแก้ จึงยังไม่ใช่ release ใหม่
+
+ตรวจซ้ำ P0.8 วันที่ 29 ต.ค.: การจำแนกสื่อเดิมใน CLI import เทียบ path ที่ resolve placeholder/relative กับ project root แล้วด้วย เพื่อไม่คัดลอกและเปลี่ยนทะเบียนต้นฉบับซ้ำโดยไม่จำเป็น; สื่อใหม่ยังผ่าน copy/hash/registry transaction เดิม หลักฐาน `audits/readiness-recheck-1.5.55/report.md` (441 Python, 14 JS; native playback ยังตรวจไม่ได้)
+
+
+## ประกาศและหน้าแอป — 1.5.56 / P0.10
+
+`announcements.py` ตรวจ schema/ขนาด/type whitelist และคงเนื้อหาเป็น plain text; server บันทึกประกาศแบบ atomic ปฏิเสธชนิดผิดก่อนเปลี่ยนไฟล์เดิม ทุก renderer escape attributes หรือใช้ text nodes แทน raw HTML
+
+หน้า login ใช้ `/api/public_announcements` ซึ่งคืนเฉพาะประกาศจาก version.json ที่มากับแอปเผยแพร่ ไม่อ่านประกาศ local/admin; `/api/announcements` และ API หลังบ้านยังต้องล็อกอินเหมือนเดิม หน้าแอดมินผูก event listeners ด้วยค่าอีเมล/UID จริงแทนต่อ JavaScript ใน onclick ส่วนหัวเก่าที่ซ่อนไว้ใช้ legacy IDs ไม่ชนส่วนหัวปัจจุบัน Stock Bridge รุ่น 0.1.7 ต้อง Reload ใน Chrome หลังอัปเดตแอปเพื่อใช้ worker ใหม่

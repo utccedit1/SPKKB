@@ -1,0 +1,31 @@
+{
+  "version": "1.5.56",
+  "codesign_verified": true,
+  "self_test": {
+    "version": "1.5.56",
+    "frozen": true,
+    "bundle": "/Users/macbookm5proarm/Desktop/Armm/Scripts | Python/ช่วยด้วยจ้า Capcut/v1.4/app/dist-1.5.56-final/ช่วยด้วยจ้า.app",
+    "editor": true,
+    "ffmpeg": true,
+    "ffmpeg_bundled": true,
+    "ffprobe_bundled": true,
+    "cli_version": "0.30.0",
+    "cli_ready": true,
+    "ffprobe": true,
+    "context_shared": true
+  },
+  "required_modules": [
+    "ks.announcements",
+    "ks.proofread",
+    "ks.unified_history",
+    "ks.broll_assets",
+    "ks.broll_auto",
+    "ks.broll_auto_ui",
+    "ks.cli_results",
+    "ks.job_store",
+    "ks.cli_lab_commit",
+    "ks.storage_manager",
+    "ks.cli_lab_ui"
+  ],
+  "credential_filename_hits": []
+}

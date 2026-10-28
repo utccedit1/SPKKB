@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.55 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 28 ตุลาคม 2026 · ฐานรุ่น 1.5.56 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -22,6 +22,8 @@
 | P0.3 | OPEN | จัดที่เก็บซอร์สจริงและขอบเขต private/public | root ยังไม่มี Git ซอร์ส; `release_repository` มีเพียง manifest ต้องตกลง repository ก่อน init/push; exclude credentials, runtime builds, outputs และสื่อ |
 | P0.4 | PARTIAL | รักษาเพียง 5 เวอร์ชันล่าสุด | cleanup วันที่ 28 ต.ค. มี receipt แล้ว; ยังต้องออกแบบ retention หลัง release ที่ตรวจสื่ออ้างอิง/รุ่นที่รันอยู่ ไม่ล้าง Trash เอง |
 | P0.5 | DONE (audit) | ตรวจความพร้อมภาพรวมซอร์ส 1.5.49 และรายงานข้อผิดพลาด | `audits/full-readiness-1.5.49/report.md`; 393 Python tests ผ่าน, JS 11/12 (อีกชุด test harness เสีย), ยืนยัน F01–F06; DONE เฉพาะการตรวจ ไม่ใช่งานแก้หรือ acceptance ทุกเครื่อง |
+
+| P0.7 | DONE (audit) | ตรวจความพร้อมหลัง 1.5.55 รวมฟังก์ชันอื่น | `audits/full-readiness-1.5.55/report.md`; 432 Python + 13 JS ผ่าน แต่พบ F01–F07 ด้วย probes เพิ่มเติม; ยังไม่แก้หรือรับรองใช้งานครบทุกเครื่อง |
 
 งานแก้จาก audit: **P0.6 PARTIAL (เผยแพร่ 1.5.50 แล้ว; ยังไม่ CapCut playback/export acceptance)** — แก้ F01–F06 ตาม `audits/readiness-fixes-1.5.49/report.md`; ไม่ใช่การอนุมัติ publish หรือติดตั้งทับแอปที่กำลังรัน
 
@@ -158,3 +160,13 @@
 | 2026-10-28 | P1.4 — 1.5.55 release | 432 tests + JS 13 ชุด, bundle/signature/ZIP/public download/hash ผ่าน main manifest 71553c3ed5ed0658c2b6fc4a64b78c689d90acd5; ซ่อมโปรเจกต์หลัง CapCut save ผ่าน tracks/media/registry checks และกลับหน้าหลักแล้ว | ยืนยันติดตั้ง/native window; ยังไม่ live Artlist batch หรือ export |
 
 | 2026-10-28 | P4.2 — 1.5.55 ติดตั้ง | updater receipt=installed, native window 1.5.55 และหน้า B-roll โปรเจกต์เดิมแสดง; `audits/release-1.5.55/installed-verification.json` | เครื่องอื่นอัปเดตได้; ยังไม่ Artlist batch/export บนเครื่องปลายทาง |
+
+| 2026-10-28 | P0.7 / P0.2 สำรวจบางส่วน | ตรวจซอร์ส/แอปติดตั้ง 1.5.55; 432 Python + 13 JS/self-test/signature ผ่าน; ยืนยัน 7 บั๊ก: shared Gemini fallback, generic media registry, legacy mirror restore, resegment missing-job, stock poll delay, silent export, shared proofread lexicon; รายงาน `audits/full-readiness-1.5.55/report.md` | แก้ F01–F03 ก่อน ตามด้วย F04–F07 และ regression/native acceptance; รอบนี้ไม่แก้ซอร์ส/ไม่ release/ไม่เขียนโปรเจกต์จริง; ยังไม่ live Artlist batch/AI/CapCut export/เครื่องปลายทาง |
+
+| 2026-10-29 | P0.8 — แก้ F01–F07 ซอร์ส / PARTIAL acceptance | แก้ owner-filtered Gemini fallback, generic media registry/copy, legacy mirror transaction, scoped resegment recovery, stock queue wake, silent-video export, owner lexicon/cache; Python 438 + JS 14 ผ่าน; `audits/readiness-fixes-1.5.55/report.md` | ยังไม่ native CapCut import/restore/playback/export หรือ live Artlist batch/AI หลังแก้; ยังไม่ bump/build/release/install ซอร์สและแอปแจกฐาน 1.5.55 |
+
+| 2026-10-29 | P0.8 — ตรวจซ้ำ / F08 แก้แล้ว | พบ generic import คัดลอกต้นฉบับซ้ำเมื่อ placeholder/absolute path ต่างกัน แก้ normalize comparison พร้อม regression; เพิ่ม copy-corruption retry/nested audio tests; Python 441 + JS 14 + editor syntax 3 ผ่าน; `audits/readiness-recheck-1.5.55/report.md`; เปิด/บันทึก CapCut fixture แยก สื่อ 3 ไฟล์ resolve+registry ครบ | UI tool จับ floating EditPilot จึงไม่ยืนยัน native preview/playback/audio/export; ยังไม่ live Artlist batch/เครื่องปลายทาง; ไม่ bump/build/publish/install |
+
+| 2026-10-29 | P0.9 — DONE audit / readiness ยังไม่ผ่าน | ตรวจทุกกลุ่มฟีเจอร์ตาม matrix; browser source UI 11 หน้า/55 navigation/80 captions, width 1280/720/480; login/picker/admin/announcements; 441 Python ใน 54 modules + JS 14 + installed self-test/signature ผ่าน; พบ F09 stored HTML/JS ผ่าน announcement type, F10 apostrophe email ทำ admin handlers syntax เสีย, F11 login announcements 401; `audits/all-features-ui-1.5.55/report.md` | ยังไม่แก้ F09–F11/ไม่เปลี่ยน source version/ไม่ release; live AI/Artlist batch/native playback-export/long soak/เครื่องอื่นยังไม่ครบ; source patches P0.8 ยังไม่อยู่ในแอปแจก |
+
+| 2026-10-29 | P0.10 — แก้/แพ็ก 1.5.56 | รวม P0.8 F01–F08 และแก้ F09–F11; announcement schema/atomic save/public bundled endpoint/plain text renderers; admin identity event listeners; unique header IDs; Stock Bridge 0.1.7; Python 447 + JS 15 และ source browser security check ผ่าน | ตรวจ bundle/package/public download/source push/install ก่อนสรุป release; ยังไม่ live AI/Artlist batch/CapCut playback-export ครบทุกเครื่อง |

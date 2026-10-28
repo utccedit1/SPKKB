@@ -1,0 +1,11 @@
+{
+  "version": "1.5.56",
+  "malicious_announcement_marker_executed": false,
+  "announcement_image_elements": 0,
+  "announcement_literal_text_visible": true,
+  "duplicate_ids": [],
+  "unhandled_errors": [],
+  "login_public_announcements_visible": true,
+  "private_admin_records_not_in_login": true,
+  "fixture_only": true
+}

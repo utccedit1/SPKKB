@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ช่วยด้วยจ้า · Stock Bridge",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "เชื่อมงานค้นและดาวน์โหลดสื่อจากบัญชีของคุณกับแอปช่วยด้วยจ้าในเครื่อง",
   "permissions": [
     "storage",

@@ -9,7 +9,7 @@ def additions(original, edited):
     return [m for m in edited.get('materials',{}).get('videos',[]) if m.get('id') not in ids]
 
 
-def register(metadata, materials):
+def register(metadata, materials, audio_ids=()):
     result=copy.deepcopy(metadata)
     groups=result.setdefault('draft_materials',[])
     if not isinstance(groups,list):raise ValueError('ทะเบียนสื่อ CapCut อ่านไม่ได้ ยังไม่นำเข้า')
@@ -27,7 +27,7 @@ def register(metadata, materials):
             continue
         group['value'].append(dict(ai_group_type='',create_time=-1,duration=material.get('duration',0),enter_from=0,
             extra_info=path.name,file_Path=str(path),height=material.get('height',0),width=material.get('width',0),
-            id=key,import_time=-1,import_time_ms=-1,item_source=1,material_color_tag='',md5='',metetype='video',
+            id=key,import_time=-1,import_time_ms=-1,item_source=1,material_color_tag='',md5='',metetype='audio' if id(material) in audio_ids else 'video',
             roughcut_time_range=dict(duration=-1,start=-1),sub_time_range=dict(duration=-1,start=-1),type=0))
     return result
 

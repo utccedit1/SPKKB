@@ -44,13 +44,18 @@ def commit_draft(proj,draft,expected_raw,label):
   E.progress(message='กำลังสำรองและบันทึกผล',commit_started=True)
   backup=T.checkpoint(proj,label);old=T.read_checkpoint(proj,backup.name)
   if src.read_bytes()!=expected_raw or old['draft_info.json']!=expected_raw or (parent is not None and main.read_bytes()!=parent):raise ValueError('ไฟล์เปลี่ยนระหว่างสำรอง ยังไม่ได้บันทึกผล')
-  data=json.dumps(draft,ensure_ascii=False).encode();updates={'draft_info.json':data,'draft_info_original.json':None,'.spinworld_state.json':None}
+  data=json.dumps(draft,ensure_ascii=False).encode();updates=T.mirror_updates(old,data)
+  updates.update({'draft_info_original.json':None,'.spinworld_state.json':None})
   if old['draft_info_backup.json'] is None:updates['draft_info_backup.json']=expected_raw
   if parent is not None:updates['__project_draft_info.json']=data
   for key in ('draft_meta_info.json','__project_draft_meta_info.json'):
    if old[key] is not None:
     meta=json.loads(old[key]);meta.update(tm_duration=draft.get('duration') or max((int(s.get('target_timerange',{}).get('start',0))+int(s.get('target_timerange',{}).get('duration',0)) for t in draft.get('tracks',[]) for s in t.get('segments',[])),default=0),tm_draft_modified=int(time.time()*1e6));updates[key]=json.dumps(meta,ensure_ascii=False).encode()
   T.ensure_closed()
+  for name in updates:
+   path=T.target_path(proj,name)
+   live=path.read_bytes() if path is not None and path.is_file() else None
+   if live!=old[name]:raise ValueError('ไฟล์เปลี่ยนก่อนบันทึก ยังไม่ได้เขียนผล')
   try:T.replace_files(proj,updates)
   except Exception:T.replace_files(proj,{k:old[k] for k in updates});raise
   return backup.name

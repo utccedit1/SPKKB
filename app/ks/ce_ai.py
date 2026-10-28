@@ -514,7 +514,8 @@ def _gemini_with_fallback(api_key, model, prompt, system, max_tokens=2048):
             _c = load_config(); _c["gemini_model"] = "gemini-flash-latest"; save_config(_c)
             return raw, "gemini-flash-latest"
         if e.code in (503, 429):
-            conf = _load_config_raw()
+            from ce_config import load_config, get_current_uid
+            conf = load_config() if get_current_uid() else {}
             current_key = (api_key or "").strip()
             keys = [it for it in (conf.get("gemini_keys") or [])
                     if it.get("key") and it["key"].strip() != current_key]

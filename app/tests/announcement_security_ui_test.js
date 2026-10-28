@@ -1,0 +1,23 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const source=fs.readFileSync('app/ks/pages.py','utf8');
+const editor=source.split('_EDITOR_JS = r"""')[1].split('"""')[0];
+const esc=editor.match(/function esc\(s\)\{[^\n]+\}/)[0];
+const adm=editor.slice(editor.indexOf('window.admLoad ='),editor.indexOf('function admSay'));
+const actions=[];const buttons=['active','edit','delete'].map(action=>({dataset:{userIndex:'0',userAction:action},addEventListener(type,fn){this.click=fn}}));
+const box={innerHTML:'',querySelectorAll:()=>buttons};const other={style:{},textContent:''};
+const email="o'connor\"&@example.invalid",uid="fixture'\"uid";
+const c=vm.createContext({window:{admToggleActive:(...x)=>actions.push(x),admEdit:(...x)=>actions.push(x),admDel:(...x)=>actions.push(x)},$q:id=>id==='admList'?box:other,tsFmt:()=>'-',fetch:async url=>({json:async()=>url.includes('machine_info')?{ok:true,machine_id:'fixture',hostname:'fixture'}:{ok:true,users:[{email,uid,is_active:true}]}})});
+vm.runInContext(esc+'\n'+adm,c);
+(async()=>{
+ await c.window.admLoad();assert(!box.innerHTML.includes('onclick='));assert(box.innerHTML.includes('&#39;'));assert(box.innerHTML.includes('&quot;'));
+ buttons.forEach(b=>b.click());assert.deepEqual(actions,[[email,false],[email,uid,uid],[email]]);
+ assert.equal(vm.runInContext('esc(`\"\'<> &`)',c),'&quot;&#39;&lt;&gt; &amp;');
+ const row=editor.slice(editor.indexOf('function annRowHtml'),editor.indexOf('let _annRows'));
+ vm.runInContext('function annTypeOpts(){return ""}\n'+row,c);
+ const html=vm.runInContext('annRowHtml({text:`</textarea><img src=x onerror=fixture>`,date:`\" onfocus=fixture x=\"`},0)',c);
+ assert(!html.includes('<img'));assert(html.includes('&lt;/textarea&gt;'));assert(html.includes('&quot; onfocus=fixture'));
+ const login=source.slice(source.indexOf('  async function loadAnn(){'),source.indexOf('  loadAnn();'));
+ assert(login.includes('/api/public_announcements'));assert(login.includes('textContent'));assert(!login.includes('innerHTML'));
+ assert(editor.includes("Object.hasOwn(TAG_ICON,a.type)?a.type:'info'"));
+ console.log('Announcements: quoted admin identity reaches callbacks intact; markup is escaped; public login renderer uses text nodes');
+})().catch(e=>{console.error(e);process.exit(1)});

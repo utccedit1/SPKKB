@@ -1,4 +1,5 @@
-let polling=false;
+let polling=false,pollTimer=null;
+function wakeQueue(){if(pollTimer!==null)clearTimeout(pollTimer);pollTimer=setTimeout(()=>{pollTimer=null;poll();},2000);}
 async function config(){return (await chrome.storage.local.get('connection')).connection;}
 async function post(data){const c=await config();if(!c)throw Error('not paired');const r=await fetch(c.base+'/api/stock_bridge',{method:'POST',headers:{'Content-Type':'application/json','X-Stock-Extension-Origin':chrome.runtime.getURL('').replace(/\/$/,''),'Authorization':'Bearer '+c.token},body:JSON.stringify(data),signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('bridge_http_'+r.status);return r.json();}
 async function pageTask(tabId,task){await chrome.scripting.executeScript({target:{tabId},files:['content.js']});const results=await chrome.scripting.executeScript({target:{tabId},func:async data=>stockPageTask(data),args:[task]});return results[0]?.result||{error:'download_failed'};}
@@ -95,7 +96,7 @@ async function poll(){
   }
   stage='bridge';const result=await post({action:'poll',account_state:account,account_reason:reason});if(result.job&&tab)await run(result.job,tab.id);
   return {message:account==='connected'?'ตรวจพบบัญชีแล้ว':reason==='captcha'?'Artlist ขอให้ยืนยัน CAPTCHA บนเว็บ':reason==='needs_login'?'พบปุ่มเข้าสู่ระบบบนเว็บ':reason==='account_not_found'?'ยังไม่พบเมนูบัญชีในหน้าเว็บนี้ ลองเปิดหน้า Artlist หลักแล้วตรวจอีกครั้ง'+(signals?' (ลิงก์ '+signals.links+', ปุ่ม/ลิงก์ '+signals.controls+', Downloads '+Number(signals.downloads)+', Favorites '+Number(signals.favorites)+')':''):'กำลังรอหน้า Artlist พร้อมใช้งาน'};
- }catch(e){const reason=/^bridge_http_\d{3}$/.test(e.message)?e.message:(e.name==='TypeError'?'network':e.message?.includes('stockPageTask')?'page_script':'browser_page');return {message:'เชื่อมแอปไม่ได้ ('+stage+':'+reason+') เปิดช่วยด้วยจ้าและตรวจรหัสเชื่อมอีกครั้ง'};}finally{polling=false;}
+ }catch(e){const reason=/^bridge_http_\d{3}$/.test(e.message)?e.message:(e.name==='TypeError'?'network':e.message?.includes('stockPageTask')?'page_script':'browser_page');return {message:'เชื่อมแอปไม่ได้ ('+stage+':'+reason+') เปิดช่วยด้วยจ้าและตรวจรหัสเชื่อมอีกครั้ง'};}finally{polling=false;if(await config().catch(()=>null))wakeQueue();}
 }
 chrome.downloads.onDeterminingFilename.addListener((item,suggest)=>{
  chrome.storage.local.get('activeJob').then(({activeJob:j})=>{if(j&&j.downloadRequested===true&&Date.now()-j.created<480000&&new URL(item.url).protocol==='https:'&&/^https:\/\/artlist\.io\//.test(item.referrer||'')){
@@ -108,7 +109,7 @@ chrome.downloads.onChanged.addListener(async delta=>{
  try{if(delta.state.current==='interrupted')return await fail(j,'download_failed');
   await phase(j,'verify');
   const [item]=await chrome.downloads.search({id:delta.id});await post({action:'result',job_id:j.id,filename:item.filename,url:j.url,title:j.title});await chrome.storage.local.remove('activeJob');
- }catch(e){await fail(j,'download_failed').catch(()=>{});}
+ }catch(e){await fail(j,'download_failed').catch(()=>{});}finally{wakeQueue();}
 });
 chrome.runtime.onMessage.addListener((message,sender,reply)=>{if(message.action==='poll'){poll().then(reply);return true;}});
 async function ensureAlarm(){if(!await chrome.alarms.get('stock-poll'))await chrome.alarms.create('stock-poll',{periodInMinutes:.5});}

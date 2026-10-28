@@ -41,7 +41,7 @@ const fs=require('node:fs');const vm=require('node:vm');const path=require('node
  let response='forbidden';
  const event={addListener:()=>{}};
  const chrome={storage:{local:{get:async keys=>typeof keys==='string'?{[keys]:store[keys]}:Object.fromEntries(keys.map(k=>[k,store[k]])),remove:async key=>{delete store[key];},set:async values=>Object.assign(store,values)}},runtime:{getURL:()=> 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/',onMessage:event},downloads:{onDeterminingFilename:event,onChanged:event},alarms:{get:async()=>null,create:()=>{},onAlarm:event},tabs:{onUpdated:event}};
- const context=vm.createContext({chrome,URL,AbortSignal,Date,setTimeout,fetch:async()=>({ok:response!=='forbidden',status:403,json:async()=>({state:'missing'})})});
+ const context=vm.createContext({chrome,URL,AbortSignal,Date,setTimeout:()=>1,clearTimeout:()=>{},fetch:async()=>({ok:response!=='forbidden',status:403,json:async()=>({state:'missing'})})});
  vm.runInContext(worker,context);
  await vm.runInContext("fail({id:'old'},'download_failed').catch(()=>{})",context);
  assert.equal(store.activeJob,undefined);

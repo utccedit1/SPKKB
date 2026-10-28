@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
 const event={addListener(){}};
 let store={},ticks=0,cleared=0,heartbeats=0,phases=[];
 const chrome={storage:{local:{get:async key=>typeof key==='string'?{[key]:store[key]}:store,set:async v=>Object.assign(store,v),remove:async k=>delete store[k]}},runtime:{onMessage:event},downloads:{onDeterminingFilename:event,onChanged:event},alarms:{get:async()=>true,onAlarm:event},tabs:{onUpdated:event,get:async()=>({})}};
-const c=vm.createContext({chrome,URL,AbortSignal,setTimeout,clearTimeout,setInterval:fn=>{c.tick=fn;ticks++;return 1},clearInterval:()=>cleared++});
+const c=vm.createContext({chrome,URL,AbortSignal,setTimeout:()=>1,clearTimeout:()=>{},setInterval:fn=>{c.tick=fn;ticks++;return 1},clearInterval:()=>cleared++});
 vm.runInContext(fs.readFileSync('app/stock_extension/worker.js','utf8'),c);
 vm.runInContext("post=async data=>{if(data.action==='heartbeat')heartbeatCount++;return {state:'running'}};var heartbeatCount=0;phase=async()=>{};chooseStock=async()=>{await tick();return {error:'no_match'}};fail=async()=>{}",c);
 (async()=>{

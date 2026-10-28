@@ -3,12 +3,18 @@ import copy,difflib,hashlib,json,os,threading,re
 from collections import OrderedDict
 from pathlib import Path
 from . import event_clip as E,event_timeline as T
-from ce_config import CONFIG_DIR
+from ce_config import CONFIG_DIR, get_current_uid, STATE
 
 _CACHE=OrderedDict();_LOCK=threading.Lock()
 
+def _owner():
+ return str(get_current_uid() or STATE.get("_session_owner") or "guest")
+
+def _lexicon_path():
+ return Path(CONFIG_DIR)/"proofread_users"/(hashlib.sha256(_owner().encode()).hexdigest()+".json")
+
 def lexicon():
- try:return json.loads((Path(CONFIG_DIR)/'proofread_words.json').read_text())
+ try:return json.loads(_lexicon_path().read_text())
  except (OSError,ValueError):return []
 
 def remember(word):
@@ -17,8 +23,8 @@ def remember(word):
  with _LOCK:
   words=sorted(set(lexicon()+[word]))
   if len(words)>500:raise ValueError('บันทึกศัพท์ได้สูงสุด 500 คำ')
-  root=Path(CONFIG_DIR);root.mkdir(exist_ok=True,parents=True)
-  T.atomic_write(root/'proofread_words.json',json.dumps(words,ensure_ascii=False).encode())
+  root=_lexicon_path().parent;root.mkdir(exist_ok=True,parents=True)
+  T.atomic_write(_lexicon_path(),json.dumps(words,ensure_ascii=False).encode())
  return {'ok':True,'words':words}
 
 def read(proj):
@@ -83,7 +89,7 @@ def scan(proj,cfg):
  mode=cfg.get('mode','spelling')
  if mode not in ('spelling','full'):raise ValueError('เลือกวิธีตรวจคำให้ถูกต้อง')
  words=src['words'];rows=src['rows'];found=[];pending=[]
- keys={r['index']:(r['text'],tuple(words),mode,'orthography-v2') for r in rows}
+ keys={r['index']:(_owner(),os.path.realpath(proj),r['text'],tuple(words),mode,'orthography-v3') for r in rows}
  with _LOCK:
   for row in rows:
    cached=_CACHE.get(keys[row['index']])

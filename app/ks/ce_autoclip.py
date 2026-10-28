@@ -381,16 +381,21 @@ def ac_render_segments(video, segs, out_path, reencode=True):
     if not segs: raise ValueError("ไม่มีช่วงให้เรนเดอร์")
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     if reencode:
+        probe=ac_ffprobe_bin()
+        if not probe:raise RuntimeError("ไม่พบ ffprobe สำหรับตรวจเสียงก่อนส่งออก")
+        rc, audio, err=ac_run([probe,"-v","error","-select_streams","a:0","-show_entries","stream=index","-of","csv=p=0",video])
+        if rc:raise RuntimeError("ตรวจสื่อก่อนส่งออกไม่สำเร็จ")
+        has_audio=bool(audio.strip())
         parts_v, parts_a, filt, n = [], [], [], len(segs)
         for i, (s, e) in enumerate(segs):
             filt.append(f"[0:v]trim=start={s}:end={e},setpts=PTS-STARTPTS[v{i}]")
-            filt.append(f"[0:a]atrim=start={s}:end={e},asetpts=PTS-STARTPTS[a{i}]")
+            if has_audio:filt.append(f"[0:a]atrim=start={s}:end={e},asetpts=PTS-STARTPTS[a{i}]")
             parts_v.append(f"[v{i}]"); parts_a.append(f"[a{i}]")
-        filt.append("".join(v + a for v, a in zip(parts_v, parts_a)) +
-                    f"concat=n={n}:v=1:a=1[outv][outa]")
+        filt.append("".join(v + (a if has_audio else "") for v, a in zip(parts_v, parts_a)) +
+                    f"concat=n={n}:v=1:a={int(has_audio)}[outv]"+("[outa]" if has_audio else ""))
         cmd = [ac_ffmpeg_bin(), "-hide_banner", "-y", "-i", video,
                "-filter_complex", ";".join(filt),
-               "-map", "[outv]", "-map", "[outa]",
+               "-map", "[outv]", *(["-map", "[outa]"] if has_audio else []),
                "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
                "-c:a", "aac", "-b:a", "160k", out_path]
         rc, out, err = ac_run(cmd)

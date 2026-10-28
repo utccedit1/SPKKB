@@ -882,7 +882,10 @@ async function loadAnnouncements(){
     }
     j.announcements.forEach(a=>{
       const row=document.createElement('div'); row.className='snaprow';
-      row.innerHTML=`<span><b>${a.title||'(ไม่มีหัวข้อ)'}</b><br><span style="color:var(--sub);font-size:12px">${(a.body||'').slice(0,80)}${(a.body||'').length>80?'…':''}</span></span>`;
+      const label=document.createElement('span'),title=document.createElement('b'),body=document.createElement('span');
+      title.textContent=a.title||'(ไม่มีหัวข้อ)';body.style.cssText='color:var(--sub);font-size:12px';
+      body.textContent=(a.body||'').slice(0,80)+((a.body||'').length>80?'…':'');
+      label.append(title,document.createElement('br'),body);row.append(label);
       const btnEdit=document.createElement('button'); btnEdit.className='ghost'; btnEdit.textContent='✏️ แก้ไข';
       btnEdit.onclick=()=>{
         _annEditId=a.id; $('ann_form_title').textContent='✏️ แก้ไขประกาศ';
@@ -900,7 +903,7 @@ async function loadAnnouncements(){
       btnWrap.appendChild(btnEdit); btnWrap.appendChild(btnDel);
       row.appendChild(btnWrap); box.appendChild(row);
     });
-  }catch(e){ $('ann_list').innerHTML='<div class="snaprow"><span style="color:#dc2626">โหลดไม่ได้: '+e.message+'</span></div>'; }
+  }catch(e){ $('ann_list').textContent='โหลดไม่ได้: '+e.message; }
 }
 async function saveAnnouncement(){
   const payload={title:$('ann_title').value.trim(), body:$('ann_body').value.trim(), type:$('ann_type').value};
@@ -1925,6 +1928,7 @@ function showLoanwordReport(result){
  for(const text of ['เวลา '+time+' · ซับต้นฉบับ '+row.index,'ข้อความเดิม: '+row.original,'AI อ้างคำ: '+(row.source??'ไม่ได้ระบุ')+' → '+(row.english??'ไม่ได้ระบุ'),'เหตุผล: '+row.reason+(row.occurrence!=null?' · AI ระบุครั้งที่ '+row.occurrence+' แต่พบจริง '+row.matches+' ครั้ง':'')]){const p=document.createElement('p');p.textContent=text;card.append(p)}panel.append(card)}
  $('resegResult').after(panel);
 }
+const resegStorageKey='resegJob:'+new URLSearchParams(location.search).get('workspace')+':'+location.pathname;
 let resegJob=null,resegBusy=false;
 function resegControls(on){document.querySelectorAll('button[onclick="aiReseg()"],button[onclick="captionStyleOnly()"],#reseg_words,#resegPersona,#resegEnglish').forEach(el=>el.disabled=on);const cancel=$('studioResegCancel');if(cancel)cancel.disabled=!on||!resegJob}
 async function watchReseg(){
@@ -1933,18 +1937,18 @@ async function watchReseg(){
  try{
   while(resegJob){
    const r=await fetch('/api/event_clip/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:resegJob})});
-   const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'เชื่อมต่อสถานะไม่สำเร็จ');
+   const j=await r.json();if(!r.ok||!j.ok){if(j.code==='job_not_found'){resegJob=null;sessionStorage.removeItem(resegStorageKey)}throw Error(j.error||'เชื่อมต่อสถานะไม่สำเร็จ');}
    if($('studioResegCancel'))$('studioResegCancel').disabled=!!j.commit_started||!['queued','running'].includes(j.state);
    window.studioJobUpdate?.(j);box.textContent='กำลังจัดซับ… ดูรายละเอียดที่สถานะ AI ในแถบข้าง';
    if(j.state==='done'){
-    const result=j.result;resegJob=null;sessionStorage.removeItem('resegJob');
+    const result=j.result;resegJob=null;sessionStorage.removeItem(resegStorageKey);
     await loadCaps();
     try{localStorage.setItem('ksLoanwordReport:'+result.source_project,JSON.stringify({loanword_report:result.loanword_report||[]}))}catch(e){}
     showLoanwordReport(result);
     box.textContent='✅ '+result.msg+(result.backup_name?' | มี backup ก่อนจัดซับ กู้คืนได้ในประวัติ / กู้คืน':'')+' | '+(result.timing_note||'');break;
    }
    if(j.state==='failed'||j.state==='cancelled'){
-    resegJob=null;sessionStorage.removeItem('resegJob');throw Error(j.error||j.message);
+    resegJob=null;sessionStorage.removeItem(resegStorageKey);throw Error(j.error||j.message);
    }
    await new Promise(r=>setTimeout(r,2000));
   }
@@ -1959,7 +1963,7 @@ async function captionStyleOnly(){
   $('captionHomeConfirmed').checked=false;
   const r=await fetch('/api/event_clip/resegment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({style_only:true,capcut_home_confirmed:homeConfirmed,state_hash:STATE_HASH,only:only.length?only:null,font:$('font').value,normal_size:parseFloat($('ns').value),highlight_size:parseFloat($('hs').value)})});
   const j=await r.json();if(!j.ok)throw Error(j.error||'เริ่มงานไม่ได้');
-  resegJob=j.job_id;sessionStorage.setItem('resegJob',resegJob);await watchReseg();
+  resegJob=j.job_id;sessionStorage.setItem(resegStorageKey,resegJob);await watchReseg();
  }catch(e){msg('❌ '+e.message,false);}
 }
 async function aiReseg(){
@@ -1971,10 +1975,10 @@ async function aiReseg(){
    body:JSON.stringify({only:only.length?only:null,state_hash:STATE_HASH,
     english_loanwords:!!$('resegEnglish')?.checked,persona:($('resegPersona')?.value||''),max_words:parseInt($('reseg_words').value)})});
   const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'เริ่มงานไม่ได้');
-  resegJob=j.job_id;sessionStorage.setItem('resegJob',resegJob);await watchReseg();
+  resegJob=j.job_id;sessionStorage.setItem(resegStorageKey,resegJob);await watchReseg();
  }catch(e){$('resegResult').textContent='❌ '+e.message;resegControls(false);}
 }
-window.addEventListener('DOMContentLoaded',()=>{const id=sessionStorage.getItem('resegJob');if(id){resegJob=id;watchReseg()}});
+window.addEventListener('DOMContentLoaded',()=>{const id=sessionStorage.getItem(resegStorageKey);if(id){resegJob=id;watchReseg()}});
 function _readFileB64(file){
   return new Promise((res,rej)=>{
     const rd=new FileReader();

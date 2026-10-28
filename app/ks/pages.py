@@ -177,7 +177,7 @@ async function login(){
 
   async function loadAnn(){
     try{
-      const r = await fetch('/api/announcements', {cache:'no-store'});
+      const r = await fetch('/api/public_announcements', {cache:'no-store'});
       if(!r.ok) return;
       const d = await r.json();
       const items = d.announcements || [];
@@ -188,15 +188,16 @@ async function login(){
       const list  = document.getElementById('annList');
       if(!board||!list) return;
 
-      list.innerHTML = items.map(a=>{
-        const type  = a.type||'info';
-        const label = TAG_LABEL[type]||'ℹ️';
-        const date  = a.date ? '<span class="ann-date">'+a.date+'</span>' : '';
-        return '<div class="ann-item">'
-          +'<span class="ann-tag '+type+'">'+label+'</span>'
-          +'<span style="flex:1">'+a.text+'</span>'
-          +date+'</div>';
-      }).join('');
+      list.replaceChildren();
+      for(const a of items){
+        const type=Object.hasOwn(TAG_LABEL,a.type)?a.type:'info';
+        const row=document.createElement('div');row.className='ann-item';
+        const tag=document.createElement('span');tag.className='ann-tag '+type;tag.textContent=TAG_LABEL[type];
+        const text=document.createElement('span');text.style.flex='1';text.textContent=a.text||[a.title,a.body].filter(Boolean).join('\n');
+        row.append(tag,text);
+        if(a.date){const date=document.createElement('span');date.className='ann-date';date.textContent=a.date;row.append(date)}
+        list.append(row);
+      }
 
       board.style.display='block';
     }catch(e){}
@@ -622,6 +623,8 @@ def build_editor_page(base):
         ".ks-apply-bar .ks-ab-hint{font-size:12px;color:var(--sub);flex:1}"
         "</style>"
     )
+    for control in ('ksQuota','ksNet','ksThemeBtn'):
+        html=html.replace('id="'+control+'"','id="legacy_'+control+'"')
     SIDEBAR_HTML = (
         '<div class="ks-shell">'
         '<div class="ks-sidebar">'
@@ -942,7 +945,7 @@ _EDITOR_JS = r"""
 <script>
 (function(){
 function $q(id){return document.getElementById(id);}
-function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 /* ---------- Dark / Light Mode ---------- */
 (function initEditorTheme(){
@@ -1402,12 +1405,18 @@ window.admLoad = async function(){
          '<td>'+(u.is_admin?'👑 แอดมิน':'👤 ผู้ใช้')+'</td>'+
          '<td>'+tsFmt(u.last_login)+'</td>'+
          '<td style="white-space:nowrap">'+
-         '<button class="ghost" style="padding:4px 8px;font-size:11px" onclick="admToggleActive(\''+esc(u.email)+'\','+(u.is_active?'false':'true')+')">'+( u.is_active?'🚫 ระงับ':'✅ เปิด')+'</button> '+
-         '<button class="ghost" style="padding:4px 8px;font-size:11px" onclick="admEdit(\''+esc(u.email)+'\',\''+esc(u.uid||'')+'\',\''+esc(u.firebase_uid||u.uid||'')+'\')"  >✏️ แก้ไข</button> '+
-         '<button class="danger" style="padding:4px 8px;font-size:11px" onclick="admDel(\''+esc(u.email)+'\')">🗑️ ลบ</button>'+
+         '<button class="ghost" data-user-index="'+users.indexOf(u)+'" data-user-action="active">'+(u.is_active?'🚫 ระงับ':'✅ เปิด')+'</button> '+
+         '<button class="ghost" data-user-index="'+users.indexOf(u)+'" data-user-action="edit">✏️ แก้ไข</button> '+
+         '<button class="danger" data-user-index="'+users.indexOf(u)+'" data-user-action="delete">🗑️ ลบ</button>'+
          '</td></tr>';
     });
     h+='</table>';box.innerHTML='<div class="usertbl-wrap">'+h+'</div>';
+    box.querySelectorAll('[data-user-action]').forEach(button=>button.addEventListener('click',()=>{
+      const user=users[Number(button.dataset.userIndex)];if(!user)return;
+      if(button.dataset.userAction==='active')window.admToggleActive(user.email,!user.is_active);
+      else if(button.dataset.userAction==='edit')window.admEdit(user.email,user.uid||'',user.firebase_uid||user.uid||'');
+      else window.admDel(user.email);
+    }));
   }catch(e){box.innerHTML='<div class="kmini" style="color:#dc2626">❌ เชื่อมต่อ Firebase ไม่ได้</div>';}
 }
 function admSay(t,ok){const m=$q('admMsg');m.textContent=t;m.style.color=ok?'#4ade80':'#ff6b6b';}
@@ -1484,7 +1493,7 @@ async function ksAnnPanelLoad(){
       return;
     }
     listEl.innerHTML = items.slice().reverse().map(function(a){
-      const type = a.type||'info';
+      const type = Object.hasOwn(TAG_ICON,a.type)?a.type:'info';
       const icon = TAG_ICON[type]||'ℹ️';
       const label = TAG_LABEL_ED[type]||'ทั่วไป';
       const ts = a.ts ? new Date(a.ts*1000).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}) : (a.date||'');
@@ -1528,10 +1537,10 @@ function annRowHtml(a, i){
     <select id="annType${i}" style="flex:0 0 130px;padding:6px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--inp);color:var(--txt);font-size:12px">
       ${annTypeOpts(a.type||'info')}
     </select>
-    <input id="annText${i}" type="text" value="${(a.text||'').replace(/"/g,'&quot;')}"
+    <textarea id="annText${i}" rows="2"
       placeholder="ข้อความประกาศ..."
-      style="flex:1;min-width:200px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--inp);color:var(--txt);font-size:12px">
-    <input id="annDate${i}" type="text" value="${a.date||''}"
+      style="flex:1;min-width:200px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--inp);color:var(--txt);font-size:12px">${esc(a.text||[a.title,a.body].filter(Boolean).join('\n'))}</textarea>
+    <input id="annDate${i}" type="text" value="${esc(a.date||'')}"
       placeholder="เช่น 15 ม.ค. 68"
       style="flex:0 0 110px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--inp);color:var(--txt);font-size:12px">
     <button onclick="annDelRow(${i})"
@@ -1577,11 +1586,12 @@ window.annDelRow = function(i){
 
 window.annSave = async function(){
   // อ่านค่าจาก DOM ก่อน save
-  const items = _annRows.map((_,i)=>({
-    type: document.getElementById('annType'+i)?.value || 'info',
-    text: document.getElementById('annText'+i)?.value || '',
-    date: document.getElementById('annDate'+i)?.value || '',
-  })).filter(a=>a.text.trim());
+  const items = _annRows.map((a,i)=>{
+    const text=document.getElementById('annText'+i).value;
+    const item={...a,type:document.getElementById('annType'+i).value,text,date:document.getElementById('annDate'+i).value};
+    if(text!==(a.text||[a.title,a.body].filter(Boolean).join('\n'))){delete item.title;delete item.body}
+    return item;
+  }).filter(a=>a.text.trim());
 
   const newVer  = (document.getElementById('annNewVersion')?.value||'').trim();
   const relNotes = (document.getElementById('annReleaseNotes')?.value||'').trim();

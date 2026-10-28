@@ -174,6 +174,28 @@ def commit(owner, project, token):
         if ticket.get('contract')=='broll_repair':
             from .broll_assets import repair_materials
             broll_materials=repair_materials(edited)
+        # Register every new/replaced local asset, including nested timelines.
+        from .cli_lab_story import resolve_media_paths
+        original_media=set()
+        for node in drafts(current):
+            for kind in ('videos','audios'):
+                for material in node.get('materials',{}).get(kind,[]):
+                    original_media.add((kind,material.get('id'),material.get('path')))
+                    # A saved placeholder and its absolute path identify the same
+                    # original asset. Do not copy a long source clip just to relink it.
+                    try:
+                        resolved=resolve_media_paths({'materials':{kind:[material]}},target)
+                        value=resolved['materials'][kind][0].get('path')
+                        if value:original_media.add((kind,material.get('id'),str(Path(value).resolve())))
+                    except ValueError:
+                        # A removed/replaced missing original need not block import.
+                        pass
+        for node in drafts(edited):
+            for kind in ('videos','audios'):
+                for material in node.get('materials',{}).get(kind,[]):
+                    path=Path(material.get('path','')).resolve()
+                    if path.is_file() and ((kind,material.get('id'),str(path)) not in original_media or path.is_relative_to(result)):
+                        if not any(material is m for m in broll_materials):broll_materials.append(material)
         try:
             for kind in ('videos','audios'):
                 for material in (m for node in drafts(edited) for m in node.get('materials',{}).get(kind,[])):
@@ -198,7 +220,7 @@ def commit(owner, project, token):
                 meta.update(tm_duration=edited['duration'],tm_draft_modified=int(time.time()*1e6))
                 if broll_materials:
                     from .broll_assets import register
-                    meta=register(meta,broll_materials)
+                    meta=register(meta,broll_materials,audio_ids={id(m) for node in drafts(edited) for m in node.get('materials',{}).get('audios',[])})
                 metadata_updates[name]=json.dumps(meta,ensure_ascii=False).encode('utf-8')
             if ticket.get('contract') == 'broll_only':validate_additions(current,edited)
             if ticket.get('contract')=='broll_repair':validate_repair(current,edited)

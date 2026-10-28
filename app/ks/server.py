@@ -16,6 +16,7 @@ from http.cookies import SimpleCookie
 from . import core_engine as CE
 from . import auth, chatbot, broll, ai_router, pages, event_clip, event_jobs, event_timeline
 from .updater import update_manager, CURRENT_VERSION
+from .announcements import normalize as normalize_announcements, public_records
 
 # ─── ANNOUNCEMENT STORAGE ────────────────────────────────────────────────────
 import json as _json, os as _os
@@ -27,14 +28,13 @@ def _ann_load() -> list:
     try:
         with open(_ANN_FILE, encoding="utf-8") as f:
             data = _json.load(f)
-        return data if isinstance(data, list) else []
+        return normalize_announcements(data)
     except Exception:
         return []
 
 def _ann_save(items: list):
-    _os.makedirs(_os.path.dirname(_ANN_FILE), exist_ok=True)
-    with open(_ANN_FILE, "w", encoding="utf-8") as f:
-        _json.dump(items, f, ensure_ascii=False, indent=2)
+    from .ce_config import _atomic_json
+    _atomic_json(_ANN_FILE,normalize_announcements(items,strict=True))
 
 def _gh_token_load() -> str:
     try:
@@ -273,6 +273,9 @@ class Handler(BaseHTTPRequestHandler):
         # Readiness must not wait on a third-party desktop-login refresh.
         if path == "/api/ping":
             self._send({"ok":True});return
+
+        if path == '/api/public_announcements':
+            self._send({'announcements':public_records()});return
 
         # ── โหมดแอป: กู้เซสชันที่จำไว้ในเครื่อง ก่อนตัดสินใจให้ต้อง login ──
         # ถ้ายังไม่มี cookie ที่ valid แต่อยู่ใน KS_APP_MODE ให้ลอง restore
@@ -726,6 +729,9 @@ class Handler(BaseHTTPRequestHandler):
                         items.append(new_record)   # ไม่เจอ id → append
                 else:
                     items.append(new_record)
+            try:items=normalize_announcements(items,strict=True)
+            except ValueError as exc:
+                self._send({'ok':False,'error':str(exc)},code=400);return
             _ann_save(items)
             token = _gh_token_load()
             if token:
