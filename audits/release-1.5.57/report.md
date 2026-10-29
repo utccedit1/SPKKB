@@ -7,3 +7,5 @@
 Python 455 tests + JavaScript 15 suites ผ่าน; bundled self-test, code signature, required modules, ZIP CRC และ credential filename exclusion ผ่าน ดาวน์โหลดสาธารณะครบ 157153679 bytes SHA256 a5803a6a09d90dafc29f6ba5546c338b7c8f6467a51df198eb096a9dba924f4c
 
 ผู้ใช้ยืนยันว่างานเกิดบนเครื่องอื่น ไม่ได้เข้าถึง receipt/โปรเจกต์นั้น จึงยังไม่ยืนยันสาเหตุเฉพาะงานจาก log ท้ายชุด การทดสอบ stock/AI ใช้ค่าจำลอง ไม่ได้ยืนยัน live Artlist batch หรือ CapCut playback/export รอบนี้ ไม่แก้โปรเจกต์จริง ไม่ข้าม retention guard ที่เคยปฏิเสธเพราะอ่าน metadata สื่ออ้างอิงไม่ได้
+
+ติดตั้งผ่าน updater สำเร็จ receipt=installed, Info.plist 1.5.57, installed signature/self-test ผ่าน ไม่ยืนยัน native window หรือ playback รอบนี้ ซอร์สอัปโหลด branch source/readiness-fixes-2026-10-28 commit c55a1133faa568da5920b59d2b654cfbf5df3b21
