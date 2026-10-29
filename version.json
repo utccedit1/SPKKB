@@ -1,7 +1,7 @@
 {
-  "version": "1.5.56",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.56/SPKKB.app.zip",
-  "release_notes": "รวมการแก้ความเสถียรและความปลอดภัย: ปิดช่องแทรกโค้ดผ่านประกาศ แก้ปุ่มจัดการบัญชีและประกาศก่อนล็อกอิน แยกคีย์ AI/ศัพท์ตามผู้ใช้ ลงทะเบียนสื่อใหม่และ timeline mirrors ให้ครบ ลดการคัดลอกต้นฉบับซ้ำ แก้งานซับค้าง และส่งออกวิดีโอไม่มีเสียง รองรับ Stock Bridge 0.1.7 (หลังอัปเดตให้กด Reload ส่วนขยายใน Chrome)",
+  "version": "1.5.57",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.57/SPKKB.app.zip",
+  "release_notes": "แก้ B-roll พร้อม 0 ภาพ: ไม่นับแทร็กภาพที่ปิดไว้เป็นภาพทับช่วง คงการป้องกันภาพเดิมที่เปิดอยู่ ตรวจช่วงที่ถูกปิดทับทั้งหมดก่อนเรียก AI/Artlist เพิ่ม log และตัวนับเหตุผลทุกช่วงที่ข้าม แยกยังไม่เริ่มค้นออกจากค้นแล้วไม่พบ เก็บสรุปงานล้มเหลว และไม่แสดงข้อความหยุดซ้ำ",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "f61434cc006ed6cb3c5b7c96b6afeb8e0d4cf15d8f918c7f1e425e209991663f",
-  "size": 157151184,
+  "sha256": "a5803a6a09d90dafc29f6ba5546c338b7c8f6467a51df198eb096a9dba924f4c",
+  "size": 157153679,
   "platform": "macos",
   "architecture": "arm64"
 }
