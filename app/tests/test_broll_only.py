@@ -226,3 +226,59 @@ class BrollOnlyTests(unittest.TestCase):
         for track in d['tracks']:
             if track.get('name')==B.NAME:track['segments'][0]['volume']=1
         with self.assertRaises(ValueError):A.repair_materials(d)
+
+    def test_hidden_overlay_does_not_block_and_is_preserved(self):
+        overlay=copy.deepcopy(self.draft['tracks'][0]);overlay.update(id='hidden-overlay',attribute=1,name='Existing hidden image')
+        d=copy.deepcopy(self.draft);d['tracks'].append(overlay);raw=json.dumps(d).encode();(self.proj/'draft_info.json').write_bytes(raw)
+        result=self.build();self.assertEqual(result['inserted'],1)
+        edited=json.loads((Path(result['destination'])/'draft_info.json').read_bytes())
+        B.validate_additions(d,edited);self.assertEqual(edited['tracks'][:len(d['tracks'])],d['tracks'])
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),raw)
+
+    def test_full_visible_overlay_stops_before_ai_or_stock_with_reason(self):
+        overlay=copy.deepcopy(self.draft['tracks'][0]);overlay.update(id='full-overlay');overlay['segments'][0]['id']='other-shot'
+        d=copy.deepcopy(self.draft);d['tracks'].append(overlay);raw=json.dumps(d).encode();(self.proj/'draft_info.json').write_bytes(raw)
+        with patch.object(B.broll,'api_broll') as ai,patch.object(B.A,'wait_download') as fetch,self.assertRaises(B.PreparationError) as caught:self.build()
+        ai.assert_not_called();fetch.assert_not_called();self.assertIn('ยังไม่เริ่มค้น Artlist',str(caught.exception))
+        self.assertEqual(caught.exception.summary['attempted'],0);self.assertIn('existing_visuals_cover_timeline',caught.exception.summary['skip_reasons'])
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),raw)
+
+    def test_blocked_candidate_logs_real_reason_and_skip_count(self):
+        overlay=copy.deepcopy(self.draft['tracks'][0]);overlay.update(id='overlay');overlay['segments'][0].update(id='other-shot',target_timerange={'start':1000000,'duration':2000000})
+        d=copy.deepcopy(self.draft);d['tracks'].append(overlay);(self.proj/'draft_info.json').write_text(json.dumps(d));messages=[]
+        with patch.object(B.A,'wait_download') as fetch,self.assertRaises(B.PreparationError) as caught:
+            B.build('alice',self.proj,{},messages.append)
+        fetch.assert_not_called();self.assertEqual(caught.exception.summary['skipped'],1)
+        self.assertEqual(caught.exception.summary['skip_reasons'],{'occupied':1})
+        self.assertTrue(any('ทับแทร็กภาพเดิม' in m['message'] for m in messages))
+        self.assertEqual(messages[-1]['skip_reasons'],{'occupied':1})
+
+    def test_invalid_time_or_query_is_not_reported_as_stock_search_failure(self):
+        cases=[(dict(start=30,end=31,query='blue sky',keywords=[]),'invalid_timing'),(dict(start=1,end=1.2,query='blue sky',keywords=[]),'short_window'),(dict(start=1,end=3,query='ภาษาไทย',keywords=[]),'invalid_query')]
+        for idea,reason in cases:
+            with self.subTest(reason=reason),patch.object(B.broll,'api_broll',return_value={'ok':True,'items':[idea]}),patch.object(B.A,'wait_download') as fetch,self.assertRaises(B.PreparationError) as caught:self.build()
+            fetch.assert_not_called();self.assertEqual(caught.exception.summary['skip_reasons'],{reason:1});self.assertEqual(caught.exception.summary['attempted'],0)
+
+    def test_no_match_is_distinct_from_skipping_before_search(self):
+        with patch.object(B.A,'wait_download',return_value=None),self.assertRaises(B.PreparationError) as caught:self.build()
+        self.assertGreater(caught.exception.summary['attempted'],0);self.assertEqual(caught.exception.summary['skip_reasons'],{'no_match':1})
+        self.assertIn('ค้น Artlist แล้ว',str(caught.exception))
+
+    def test_eighteen_blocked_ideas_report_zero_searches_and_eighteen_skips(self):
+        overlay=copy.deepcopy(self.draft['tracks'][0]);overlay.update(id='overlay')
+        overlay['segments'][0].update(id='other-shot',target_timerange={'start':1000000,'duration':18000000})
+        draft=copy.deepcopy(self.draft);draft['tracks'].append(overlay);raw=json.dumps(draft).encode();(self.proj/'draft_info.json').write_bytes(raw)
+        ideas={'ok':True,'items':[dict(start=1,end=3,query='phone screen '+str(i),keywords=[]) for i in range(18)]};messages=[]
+        with patch.object(B.broll,'api_broll',return_value=ideas),patch.object(B.A,'wait_download') as fetch,self.assertRaises(B.PreparationError) as caught:
+            B.build('alice',self.proj,{'max_shots':18},messages.append)
+        fetch.assert_not_called();summary=caught.exception.summary
+        self.assertEqual((summary['prepared'],summary['attempted'],summary['skipped']),(0,0,18))
+        self.assertEqual(summary['skip_reasons'],{'occupied':18});self.assertIn('ทับภาพเดิม 18 ช่วง',str(caught.exception))
+        self.assertEqual(sum('ข้ามแล้ว' in row['message'] for row in messages),18)
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),raw)
+
+    def test_very_short_empty_timeline_is_not_blame_on_existing_overlay(self):
+        d=copy.deepcopy(self.draft);d['duration']=200000;(self.proj/'draft_info.json').write_text(json.dumps(d))
+        with patch.object(B.broll,'api_broll',return_value={'ok':True,'items':[dict(start=0,end=.2,query='blue sky',keywords=[])]}),self.assertRaises(B.PreparationError) as caught:self.build()
+        self.assertNotIn('existing_visuals_cover_timeline',caught.exception.summary['skip_reasons'])
+        self.assertEqual(caught.exception.summary['skip_reasons'],{'short_window':1})

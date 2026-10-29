@@ -2,7 +2,7 @@
 def occupied(draft):
     main=next((t for t in draft.get('tracks',[]) if t.get('type')=='video' and not t.get('attribute',0)&1),None)
     return sorted((s['target_timerange']['start']/1e6,(s['target_timerange']['start']+s['target_timerange']['duration'])/1e6)
-                  for t in draft.get('tracks',[]) if t.get('type')=='video' and t is not main
+                  for t in draft.get('tracks',[]) if t.get('type')=='video' and t is not main and not t.get('attribute',0)&1
                   for s in t.get('segments',[]) if s.get('target_timerange'))
 
 def next_slot(draft, start, duration, gap=3):

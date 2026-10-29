@@ -53,3 +53,12 @@ class BatchDeadlineTests(unittest.TestCase):
             with self.assertRaises(A.StockDownloadError) as caught:A.wait_download('fixture-owner','artlist',{'query':'office desk'},lambda m:None)
             self.assertEqual(caught.exception.code,'timeout')
             self.assertEqual(job['state'],'failed')
+
+    def test_failed_broll_receipt_keeps_operation_and_structured_reasons(self):
+        from ks.broll_auto import PreparationError
+        summary={'attempted':0,'prepared':0,'skipped':18,'skip_reasons':{'occupied':18}}
+        def failure(*args):raise PreparationError('blocked fixture',summary)
+        with tempfile.TemporaryDirectory() as folder,patch.dict(L._jobs,{},clear=True),patch.object(L.job_store,'save'),patch.object(L.CE.STATE,'capture',side_effect=lambda f:f),patch.object(L.threading,'Thread',InlineThread),patch.object(L,'handle',side_effect=failure):
+            token=L.start_job('fixture-owner',folder,{'operation':'broll_only'})['job_id'];job=L._jobs[token]
+            self.assertEqual(job['operation'],'broll_only');self.assertEqual(job['state'],'failed');self.assertEqual(job['broll_summary'],summary)
+            summary['skipped']=99;self.assertEqual(job['broll_summary']['skipped'],18)

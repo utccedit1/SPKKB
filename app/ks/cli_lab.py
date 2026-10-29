@@ -84,7 +84,7 @@ def start_job(owner, project, data):
         if sum(j['state'] == 'running' for j in _jobs.values()) >= 2:
             raise ValueError('มีงานเต็มแล้ว กรุณาลองภายหลัง')
         token = uuid.uuid4().hex
-        _jobs[token] = dict(owner=owner, project=path, state='running', message='กำลังเริ่มงาน', created=time.time(),updated=time.time(),cancel=False)
+        _jobs[token] = dict(owner=owner, project=path, operation=operation, state='running', message='กำลังเริ่มงาน', created=time.time(),updated=time.time(),cancel=False)
         try:job_store.save('cli',token,_jobs[token])
         except Exception:
             _jobs.pop(token,None)
@@ -92,7 +92,7 @@ def start_job(owner, project, data):
     def progress(message):
         details={}
         if isinstance(message,dict):
-            details={k:message[k] for k in ('stage','prepared','downloaded','requested','attempted','skipped') if k in message}
+            details={k:message[k] for k in ('stage','prepared','downloaded','requested','attempted','skipped','skip_reasons') if k in message}
             message=str(message.get('message',''))
         with _jobs_lock:
             if _jobs[token].get('cancel'):raise InterruptedError('ยกเลิกงานแล้ว')
@@ -115,6 +115,7 @@ def start_job(owner, project, data):
         except Exception as exc:
             with _jobs_lock:
                 _jobs[token].update(state='failed', error=str(exc), updated=time.time())
+                if operation=='broll_only' and isinstance(getattr(exc,'summary',None),dict):_jobs[token]['broll_summary']=json.loads(json.dumps(exc.summary))
                 job_store.save('cli',token,_jobs[token])
     threading.Thread(target=CE.STATE.capture(work), name='cli-lab-' + token[:8], daemon=True).start()
     return {'ok': True, 'job_id': token}
