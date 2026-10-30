@@ -1,7 +1,7 @@
 {
-  "version": "1.5.60",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.60/SPKKB.app.zip",
-  "release_notes": "รวมตรวจสถานะ CapCut ตรวจอัปเดต และตั้งค่าครั้งแรกในเมนูระบบ เพิ่มสถานะรอ Webhook และใช้ผลช่วงที่ตรวจแล้วเมื่อวิเคราะห์ใหม่โดยไม่ส่งคำขอซ้ำอัตโนมัติ",
+  "version": "1.5.61",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.61/SPKKB.app.zip",
+  "release_notes": "ปรับหน้าสรุปไฮไลต์ให้เห็นสถานะและแผนชัดเจน พับรายการประเด็นและเลื่อนไปแผนเมื่อเสร็จ",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "66951f5a29910d413ac658033b3f8bb3bda3ebbc3a21c33f6b801658f326d795",
-  "size": 157159722,
+  "sha256": "8f9cafb45419113fa42ab0b58a1769e22606b2ed1b19007e6ed06e4d8fb9ff34",
+  "size": 157161493,
   "platform": "macos",
   "architecture": "arm64"
 }
