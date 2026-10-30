@@ -43,6 +43,26 @@ class BrollOnlyTests(unittest.TestCase):
         preview=R.review('alice',self.proj,result['result_id'])
         applied=C.commit('alice',self.proj,preview['install_id'])
         self.assertTrue(applied['ok']);B.validate_additions(self.draft,json.loads((self.proj/'draft_info.json').read_bytes()))
+
+    def test_receipt_failure_after_commit_is_reported_and_recovered(self):
+        result=self.build();preview=R.review('alice',self.proj,result['result_id'])
+        with patch.object(R,'imported',side_effect=OSError('disk unavailable')):
+            applied=C.commit('alice',self.proj,preview['install_id'])
+            self.assertTrue(applied['ok']);self.assertIn('บันทึกโปรเจกต์แล้ว',applied['warning'])
+            self.assertEqual(R.listing('alice',self.proj)['results'],[])
+        C._tickets.clear()
+        self.assertEqual(C.check('alice',self.proj,preview['install_id'])['state'],'committed')
+        self.assertEqual(C.check('bob',self.proj,preview['install_id'])['state'],'unknown')
+        self.assertEqual(R.listing('alice',self.proj)['results'],[])
+        with self.assertRaises(ValueError):C.commit('alice',self.proj,preview['install_id'])
+        (self.proj/T.JOURNAL).write_text('{}')
+        self.assertEqual(C.check('alice',self.proj,preview['install_id'])['state'],'unknown')
+
+    def test_receipt_write_fails_before_transaction_leaves_source_unchanged(self):
+        result=self.build();preview=R.review('alice',self.proj,result['result_id'])
+        with patch.object(C.job_store,'save',side_effect=OSError('disk unavailable')):
+            with self.assertRaises(OSError):C.commit('alice',self.proj,preview['install_id'])
+        self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
     def test_preservation_rejects_every_other_edit(self):
         result=self.build();edited=json.loads((Path(result['destination'])/'draft_info.json').read_bytes())
         for name,mutate in [('cut',lambda d:d['tracks'][0]['segments'][0]['target_timerange'].update(duration=1000000)),('music',lambda d:d['tracks'][1]['segments'][0].update(volume=1)),('caption',lambda d:d['materials']['texts'][0].update(content='changed')),('settings',lambda d:d.update(duration=30000000)),('material_deleted',lambda d:d['materials'].pop('audios'))]:

@@ -1,0 +1,15 @@
+Announcements: quoted admin identity reaches callbacks intact; markup is escaped; public login renderer uses text nodes
+B-roll only UI: isolated mode, explicit import, validation, missing job, offline recovery and failure guards passed
+CLI UI: offline recovery, explicit resume, terminal missing jobs, auth recovery, validation and cleanup undo isolation passed
+Onboarding: first-run, deferred reopening, explicit readiness and missing CapCut guards passed
+Readiness: missing job clears receipt; download completion wakes next queue within 2 seconds
+Stock background timeout: search/download stop after wall-clock deadline
+Stock bridge: visible account signals, hidden/active CAPTCHA, whitespace titles, required concepts, bounded search retry, no CAPTCHA retry, persistent alarm, failed report cleanup and owner job reconciliation passed
+Music switches out of footage catalog before submitting a search
+Downloaded clip icon opens HD; unrelated named controls are never used as fallback
+Stock folder UI: load destination, browse directories, select and save project folder passed
+Stock navigation: actual catalog links, native search form, scoped routes, calendar relevance
+Stock retry: recovers page readiness, caps retries, never retries CAPTCHA/login/no-match
+Worker: saves searching job, scoped heartbeat, resumes search after restart, never repeats an attempted download
+Studio jobs: workspace isolation, offline/auth resume, wrong-project result protection, missing/corrupt receipts and failed caption reload passed
+Update banner: automatic hide, stable timer, persistent dismiss, manual retry, new version and active progress passed

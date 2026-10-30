@@ -72,10 +72,17 @@ from .job_admission import admit
 @admit
 def start_job(owner, project, data):
     operation = data.get('operation')
-    if operation not in ('plan', 'apply', 'enhance', 'setup_alignment', 'broll_only'):
+    if operation not in ('plan', 'apply', 'enhance', 'setup_alignment', 'broll_only', 'install_commit'):
         raise ValueError('งานเบื้องหลังไม่รองรับคำสั่งนี้')
     path = str(Path(project).resolve())
     with _jobs_lock:
+        if operation == 'install_commit':
+            token = data.get('install_id')
+            if not isinstance(token,str) or not token.isalnum() or len(token)>80:raise ValueError('รายการนำเข้าไม่ถูกต้อง')
+            existing = _jobs.get(token) or job_store.load(owner,'cli',token)
+            if existing:
+                if existing.get('owner')!=owner or existing.get('project')!=path or existing.get('operation')!='install_commit':raise ValueError('รายการนำเข้าไม่ตรงกับโปรเจกต์')
+                return {'ok':True,'job_id':token}
         for key in list(_jobs):
             if _jobs[key]['state'] in ('done', 'failed') and time.time()-_jobs[key]['updated'] > 3600:
                 del _jobs[key]
@@ -83,7 +90,7 @@ def start_job(owner, project, data):
             raise ValueError('มีงานวางแผนหรือตัดต่อกำลังทำอยู่ กรุณารอให้เสร็จ')
         if sum(j['state'] == 'running' for j in _jobs.values()) >= 2:
             raise ValueError('มีงานเต็มแล้ว กรุณาลองภายหลัง')
-        token = uuid.uuid4().hex
+        token = token if operation == 'install_commit' else uuid.uuid4().hex
         _jobs[token] = dict(owner=owner, project=path, operation=operation, state='running', message='กำลังเริ่มงาน', created=time.time(),updated=time.time(),cancel=False)
         try:job_store.save('cli',token,_jobs[token])
         except Exception:
@@ -97,7 +104,7 @@ def start_job(owner, project, data):
         with _jobs_lock:
             if _jobs[token].get('cancel'):raise InterruptedError('ยกเลิกงานแล้ว')
             # Stock batches have bounded AI/download/CLI steps, not a fixed total.
-            if operation!='broll_only' and time.time()-_jobs[token]['created']>1800:raise TimeoutError('งานเกิน 30 นาที กรุณาเริ่มใหม่')
+            if operation not in ('broll_only','install_commit') and time.time()-_jobs[token]['created']>1800:raise TimeoutError('งานเกิน 30 นาที กรุณาเริ่มใหม่')
             if _jobs[token].get('message')==message and time.time()-_jobs[token].get('updated',0)<2:return
             history=_jobs[token].setdefault('progress_log',[])
             if not history or history[-1]['message']!=message:
@@ -111,7 +118,12 @@ def start_job(owner, project, data):
             result = handle(owner, path, dict(data, action=operation), progress)
             with _jobs_lock:
                 _jobs[token].update(state='done', result=result, message='สร้างคลิปเสร็จแล้ว · ตรวจผลและสรุปด้านล่าง' if operation in ('apply','enhance','broll_only') else 'วางแผนเสร็จแล้ว · ตรวจแผนด้านล่าง', updated=time.time())
-                job_store.save('cli',token,_jobs[token])
+                try:job_store.save('cli',token,_jobs[token])
+                except OSError:
+                    # The project may already be written. Keep the real result
+                    # in memory and do not turn a successful commit into failure.
+                    if operation!='install_commit':raise
+                    _jobs[token]['result']['warning']='บันทึกโปรเจกต์แล้ว แต่บันทึกสถานะงานไม่ได้ โปรดตรวจพื้นที่จัดเก็บ'
         except Exception as exc:
             with _jobs_lock:
                 _jobs[token].update(state='failed', error=str(exc), updated=time.time())
@@ -155,13 +167,17 @@ def handle(owner, project, data, progress=lambda message: None):
         from . import cli_lab_commit
         if action == 'install_preview':
             return cli_lab_commit.preview(owner, project, data.get('result_folder', ''))
-        return cli_lab_commit.commit(owner, project, data.get('install_id'))
+        return cli_lab_commit.commit(owner, project, data.get('install_id'), progress)
+    if action == 'install_check':
+        from . import cli_lab_commit
+        return cli_lab_commit.check(owner,project,data.get('install_id'))
     if action == 'start':
         return start_job(owner, project, data)
     if action == 'cancel':
         with _jobs_lock:
             job=_jobs.get(data.get('job_id'))
             if not job or job['owner']!=owner or job['project']!=str(Path(project).resolve()):raise ValueError('ไม่พบงานของผู้ใช้และโปรเจกต์นี้')
+            if job.get('operation')=='install_commit':raise ValueError('กำลังนำผลเข้า กรุณารอให้ตรวจสถานะเสร็จ')
             if job['state']=='running':job['cancel']=True
         return {'ok':True,'message':'กำลังยกเลิก รอคำขอปัจจุบันจบก่อน'}
     if action == 'job_status':

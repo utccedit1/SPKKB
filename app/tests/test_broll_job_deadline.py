@@ -1,5 +1,6 @@
 """Batch duration is distinct from an individual request timeout."""
 import tempfile
+import os
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -12,6 +13,16 @@ class InlineThread:
 
 
 class BatchDeadlineTests(unittest.TestCase):
+    def test_install_job_reuses_receipt_without_replaying_commit(self):
+        with tempfile.TemporaryDirectory() as folder,patch.dict(os.environ,{'KS_JOB_STATE_DIR':folder}),patch.dict(L._jobs,{},clear=True),patch.object(L.CE.STATE,'capture',side_effect=lambda f:f),patch.object(L.threading,'Thread',InlineThread),patch.object(L,'handle',return_value={'ok':True,'message':'committed'}) as handle:
+            request={'operation':'install_commit','install_id':'ticket123'}
+            self.assertEqual(L.start_job('alice',folder,request)['job_id'],'ticket123')
+            self.assertEqual(L.start_job('alice',folder,request)['job_id'],'ticket123')
+            L._jobs.clear()
+            self.assertEqual(L.start_job('alice',folder,request)['job_id'],'ticket123')
+            self.assertEqual(handle.call_count,1)
+            self.assertEqual(L.handle.call_args.args[2]['action'],'install_commit')
+
     def run_batch(self, operation, cancel=False):
         clock=[1000]
         def handle(owner, project, data, progress):

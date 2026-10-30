@@ -122,7 +122,30 @@ def review_notes(folder):
     return '\n'.join(notes)
 
 
-def commit(owner, project, token):
+def _matches_committed(ticket, target):
+    expected=ticket.get('commit_updates')
+    if not isinstance(expected,dict) or not expected or (target/T.JOURNAL).exists():return False
+    for name, fingerprint in expected.items():
+        if name not in T.FILES:return False
+        path=T.target_path(str(target),name)
+        if path is None:return False
+        actual=digest(path.read_bytes()) if path.is_file() else None
+        if actual!=fingerprint:return False
+    return True
+
+
+def check(owner, project, token):
+    target=Path(project).resolve()
+    with _lock: ticket=_tickets.get(token)
+    if ticket is None:ticket=job_store.load(owner,'installs',token)
+    if not ticket or ticket.get('owner')!=owner or ticket.get('project')!=str(target):
+        return {'ok':True,'state':'unknown','message':'ยังยืนยันผลไม่ได้ โปรดตรวจโปรเจกต์และประวัติก่อนนำเข้าอีกครั้ง'}
+    if _matches_committed(ticket,target):
+        return {'ok':True,'state':'committed','message':'ตรวจพบว่าบันทึกผลในโปรเจกต์แล้ว โปรดเปิดตรวจใน CapCut'}
+    return {'ok':True,'state':'unknown','message':'ยังยืนยันผลไม่ได้ โปรดตรวจโปรเจกต์และประวัติก่อนนำเข้าอีกครั้ง'}
+
+
+def commit(owner, project, token, progress=lambda message: None):
     target = Path(project).resolve()
     with _lock:
         ticket = _tickets.get(token)
@@ -132,6 +155,7 @@ def commit(owner, project, token):
         raise ValueError('ไม่พบรายการเตรียมนำเข้า ผลตัดต่อยังอยู่ กดเตรียมนำคลิปเข้าอีกครั้ง โดยไม่ต้องตัดใหม่')
     if ticket['owner'] != owner or ticket['project'] != str(target):
         raise ValueError('รายการนำเข้านี้เป็นของผู้ใช้หรือโปรเจกต์อื่น กรุณาเลือกโปรเจกต์ที่สร้างผลนี้')
+    progress('กำลังตรวจโปรเจกต์และเตรียมสำรองข้อมูล')
     with project_lock(str(target)):
         T.ensure_closed()
         from .ce_project import active_project_path
@@ -197,6 +221,7 @@ def commit(owner, project, token):
                     if path.is_file() and ((kind,material.get('id'),str(path)) not in original_media or path.is_relative_to(result)):
                         if not any(material is m for m in broll_materials):broll_materials.append(material)
         try:
+            progress('กำลังคัดลอกและตรวจไฟล์สื่อเข้าโปรเจกต์')
             for kind in ('videos','audios'):
                 for material in (m for node in drafts(edited) for m in node.get('materials',{}).get(kind,[])):
                     path = Path(material.get('path', '')).resolve()
@@ -232,14 +257,26 @@ def commit(owner, project, token):
             T.ensure_closed()
             if any((p.read_bytes() if p is not None and p.is_file() else None) != before[name] for name,p in paths.items()):
                 raise ValueError('โปรเจกต์เปลี่ยนก่อนแทนผล ยังไม่ได้เขียน')
+            # Persist the exact intended fingerprint before changing the project.
+            # It makes an interrupted or receipt-failed commit distinguishable from
+            # an unstarted one without replaying a write.
+            ticket['commit_hash'] = digest(data)
+            ticket['commit_updates'] = {name:(digest(value) if value is not None else None) for name,value in updates.items() if T.target_path(str(target),name) is not None}
+            ticket['backup_name'] = backup.name
+            job_store.save('installs',token,ticket)
+            progress('ตรวจไฟล์เสร็จแล้ว กำลังบันทึกโปรเจกต์')
             try: T.replace_files(str(target),updates)
             except BaseException:
                 T.replace_files(str(target),{name:before[name] for name in updates}); raise
         except BaseException:
             shutil.rmtree(assets,ignore_errors=True); raise
     from .cli_results import imported
-    imported(owner, target, result)
-    job_store.forget(owner,'installs',token)
-    with _lock: _tickets.pop(token,None)
+    warning = ''
+    try:
+        imported(owner, target, result)
+        # Keep the compact receipt as evidence if the response or job receipt
+        # is lost after the transaction. Source hashes still prevent replay.
+    except (OSError, ValueError) as exc:
+        warning = 'บันทึกโปรเจกต์แล้ว แต่ยังปรับสถานะรายการผลไม่ได้ โปรดตรวจพื้นที่จัดเก็บและโปรเจกต์ก่อนทำต่อ'
     return {'ok':True,'backup_name':backup.name,'duration':edited['duration']/1e6,
-            'message':'ใช้ผลกับโปรเจกต์เดิมแล้ว เปิดโปรเจกต์เดิมใน CapCut ได้เลย ย้อนกลับได้จากประวัติ / กู้คืน'}
+            'warning':warning, 'message':'ใช้ผลกับโปรเจกต์เดิมแล้ว เปิดโปรเจกต์เดิมใน CapCut ได้เลย ย้อนกลับได้จากประวัติ / กู้คืน'}

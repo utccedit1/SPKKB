@@ -58,7 +58,7 @@ UI = r'''
    <p>บันทึกแล้วกลับหน้าหลัก CapCut ก่อนกดใช้คลิป ระบบจะสำรองไทม์ไลน์เดิมให้ย้อนกลับได้</p>
    <button id="cliLabInstall" class="primary" onclick="cliLab('install_commit')" disabled>3. ใช้คลิปนี้ในโปรเจกต์เดิม</button>
   </div>
-  <button id="cliLabResume" type="button" hidden onclick="cliLabResumeJob()">ตรวจงานเดิมต่อ</button>
+  <button id="cliLabResume" type="button" hidden onclick="cliLabResumeJob()">ตรวจงานเดิมต่อ</button><button id="cliLabForgetImport" type="button" hidden onclick="cliLabForgetImport()">ตรวจโปรเจกต์แล้ว · ล้างสถานะรอ</button>
   <button id="cliLabPrepareResult" type="button" hidden onclick="cliLab('install_preview')">เตรียมนำคลิปเข้าอีกครั้ง</button>
   <button id="cliLabCancel" type="button" hidden onclick="cliLabCancelJob()">ยกเลิกงานที่กำลังทำ</button><pre id="cliLabResult" role="status" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto"></pre>
 __RUN_MONITOR_UI__
@@ -92,7 +92,8 @@ const storageKey='cliLabActiveJob:'+new URL(location.href).searchParams.get('wor
 q('cliLabResultFolder').addEventListener('input',()=>{install=null;q('cliLabInstall').disabled=true;q('cliLabInstallSection').hidden=true;q('cliLabInstallReview').textContent='';});
 function modeControls(){const single=q('cliLabMode').value==='single';q('cliLabModeHint').hidden=!single;['cliLabStyleCaps','cliLabStyle','cliLabAutoStock','cliLabStockDensity','cliLabSpeakerPip','cliLabStockFolder','cliLabCleanSpeech','cliLabEffects','cliLabLibrary','cliLabBroll','cliLabMusic','cliLabAutoMusic'].forEach(id=>q(id).disabled=busy||single);}
 q('cliLabMode').addEventListener('change',modeControls);
-function controls(on){busy=on;document.querySelectorAll('#tab_clilab button,#tab_clilab input,#tab_clilab select,#cliLabInstruction').forEach(e=>e.disabled=on);q('cliLabApply').disabled=on||!plan;q('cliLabInstall').disabled=on||!install;const cancel=q('cliLabCancel');if(cancel){cancel.hidden=!sessionStorage.getItem(storageKey);cancel.disabled=false;}q('cliLabResume').hidden=!waiting||on;q('cliLabResume').disabled=on;modeControls();}
+function isImportJob(){try{return JSON.parse(sessionStorage.getItem(storageKey)||'null')?.action==='install_commit';}catch(e){return false;}}
+function controls(on){busy=on;document.querySelectorAll('#tab_clilab button,#tab_clilab input,#tab_clilab select,#cliLabInstruction').forEach(e=>e.disabled=on);q('cliLabApply').disabled=on||!plan;q('cliLabInstall').disabled=on||!install;const cancel=q('cliLabCancel');if(cancel){cancel.hidden=!sessionStorage.getItem(storageKey)||isImportJob();cancel.disabled=false;}q('cliLabResume').hidden=!waiting||on;q('cliLabResume').disabled=on;q('cliLabForgetImport').hidden=on||!isImportJob();modeControls();}
 async function post(body){const c=new AbortController(),timer=setTimeout(()=>c.abort(),150000);try{const r=await fetch('/api/cli_lab',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:c.signal});const j=await r.json();if(!r.ok||!j.ok){const e=Error(j.error||'ทำงานไม่สำเร็จ');e.definitive=[400,404].includes(r.status)||['job_not_found','project_mismatch'].includes(j.code);throw e;}return j;}finally{clearTimeout(timer);}}
 function display(action,j){
  if(action==='install_preview'){
@@ -103,7 +104,7 @@ function display(action,j){
  }
  if(action==='install_commit'){
   resetPlan();q('cliLabInstallReview').textContent='';
-  q('cliLabResult').textContent=j.message;window.loadCaps?.();loadResults();return;
+  q('cliLabResult').textContent=(j.warning?'⚠️ '+j.warning+' · ':'')+j.message;window.loadCaps?.();loadResults();return;
  }
  if(action==='status'){
   q('cliLabStatus').textContent='capcut-cli: '+(j.cli_available?'พบแล้ว':'ยังไม่ติดตั้ง')+' | UTCC: '+(j.utcc_configured?'ตั้งค่าแล้ว':'ยังไม่ตั้งค่า')+' | จับเวลาคำ: '+(j.alignment_ready?'พร้อม':'ต้องติดตั้งเครื่องมือ');
@@ -158,11 +159,11 @@ window.cliLabLoadResults=loadResults;
 async function watch(saved){
  let failures=0;
  for(;;){
-  let j;try{j=await post({action:'job_status',job_id:saved.id});failures=0;}catch(e){if(e.definitive){sessionStorage.removeItem(storageKey);throw e;}if(++failures>=3)throw Error(e.message+' · กดตรวจงานเดิมต่อเมื่อเชื่อมต่อได้ งานยังอาจทำอยู่');await new Promise(r=>setTimeout(r,2000));continue;}
+  let j;try{j=await post({action:'job_status',job_id:saved.id});failures=0;}catch(e){if(e.definitive&&saved.action!=='install_commit'){sessionStorage.removeItem(storageKey);throw e;}if(++failures>=3)throw Error(e.message+' · กดตรวจงานเดิมต่อเมื่อเชื่อมต่อได้ งานยังอาจทำอยู่');await new Promise(r=>setTimeout(r,2000));continue;}
   renderRunProgress(j);
   q('cliLabResult').textContent='';
   if(j.state==='done'){sessionStorage.removeItem(storageKey);return j.result;}
-  if(j.state==='failed'){sessionStorage.removeItem(storageKey);throw Error(j.error||'ทำงานไม่สำเร็จ');}
+  if(j.state==='failed'){if(saved.action==='install_commit'){const check=await post({action:'install_check',install_id:saved.id});sessionStorage.removeItem(storageKey);if(check.state==='committed')return {ok:true,message:check.message,warning:'สถานะงานขัดข้อง แต่ตรวจพบผลที่บันทึกแล้ว'};throw Error((j.error||'งานหยุด')+' · '+check.message);}sessionStorage.removeItem(storageKey);throw Error(j.error||'ทำงานไม่สำเร็จ');}
   await new Promise(r=>setTimeout(r,1500));
  }
 }
@@ -225,15 +226,17 @@ window.cliLab=async function(action){
    stock_folder:q('cliLabStockFolder').value,stock_density:q('cliLabStockDensity').value,speaker_pip:q('cliLabSpeakerPip').checked,auto_stock:q('cliLabAutoStock').checked,stock_provider:'artlist',clean_speech:q('cliLabCleanSpeech').checked,visual_library:q('cliLabLibrary').value,effects:q('cliLabEffects').checked,style_captions:q('cliLabStyleCaps').checked,broll:q('cliLabBroll').value,music:q('cliLabMusic').value,auto_music:q('cliLabAutoMusic').checked,
    text_style:typeof buildCfg==='function'?buildCfg():{},hook:q('cliLabHook').value,cta:q('cliLabCTA').value,result_folder:q('cliLabResultFolder').value,install_id:install};
   let j;
-  if(['plan','apply','enhance','setup_alignment'].includes(action)){
+  if(action==='install_commit'){const saved={id:install,action};sessionStorage.setItem(storageKey,JSON.stringify(saved));try{await post({...body,action:'start',operation:'install_commit'});}catch(e){q('cliLabResult').textContent='ยังไม่ได้รับคำตอบ กำลังตรวจสถานะงานเดิม';}j=await watch(saved);
+  }else if(['plan','apply','enhance','setup_alignment'].includes(action)){
    const started=await post({...body,action:'start',operation:action});const saved={id:started.job_id,action};sessionStorage.setItem(storageKey,JSON.stringify(saved));controls(true);j=await watch(saved);
   }else j=await post(body);
   await finish(action,j);
  }catch(e){if(action==='install_commit'){install=null;q('cliLabInstallSection').hidden=true;q('cliLabPrepareResult').hidden=false;}q('cliLabResult').textContent='ทำงานไม่สำเร็จ: '+e.message;}
  finally{waiting=!!sessionStorage.getItem(storageKey);controls(false);}
 };
-async function recover(){if(busy)return;let saved;try{saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');}catch(e){sessionStorage.removeItem(storageKey);return;}if(!saved)return;if(typeof saved.id!=='string'||!['plan','apply','enhance','setup_alignment'].includes(saved.action)){sessionStorage.removeItem(storageKey);return;}controls(true);try{await finish(saved.action,await watch(saved));}catch(e){q('cliLabResult').textContent=e.message;}finally{waiting=!!sessionStorage.getItem(storageKey);controls(false);}}
+async function recover(){if(busy)return;let saved;try{saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');}catch(e){sessionStorage.removeItem(storageKey);return;}if(!saved)return;if(typeof saved.id!=='string'||!['plan','apply','enhance','setup_alignment','install_commit'].includes(saved.action)){sessionStorage.removeItem(storageKey);return;}controls(true);try{await finish(saved.action,await watch(saved));}catch(e){q('cliLabResult').textContent=e.message;}finally{waiting=!!sessionStorage.getItem(storageKey);controls(false);}}
 window.cliLabResumeJob=recover;
+window.cliLabForgetImport=function(){if(busy)return;sessionStorage.removeItem(storageKey);install=null;waiting=false;controls(false);q('cliLabResult').textContent='ล้างสถานะรอแล้ว · โปรดตรวจโปรเจกต์และประวัติก่อนเริ่มนำเข้าใหม่';};
 recover();
 loadResults();
 })();

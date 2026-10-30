@@ -66,6 +66,10 @@ button:active{transform:scale(.98)}
 .ann-item:last-child{border-bottom:none}
 .ann-item:nth-child(even){background:rgba(0,0,0,.02)}
 [data-theme=dark] .ann-item:nth-child(even){background:rgba(255,255,255,.03)}
+.ann-item.update{background:#eaf3ff;color:#143e76;border-left:4px solid #3974c8}.ann-item.info{background:#e9f7ee;color:#155c38;border-left:4px solid #299a60}
+.ann-item.warn{background:#fff3d7;color:#6e4604;border-left:4px solid #d18b0e}.ann-item.urgent{background:#ffebea;color:#871d1b;border-left:4px solid #d64942}
+[data-theme=dark] .ann-item.update{background:#193653;color:#e0efff}[data-theme=dark] .ann-item.info{background:#173d2c;color:#dcffea}
+[data-theme=dark] .ann-item.warn{background:#493713;color:#fff0c6}[data-theme=dark] .ann-item.urgent{background:#512929;color:#ffe2e0}
 .ann-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:2px}
 .ann-tag.update{background:#dbeafe;color:#1d4ed8}
 .ann-tag.info{background:#d1fae5;color:#065f46}
@@ -191,7 +195,7 @@ async function login(){
       list.replaceChildren();
       for(const a of items){
         const type=Object.hasOwn(TAG_LABEL,a.type)?a.type:'info';
-        const row=document.createElement('div');row.className='ann-item';
+        const row=document.createElement('div');row.className='ann-item '+type;
         const tag=document.createElement('span');tag.className='ann-tag '+type;tag.textContent=TAG_LABEL[type];
         const text=document.createElement('span');text.style.flex='1';text.textContent=a.text||[a.title,a.body].filter(Boolean).join('\n');
         row.append(tag,text);

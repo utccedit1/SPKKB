@@ -32,15 +32,25 @@ def remember(owner, project, folder, source_hash, operation):
 
 def listing(owner, project):
     project = str(Path(project).resolve())
+    # Recover a completed write when updating the result receipt failed.
+    from .cli_lab_commit import _matches_committed
+    committed=set()
+    for _, ticket in job_store.records(owner,'installs'):
+        try: matched=ticket.get('project')==project and _matches_committed(ticket,Path(project))
+        except (OSError,ValueError):matched=False
+        if matched:
+            committed.add(ticket.get('result'))
+            try:imported(owner,project,ticket['result'])
+            except (OSError,ValueError):pass
     # Adopt previous-version import receipts without refreshing their fingerprints.
     for token, ticket in job_store.records(owner, 'installs'):
-        if ticket.get('project') != project or ticket.get('result_id'): continue
+        if ticket.get('project') != project or ticket.get('result_id') or ticket.get('commit_hash'): continue
         legacy = 'legacy'+token
         if job_store.load(owner, 'results', legacy) is None:
             job_store.save('results', legacy, dict(ticket, state='ready', operation='apply'))
     rows = [dict(result_id=token, destination=r['result'], created=r['created'], operation=r.get('operation','apply'))
             for token, r in job_store.records(owner, 'results')
-            if r.get('project') == project and r.get('state') == 'ready']
+            if r.get('project') == project and r.get('state') == 'ready' and r.get('result') not in committed]
     return dict(ok=True, results=sorted(rows, key=lambda r:r['created'], reverse=True)[:30])
 
 
