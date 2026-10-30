@@ -1,7 +1,7 @@
 {
-  "version": "1.5.61",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.61/SPKKB.app.zip",
-  "release_notes": "ปรับหน้าสรุปไฮไลต์ให้เห็นสถานะและแผนชัดเจน พับรายการประเด็นและเลื่อนไปแผนเมื่อเสร็จ",
+  "version": "1.5.62",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.62/SPKKB.app.zip",
+  "release_notes": "เพิ่มตรวจและปรับรอยต่อไฮไลต์ก่อนสร้าง แก้ภาพ PNG บางชนิดที่ CapCut เปิดไม่รองรับ และเพิ่มคำเตือนเมื่อไม่มีวิดีโอในแทร็กภาพ กรุณาตรวจฟังคลิปก่อนใช้งาน",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "8f9cafb45419113fa42ab0b58a1769e22606b2ed1b19007e6ed06e4d8fb9ff34",
-  "size": 157161493,
+  "sha256": "14786641a63088f2247a085312fdbe411636125f1780f50a20152e4c13a58231",
+  "size": 157182449,
   "platform": "macos",
   "architecture": "arm64"
 }
