@@ -1,7 +1,7 @@
 {
-  "version": "1.5.63",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.63/SPKKB.app.zip",
-  "release_notes": "คัดซับยาวพร้อมกันสูงสุดสองชุดต่อหนึ่งงาน ปรับตรวจความต่อเนื่องของไฮไลต์และข้อความสำหรับงานเสียง กรุณาตรวจแผนและฟังคลิปก่อนใช้งาน",
+  "version": "1.5.64",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.64/SPKKB.app.zip",
+  "release_notes": "ปรับ AI ช่วยซ่อมรอยต่อไฮไลต์และลดขั้นตรวจซ้ำ พร้อมปรับสถานะ Webhook ให้ชัดเจน กรุณาฟังผลก่อนนำไปใช้งาน",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "cd6f952ebd02f8ccccb35eba965381a3f912de08a726f42592186cb08eab32ed",
-  "size": 157187656,
+  "sha256": "2714e4dcc1418fc8c480faf3fb229e34cb7a87b6d01b155a850fba9ffa737174",
+  "size": 157187870,
   "platform": "macos",
   "architecture": "arm64"
 }
