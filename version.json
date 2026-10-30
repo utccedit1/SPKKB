@@ -1,7 +1,7 @@
 {
-  "version": "1.5.58",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.58/SPKKB.app.zip",
-  "release_notes": "ปรับกล่องสถานะและ log B-roll ให้อ่านง่าย แยกสีคำเตือนและประกาศ ติดตามการนำเข้าต่อได้เมื่อการเชื่อมต่อสะดุด และตรวจสถานะหลังบันทึกโปรเจกต์โดยไม่สั่งนำเข้าซ้ำ",
+  "version": "1.5.59",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.59/SPKKB.app.zip",
+  "release_notes": "ปรับสีสถานะ CapCut ให้แยกพร้อมใช้งาน คำเตือน และข้อผิดพลาดอย่างชัดเจน พร้อมแก้ตัวตรวจพื้นที่ให้รองรับไฟล์ draft_biz_config.json ที่ว่าง โดยยังตรวจไฟล์อ้างอิงอื่นและหยุดเมื่ออ่านโปรเจกต์ไม่ครบ",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "62a11780af9e74ccbc3aaa094d0ca25772f3808e8f96d1f5a8a193363d03644d",
-  "size": 157157072,
+  "sha256": "9dfb56f171219708e082132cda6ad6b8782d2d6c6ca67cd91f9d7bd0df0eba85",
+  "size": 157159806,
   "platform": "macos",
   "architecture": "arm64"
 }
