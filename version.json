@@ -1,7 +1,7 @@
 {
-  "version": "1.5.59",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.59/SPKKB.app.zip",
-  "release_notes": "ปรับสีสถานะ CapCut ให้แยกพร้อมใช้งาน คำเตือน และข้อผิดพลาดอย่างชัดเจน พร้อมแก้ตัวตรวจพื้นที่ให้รองรับไฟล์ draft_biz_config.json ที่ว่าง โดยยังตรวจไฟล์อ้างอิงอื่นและหยุดเมื่ออ่านโปรเจกต์ไม่ครบ",
+  "version": "1.5.60",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.60/SPKKB.app.zip",
+  "release_notes": "รวมตรวจสถานะ CapCut ตรวจอัปเดต และตั้งค่าครั้งแรกในเมนูระบบ เพิ่มสถานะรอ Webhook และใช้ผลช่วงที่ตรวจแล้วเมื่อวิเคราะห์ใหม่โดยไม่ส่งคำขอซ้ำอัตโนมัติ",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "9dfb56f171219708e082132cda6ad6b8782d2d6c6ca67cd91f9d7bd0df0eba85",
-  "size": 157159806,
+  "sha256": "66951f5a29910d413ac658033b3f8bb3bda3ebbc3a21c33f6b801658f326d795",
+  "size": 157159722,
   "platform": "macos",
   "architecture": "arm64"
 }
