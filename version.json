@@ -1,7 +1,7 @@
 {
-  "version": "1.5.64",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.64/SPKKB.app.zip",
-  "release_notes": "ปรับ AI ช่วยซ่อมรอยต่อไฮไลต์และลดขั้นตรวจซ้ำ พร้อมปรับสถานะ Webhook ให้ชัดเจน กรุณาฟังผลก่อนนำไปใช้งาน",
+  "version": "1.5.65",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.65/SPKKB.app.zip",
+  "release_notes": "ตรวจรอยต่อไฮไลต์ให้ครบความคิด และเพิ่มพื้นหลังกราฟิกเมื่อโปรเจกต์เสียงใช้ภาพดำเป็นตัวคั่น ทดสอบสร้างและส่งออกใน CapCut จริงแล้ว กรุณาฟังผลก่อนใช้งาน",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "2714e4dcc1418fc8c480faf3fb229e34cb7a87b6d01b155a850fba9ffa737174",
-  "size": 157187870,
+  "sha256": "c9db1f8e436a31714356c9598cafe7ee48c7a20a41d007494ff7fc015e0187c4",
+  "size": 203644928,
   "platform": "macos",
   "architecture": "arm64"
 }
