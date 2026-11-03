@@ -49,7 +49,7 @@ class EventJobsTests(unittest.TestCase):
                 self.assertEqual(E.ask('test')[0]['summary'],'ok')
             gemini.assert_not_called()
             self.assertEqual(webhook.call_args.kwargs['max_retries'],1)
-            self.assertEqual(webhook.call_args.kwargs['timeout'],75)
+            self.assertEqual(webhook.call_args.kwargs['timeout'],300)
         finally:E._CONTEXT.__dict__.clear()
 
     def test_copy_job_does_not_require_ai(self):

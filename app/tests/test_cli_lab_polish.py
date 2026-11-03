@@ -40,6 +40,18 @@ class PolishTests(unittest.TestCase):
         d,t=self.fixture();out,times,report=clean(d,{})
         self.assertEqual(out,d);self.assertEqual(report['saved_seconds'],0)
 
+    def test_split_filler_with_low_confidence_is_not_cut(self):
+        d,t=self.fixture()
+        t['s'][1:2]=[dict(word='เอ',start=.7,end=.85,confidence=.9),
+                      dict(word='่อ ',start=.85,end=1,confidence=.2)]
+        self.assertEqual(candidates(d,t),[])
+
+    def test_split_filler_with_measured_confident_parts_can_be_cut(self):
+        d,t=self.fixture()
+        t['s'][1:2]=[dict(word='เอ',start=.7,end=.85,confidence=.9),
+                      dict(word='่อ ',start=.85,end=1,confidence=.8)]
+        self.assertEqual(len(candidates(d,t)),1)
+
     def test_library_matches_real_local_files_and_rejects_escape(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);(root/'sample.png').write_bytes(b'fixture')

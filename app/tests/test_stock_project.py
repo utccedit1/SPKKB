@@ -40,3 +40,11 @@ class ProjectStorageTests(unittest.TestCase):
             with patch.object(P.os,'link',side_effect=OSError(errno.EOPNOTSUPP,'unsupported')):
                 target=P.store(source,root/'drive','B-roll')
             self.assertEqual(Path(target).read_bytes(),b'footage')
+
+    def test_store_without_hashlib_file_digest_keeps_content_checks(self):
+        if not hasattr(P.hashlib, 'file_digest'):
+            self.test_reuse_does_not_overwrite_user_edits_and_distinct_media_do_not_collide()
+            return
+        with patch.object(P.hashlib, 'file_digest'):
+            del P.hashlib.file_digest
+            self.test_reuse_does_not_overwrite_user_edits_and_distinct_media_do_not_collide()

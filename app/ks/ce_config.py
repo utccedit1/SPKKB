@@ -478,7 +478,7 @@ def _apply_ai_route(cfg):
     if backend == "default":
         pass
     elif backend == "gemini":
-        cfg["ai_backend"] = "gemini"
+        cfg["ai_backend"] = "gemini"; cfg["webhook_utcc"] = False
     elif backend == "webhook":
         cfg["ai_backend"] = "webhook"; cfg["webhook_utcc"] = False
         if route.get("webhook_url"):
@@ -502,8 +502,7 @@ def _apply_ai_route(cfg):
     if feat == "align":
         if backend == "gemini":
             cfg["audio_backend"] = "gemini"
-            if kn and cfg.get("gemini_api_key"):
-                cfg["audio_api_key"] = cfg["gemini_api_key"]
+            cfg["audio_api_key"] = cfg.get("gemini_api_key", "")
         elif backend in ("webhook", "webhook_utcc"):
             cfg["audio_backend"] = "webhook"
             if cfg.get("webhook_url"):

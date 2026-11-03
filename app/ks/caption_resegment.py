@@ -131,7 +131,7 @@ def ask(prompt,conf,persona):
     else:
         with E.CE.ai_feature('resegment'):
             raw=E.CE.call_gemini(conf.get('gemini_api_key',''),conf.get('gemini_model','gemini-flash-latest'),
-                               prompt,system=persona,temperature=.15,max_tokens=4096,timeout=75,max_retries=1)
+                               prompt,system=persona,temperature=.15,max_tokens=4096,timeout=75,max_retries=1,conf=conf)
     data=E.parse_event_response(raw)
     if not isinstance(data,list):raise ValueError('AI ไม่ได้ตอบรายการแบ่งซับที่อ่านได้')
     return data
@@ -170,7 +170,7 @@ def run(proj,cfg):
     original_texts={r[0]:r[3] for r in rows}
     loanword_changed=0;loanword_warnings=[];loanword_report=[]
     if cfg.get('english_loanwords'):
-        utcc_conf,_=E.provider_config('utcc')
+        utcc_conf=conf
         converted,loanword_changed=L.convert(rows,utcc_conf,ask,warnings=loanword_warnings,report=loanword_report)
         rows=[(i,s,m,converted[i]) for i,s,m,t in rows]
     pending=[r for r in rows if len(word_ranges(r[3],'word'))>target]

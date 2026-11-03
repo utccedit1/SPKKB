@@ -859,14 +859,18 @@ def api_get_ai_routes():
         route = routes.get(feat_id) or {}
         features.append({
             "id": feat_id, "label": feat_label,
-            "backend": info["backend"], "ai_label": info["label"],
+            "backend": route.get("backend","gemini"), "ai_label": info["label"],
+            "active_label": info["label"], "active_backend": info["backend"], "active_model": info["model"], "active_detail": info["detail"],
             "model": info["model"],     "detail": info["detail"],
             "key_name":       route.get("key_name", ""),
             "model_override": route.get("model", ""),
             "webhook_url":    route.get("webhook_url", ""),
         })
     return {
-        "ok": True, "ai_routes": {k: {f: v for f, v in r.items() if f in ("backend","key_name","model","webhook_url")} for k, r in routes.items() if isinstance(r, dict)}, "features": features,
+        "ok": True, "keys": [k["name"] for k in cfg.get("gemini_keys",[]) if k.get("name")],
+        "backends": ["default","gemini","webhook","webhook_utcc"],
+        "default_backend": "webhook_utcc" if cfg.get("ai_backend")=="webhook" and cfg.get("webhook_utcc") else cfg.get("ai_backend","gemini"),
+        "ai_routes": {k: {f: v for f, v in r.items() if f in ("backend","key_name","model","webhook_url")} for k, r in routes.items() if isinstance(r, dict)}, "features": features,
         "global_backend": ("webhook_utcc" if (cfg.get("ai_backend") == "webhook"
                             and cfg.get("webhook_utcc")) else cfg.get("ai_backend", "gemini")),
         "global_model": cfg.get("gemini_model", "gemini-flash-latest"),
@@ -913,6 +917,7 @@ def api_set_ai_backend(cfg_in):
         conf["ai_backend"] = "webhook"; conf["webhook_utcc"] = True
     elif backend in ("gemini", "webhook"):
         conf["ai_backend"] = backend
+        if backend == "gemini": conf["webhook_utcc"] = False
         if backend == "webhook":
             conf["webhook_utcc"] = bool(cfg_in.get("webhook_utcc", False))
     if "webhook_url"     in cfg_in: conf["webhook_url"]     = (cfg_in.get("webhook_url") or "").strip()

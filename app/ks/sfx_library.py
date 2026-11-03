@@ -50,7 +50,7 @@ def save(folder,relative,description,source='human',provider='',expected=None):
 
 def provider():
  from . import core_engine as C
- conf=C.load_config()
+ with C.ai_feature('align'):conf=C.load_config()
  if conf.get('audio_backend')=='webhook' and str(conf.get('audio_webhook_url') or '').strip():return 'Webhook งานเสียง'
  if conf.get('audio_api_key') or conf.get('gemini_api_key'):return 'Gemini งานเสียง'
  if conf.get('webhook_audio') and conf.get('webhook_url'):return 'Webhook งานเสียง'

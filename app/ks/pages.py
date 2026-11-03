@@ -381,6 +381,8 @@ input[type=text],input[type=number],input[type=password],select,textarea{backgro
 <h2>🧩 เลือกสมองแยกรายฟีเจอร์</h2>
 <small class="hint">แต่ละฟีเจอร์เลือก Gemini / Webhook UTCC / Webhook ทั่วไป หรือ "ตามสมองหลัก" ได้อิสระ
 — เพิ่ม API Key ได้ที่แท็บ <b>🔑 API Key ของฉัน</b></small>
+<button type="button" id="ksAllGemini" onclick="ksUseGeminiAll(event)">ใช้ Gemini กับทุกฟีเจอร์ AI</button>
+<p id="ksAllGeminiStatus" role="status">ใช้คีย์และโมเดลหลักที่เลือกในแท็บ API Key รวมถึงงานตัดคลิปและไฮไลต์</p>
 <div id="ksFeatList" style="margin-top:10px"></div>
 </div>
 
@@ -652,6 +654,7 @@ def build_editor_page(base):
         '<div class="ks-ni" onclick="ksSide(\'chat\',this)"><span class="ni">&#128172;</span>แชตบอต</div>'
         '<div class="ks-ni" onclick="ksSide(\'broll\',this)"><span class="ni">&#127902;&#65039;</span>B-roll / มีม</div>'
         '<div class="ks-nav-sec">ตั้งค่า</div>'
+        '<details class="ks-system-menu"><summary>⚙️ ระบบและการตั้งค่า</summary><div id="studioSystemControls"></div></details>'
         '<div class="ks-ni" onclick="ksSide(\'hist\',this)"><span class="ni">&#128344;</span>ประวัติ / กู้คืน</div>'
         '<div class="ks-ni" onclick="ksSide(\'airoute\',this)"><span class="ni">&#129504;</span>สมอง AI</div>'
         '<div class="ks-ni" onclick="ksSide(\'mykey\',this)"><span class="ni">&#128273;</span>API Key</div>'
@@ -761,7 +764,7 @@ window.ksSide = function(name, navEl) {
     caps:'&#128203; เลือก / จัดซับ',
     chat:'&#128172; แชตบอต',broll:'&#127902; B-roll / มีม',airoute:'&#129504; สมอง AI',
     proofread:'✓ ตรวจคำ',clip:'&#9986; ตัดคลิป',event:'&#127916; Event / จับประเด็น',
-    hist:'&#128336; ประวัติ',clilab:'✂️ ตัดคลิปด้วย AI',
+    hist:'&#128336; ประวัติ',clilab:'✂️ ตัดคลิปด้วย AI',captionstudio:'✨ พรีวิวสไตล์ซับ',
     mykey:'&#128273; API Key',admin:'&#128081; แอดมิน',
     ann_mgr:'&#128226; จัดการประกาศ'};
   var el=document.getElementById('ksTopTitle'); if(el) el.innerHTML=T[name]||name;
@@ -906,7 +909,9 @@ window.ksSide = function(name, navEl) {
     from .cli_lab_ui import inject as inject_cli_lab
     from .onboarding import inject as inject_setup
     from .broll_auto_ui import inject as inject_broll_auto
-    return inject_setup(inject_broll_auto(inject_cli_lab(apply_workflow(apply_design(html))))).replace('__STUDIO_VERSION__',CURRENT_VERSION)
+    from .caption_studio_ui import inject as inject_caption_studio
+    from .kinetic_ui import inject as inject_kinetic
+    return inject_kinetic(inject_setup(inject_caption_studio(inject_broll_auto(inject_cli_lab(apply_workflow(apply_design(html))))))).replace('__STUDIO_VERSION__',CURRENT_VERSION)
 
 
 def _move_audio_brain(html):
@@ -975,7 +980,7 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 var _orig = window.showTab;
 window.showTab = function(name, btn){
   try{ if(_orig) _orig(name, btn); }catch(e){}
-  var noAction = ['chat','broll','airoute','mykey','admin','hist','proofread','event','clip','ann_mgr','clilab'];
+  var noAction = ['chat','broll','airoute','mykey','admin','hist','proofread','event','clip','ann_mgr','clilab','captionstudio'];
   var ma = $q('mainActions');
   if(ma) ma.style.display = noAction.indexOf(name)>=0 ? 'none' : '';
   var ab = $q('ksApplyBar');
@@ -1234,6 +1239,19 @@ window.ksLoadRoutes = async function(){
     });
     (j.features||[]).forEach(f=>ksSetInlineSel(f.id, f.backend||'default'));
   }catch(e){if($q('ksFeatList'))$q('ksFeatList').innerHTML='<div class="kmini">โหลดการตั้งค่าไม่ได้</div>';}
+};
+window.ksUseGeminiAll = async function(ev){
+  const btn=ev.target, status=$q('ksAllGeminiStatus');btn.disabled=true;
+  try{
+    const response=await fetch('/api/ai_routes');const current=await response.json();
+    if(!response.ok||current.error)throw new Error(current.error||'โหลดการตั้งค่าไม่ได้');
+    if(!(current.keys||[]).length)throw new Error('เพิ่ม Gemini API key ในแท็บ API Key ก่อน');
+    const routes={};(current.features||[]).forEach(f=>{routes[f.id]={backend:'gemini',key_name:'',model:''};});
+    const saved=await fetch('/api/ai_routes/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({routes})});
+    const result=await saved.json();if(!saved.ok||result.error)throw new Error(result.error||'บันทึกไม่สำเร็จ');
+    status.textContent='บันทึกแล้ว · ทุกฟีเจอร์ AI ใช้ Gemini จากคีย์หลัก';
+    await ksLoadRoutes();await ksFillBadges();
+  }catch(e){status.textContent=e.message||'บันทึกไม่สำเร็จ';}finally{btn.disabled=false;}
 };
 window.ksSyncInline = function(fid, backend){
   ksSetInlineSel(fid, backend);

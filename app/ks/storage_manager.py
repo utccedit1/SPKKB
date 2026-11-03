@@ -50,7 +50,12 @@ def _referenced(paths, roots):
                 path=Path(folder)/name
                 if path.is_symlink():continue
                 if path.stat().st_size>64*1024*1024:raise ValueError('ไฟล์โปรเจกต์ใหญ่เกินขอบเขตตรวจอัตโนมัติ ยังไม่ย้ายไฟล์เก่า')
-                try:data=json.loads(path.read_bytes())
+                raw=path.read_bytes()
+                # CapCut also creates an empty business-config placeholder.
+                # An empty file cannot contain a media reference; continue to
+                # scan every other JSON, including nonempty business configs.
+                if name=='draft_biz_config.json' and raw==b'':continue
+                try:data=json.loads(raw)
                 except (ValueError,UnicodeError):
                     if name.startswith('draft'):raise ValueError('อ่านโปรเจกต์เพื่อตรวจการอ้างอิงไม่ได้: '+str(path)+' · ยังไม่ย้ายไฟล์เก่า')
                     continue

@@ -1,7 +1,7 @@
 import pathlib,sys,unittest
 from unittest.mock import patch
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]))
-from ks import event_clip as E
+from ks import event_clip as E, ce_config as CONF
 class TranslationTests(unittest.TestCase):
  def setUp(self):
   self.rows=[{'id':7,'start':1,'end':3,'text':'We create','speaker':''},{'id':8,'start':3,'end':5,'text':'better opportunities.','speaker':''}]
@@ -37,7 +37,7 @@ class TranslationTests(unittest.TestCase):
   with patch.object(E,'transcript',return_value=({},self.rows,'hash')),patch.object(E,'ask',return_value=[{'summary':'Opportunities','translations':[]}]):
    with self.assertRaisesRegex(ValueError,'คำแปลรายท่อน'):E.analyze('translation-failed-fixture',{'translate_th':True,'refresh_analysis':True})
  def test_translation_cache_separate_and_reused(self):
-  with patch.object(E,'transcript',return_value=({},self.rows,'hash')),patch.object(E,'ask',side_effect=[[{'summary':'English'}],[{'summary':'English','translations':[self.translation]}]]) as ask:
+  with patch.object(CONF,'get_current_uid',return_value='fixture-owner'),patch.dict(E._CONTEXT.__dict__,{'conf':{'ai_backend':'webhook'}}),patch.object(E,'transcript',return_value=({},self.rows,'hash')),patch.object(E,'ask',side_effect=[[{'summary':'English'}],[{'summary':'English','translations':[self.translation]}]]) as ask:
    E.analyze('translation-cache-fixture',{})
    first=E.analyze('translation-cache-fixture',{'translate_th':True})
    second=E.analyze('translation-cache-fixture',{'translate_th':True})

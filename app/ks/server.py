@@ -8,7 +8,7 @@ server.py — เว็บเซิร์ฟเวอร์ + เส้นทา
   2) ล็อกอินแล้ว (มี cookie ks_session) -> ใช้ทุกฟีเจอร์ได้
 ทุก endpoint AI เดิมถูกหุ้มด้วย ai_feature(...) เพื่อให้ 'เลือกสมองรายฟีเจอร์' ทำงาน
 """
-import json, os, re, threading, webbrowser, uuid
+import json, os, re, threading, webbrowser, uuid, subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 from http.cookies import SimpleCookie
@@ -377,6 +377,35 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/project_info":
             proj = CE.STATE.get("project")
             self._send({"path": proj, "valid": CE.is_valid_project(proj)}); return
+        if path == '/api/caption_studio/media':
+            from . import caption_studio
+            proj=self._need_project()
+            if proj is None:return
+            target=caption_studio.asset(self._uid(),getattr(self,'_studio_workspace',''),proj,qs.get('token',[''])[0])
+            size=target.stat().st_size;start=0;end=size-1;partial=False
+            requested=self.headers.get('Range','')
+            if requested:
+                match=re.fullmatch(r'bytes=(\d*)-(\d*)',requested)
+                if not match or not any(match.groups()):
+                    self.send_response(416);self.send_header('Content-Range',f'bytes */{size}');self.send_header('Content-Length','0');self.end_headers();return
+                a,b=match.groups()
+                if a:start=int(a);end=min(int(b),end) if b else end
+                else:start=max(0,size-int(b))
+                if start>end or start>=size:
+                    self.send_response(416);self.send_header('Content-Range',f'bytes */{size}');self.send_header('Content-Length','0');self.end_headers();return
+                partial=True
+            self.send_response(206 if partial else 200)
+            self.send_header('Content-Type','video/mp4');self.send_header('Cache-Control','no-store');self.send_header('Accept-Ranges','bytes')
+            self.send_header('Content-Length',str(end-start+1))
+            if partial:self.send_header('Content-Range',f'bytes {start}-{end}/{size}')
+            self.end_headers()
+            with target.open('rb') as media:
+                media.seek(start);remaining=end-start+1
+                while remaining:
+                    chunk=media.read(min(65536,remaining))
+                    if not chunk:break
+                    self.wfile.write(chunk);remaining-=len(chunk)
+            return
         if path == "/api/fonts":
             self._send({"fonts": CE.list_fonts()}); return
         if path == "/api/captions":
@@ -538,6 +567,14 @@ class Handler(BaseHTTPRequestHandler):
             try:self._send(stock_accounts.handle(self._uid(),data,base='http://127.0.0.1:'+str(self.server.server_address[1])))
             except Exception as exc:self._send({'ok':False,'error':str(exc) if isinstance(exc,ValueError) else 'ตรวจบัญชีคลังสื่อไม่สำเร็จ'})
             return
+        if path == '/api/caption_studio':
+            from . import caption_studio
+            proj=self._need_project()
+            if proj is None:return
+            try:self._send(caption_studio.handle(self._uid(),getattr(self,'_studio_workspace',''),proj,data))
+            except (ValueError,OSError,subprocess.TimeoutExpired) as exc:
+                self._send({'ok':False,'error':str(exc) if isinstance(exc,ValueError) else 'สร้างพรีวิวไม่สำเร็จ กรุณาตรวจไฟล์สื่อและลองใหม่'},code=400)
+            return
         if path == '/api/cli_lab':
             from . import cli_lab
             proj = self._need_project()
@@ -582,7 +619,7 @@ class Handler(BaseHTTPRequestHandler):
                 if action == 'source': result = proofread.source(proj)
                 elif action == 'remember': result = proofread.remember(data.get('word', ''))
                 elif action in ('scan', 'apply'):
-                    result = event_jobs.start(self._uid(), proj, 'proofread' if action == 'scan' else 'proofread_apply', dict(data, backend='utcc'))
+                    result = event_jobs.start(self._uid(), proj, 'proofread' if action == 'scan' else 'proofread_apply', dict(data, backend=data.get('backend','route')))
                 else: raise ValueError('คำสั่งตรวจคำไม่ถูกต้อง')
                 self._send(result)
             except Exception as exc: self._send({'ok': False, 'error': str(exc)})
@@ -615,7 +652,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(event_jobs.status(self._uid(), data.get("job_id"), cancel=path.endswith("cancel"))); return
         if path == "/api/event_clip/provider":
             try:
-                _, label = event_clip.provider_config(data.get("backend", "utcc"))
+                _, label = event_clip.provider_config(data.get("backend", "route"))
                 self._send({"ok": True, "backend": label})
             except Exception as exc:
                 self._send({"ok": False, "error": str(exc)})

@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-from ks import event_clip as E, event_review as R
+from ks import event_clip as E, event_review as R, ce_config as CONF
 
 
 class ReviewTests(unittest.TestCase):
@@ -37,7 +37,7 @@ class ReviewTests(unittest.TestCase):
     def test_overlapping_speaker_names_are_not_guessed(self):
         with self.assertRaises(ValueError):E.transcript(self.proj,[{'name':'A','start':0,'end':9},{'name':'B','start':6,'end':12}])
     def test_analysis_cache_does_not_call_ai_again_but_invalidates_on_edit(self):
-        with patch.object(E,'ask',return_value=[{'summary':'ภาพรวม','keywords':[] }]) as ask:
+        with patch.object(CONF,'get_current_uid',return_value='fixture-owner'),patch.dict(E._CONTEXT.__dict__,{'conf':{'ai_backend':'webhook'}}),patch.object(E,'ask',return_value=[{'summary':'ภาพรวม','keywords':[] }]) as ask:
             E.analyze(self.proj,{})
             result=E.analyze(self.proj,{})
             self.assertTrue(result['cached']);self.assertEqual(ask.call_count,1)

@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
@@ -10,6 +11,75 @@ from ks import cli_lab as L, pages, core_engine as CE
 
 
 class LabTests(unittest.TestCase):
+    def test_plan_store_respects_cancellation_guard(self):
+        def progress(message): pass
+        def reject(save): raise InterruptedError('cancelled')
+        progress.commit_plan=reject
+        with patch.object(L.job_store,'save') as save:
+            with self.assertRaises(InterruptedError):
+                L._store_plan('token',{'owner':'alice','created':0},progress)
+            save.assert_not_called()
+        self.assertNotIn('token',L._plans)
+
+    def test_cancel_before_plan_commit_does_not_save_or_report_done(self):
+        ready=threading.Event();resume=threading.Event();finished=threading.Event()
+        def fake_handle(owner,project,data,progress):
+            progress('ready');ready.set();self.assertTrue(resume.wait(3))
+            try:
+                L._store_plan('canceltest',{'owner':owner,'created':0},progress)
+                return {'ok':True,'plan_id':'canceltest'}
+            finally:finished.set()
+        with patch.object(L,'handle',side_effect=fake_handle), patch.object(L.job_store,'save') as save:
+            job=L.start_job('cancel-owner',self.root,{'operation':'plan'})['job_id']
+            self.assertTrue(ready.wait(3))
+            with L._jobs_lock:L._jobs[job]['cancel']=True
+            resume.set();self.assertTrue(finished.wait(3))
+            for _ in range(100):
+                with L._jobs_lock:state=L._jobs[job]['state']
+                if state!='running':break
+                threading.Event().wait(.01)
+            self.assertEqual(state,'failed')
+            self.assertFalse(any(c.args[0]=='plans' for c in save.call_args_list))
+            self.assertNotIn('canceltest',L._plans)
+
+    def test_plan_commit_does_not_block_apply_progress_lock_order(self):
+        holding=threading.Event();proceed=threading.Event();acquired=threading.Event();attempting=threading.Event()
+        class InstrumentedLock:
+            def __init__(self):self.lock=threading.Lock()
+            def __enter__(self):
+                if threading.current_thread().name=='plan-commit-test':attempting.set()
+                self.lock.acquire();return self
+            def __exit__(self,*args):self.lock.release()
+        def apply_like():
+            with L._lock:
+                holding.set();proceed.wait(2)
+                with L._jobs_lock:acquired.set()
+        def progress(message):pass
+        def commit(write):
+            with L._jobs_lock:write()
+        progress.commit_plan=commit
+        with patch.object(L.job_store,'save'),patch.object(L,'_lock',InstrumentedLock()):
+            first=threading.Thread(target=apply_like,daemon=True);first.start();self.assertTrue(holding.wait(2))
+            second=threading.Thread(target=L._store_plan,args=('locktest',{'owner':'alice','created':0},progress),name='plan-commit-test',daemon=True);second.start();self.assertTrue(attempting.wait(2))
+            proceed.set();self.assertTrue(acquired.wait(2),'apply progress blocked by plan commit')
+            first.join(2);second.join(2);self.assertFalse(second.is_alive())
+
+    def test_plan_expired_while_waiting_is_not_saved(self):
+        ready=threading.Event();resume=threading.Event();finished=threading.Event()
+        def fake_handle(owner,project,data,progress):
+            progress('ready');ready.set();resume.wait(3)
+            try:L._store_plan('expiredtest',{'owner':owner,'created':0},progress)
+            finally:finished.set()
+        with patch.object(L,'handle',side_effect=fake_handle), patch.object(L.job_store,'save') as save:
+            job=L.start_job('expired-owner',self.root,{'operation':'plan'})['job_id'];self.assertTrue(ready.wait(3))
+            with L._jobs_lock:L._jobs[job]['created']-=1801
+            resume.set();self.assertTrue(finished.wait(3))
+            for _ in range(100):
+                with L._jobs_lock:state=L._jobs[job]['state']
+                if state!='running':break
+                threading.Event().wait(.01)
+            self.assertEqual(state,'failed');self.assertFalse(any(c.args[0]=='plans' for c in save.call_args_list))
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)

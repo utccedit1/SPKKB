@@ -22,7 +22,7 @@ function renderRunProgress(job){
  q('cliLabLiveProgress').textContent=message;
  const now=Date.now()/1000,elapsed=Math.max(0,now-(job.created||now)),quiet=Math.max(0,now-(job.updated||now));
  q('cliLabRunClock').textContent='ใช้เวลา '+cliRunClock(elapsed);
- q('cliLabRunWait').textContent=state==='running'&&quiet>=15?'กำลังรอผล · ขั้นตอนนี้ยังไม่ส่งสถานะใหม่มา '+cliRunClock(quiet):state==='done'?'ดูผลตัดต่อและสรุปด้านล่าง':state==='failed'?'ไฟล์ที่ดาวน์โหลดและตรวจไว้แล้วจะนำมาใช้ซ้ำเมื่อคำค้นตรงกัน':'';
+ q('cliLabRunWait').textContent=state==='running'&&quiet>=15?'กำลังรอผล · ขั้นตอนนี้ยังไม่ส่งสถานะใหม่มา '+cliRunClock(quiet):state==='done'?'ดูผลตัดต่อและสรุปด้านล่าง':'';
  const log=q('cliLabProgressLog');log.textContent='';
  for(const row of (job.progress_log||[]).slice(-60)){
   const item=document.createElement('div');item.className='cli-log-row';

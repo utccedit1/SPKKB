@@ -85,7 +85,7 @@ def render_speech(draft, output, respect_volume=False, *, sample_rate=16000, cha
     if run.returncode:raise ValueError('เตรียมเสียงจับเวลาไม่ได้: '+run.stderr[-600:])
 
 
-def align_existing(draft, progress=lambda x:None, warnings=None):
+def align_existing(draft, progress=lambda x:None, warnings=None, *, lexical=False):
     """Return segment IDs -> measured relative word times, using only supplied text."""
     from . import core_engine as CE
     from .caption_roles import speech_rows
@@ -142,7 +142,7 @@ def align_existing(draft, progress=lambda x:None, warnings=None):
                 tokenizer=Tokenizer(_model.hf_tokenizer,_model.model.is_multilingual,task='transcribe',language=language)
                 window=samples[round(start*16000):round((start+duration)*16000)]
                 try:
-                    aligned=align_windows(_model,tokenizer,window,text,duration,pad_or_trim)
+                    aligned=align_windows(_model,tokenizer,window,text,duration,pad_or_trim,lexical=lexical)
                     if not aligned or normalize(''.join(w['word'] for w in aligned))!=normalize(text):raise ValueError('จับเวลาคำไม่ครบ จึงหยุดแทนการเดาเวลาซับ')
                     last=0;valid=[]
                     for word in aligned:
@@ -167,7 +167,7 @@ def model_available():
     except (ImportError,OSError,ValueError): return False
 
 
-def align_windows(model, tokenizer, samples, text, duration, pad):
+def align_windows(model, tokenizer, samples, text, duration, pad, *, lexical=False):
     """Consume confidently aligned prefixes; all times come from audio alignment."""
     remaining=text;cursor=0.;result=[]
     for _ in range(max(2,int(duration)*2)):
@@ -178,11 +178,12 @@ def align_windows(model, tokenizer, samples, text, duration, pad):
         tokens=tokens[:400]
         features=model.feature_extractor(samples[round(cursor*16000):round((cursor+span)*16000)])
         encoded=model.encode(pad(features));words=model.find_alignment(tokenizer,[tokens],encoded,min(3000,features.shape[-1]))[0]
+        if lexical:words=lexical_words(words,remaining,allow_prefix=True)
         consumed=0;last=0.;selected=[]
         final=cursor+span>=duration-.01
         for word in words:
             a=float(word['start']);b=float(word['end']);confidence=float(word.get('probability',1))
-            if b<=a or a+.04<last or b>span+.05 or confidence<.15:break
+            if not all(math.isfinite(value) for value in (a,b,confidence)) or a<0 or b<=a or a+.04<last or b>span+.05 or confidence<.15:break
             if not final and b>span-1:break
             selected.append(dict(word, start=cursor+a,end=cursor+b));last=b
             consumed+=len(normalize(word['word']))
@@ -227,3 +228,30 @@ def audio_envelope(segment,draft,speed):
         if fade_in:factors.append(f'afade=t=in:st=0:d={fade_in}')
         if fade_out:factors.append(f'afade=t=out:st={length-fade_out}:d={fade_out}')
     return factors
+
+
+def lexical_words(fragments,text,*,allow_prefix=False):
+    """Merge Thai BPE pieces at source lexical boundaries; retain measured endpoints.
+
+    Dictionary boundaries inside a model piece are merged, never interpolated.
+    Confidence is the geometric mean of piece probabilities per lexical unit.
+    """
+    from .ce_tokenizer import tokenize
+    covered=normalize(''.join(w['word'] for w in fragments))
+    if not covered or (not normalize(text).startswith(covered) if allow_prefix else covered!=normalize(text)):
+        raise ValueError('คำที่จับเวลาไม่ตรงกับซับต้นฉบับ')
+    boundaries=set();position=0
+    for word in tokenize(text):
+        position+=len(normalize(word));boundaries.add(position)
+    result=[];group=[];position=0
+    for fragment in fragments:
+        a,b,p=(float(fragment[k]) for k in ('start','end','probability'))
+        if not all(math.isfinite(v) for v in (a,b,p)) or not 0<=p<=1 or b<a:
+            raise ValueError('ข้อมูลจับเวลาคำไม่ถูกต้อง')
+        group.append(fragment);position+=len(normalize(fragment['word']))
+        if position in boundaries:
+            confidence=math.exp(sum(math.log(max(float(w['probability']),1e-12)) for w in group)/len(group))
+            result.append(dict(word=''.join(w['word'] for w in group),start=float(group[0]['start']),end=float(group[-1]['end']),probability=confidence))
+            group=[]
+    if group and not allow_prefix:raise ValueError('จับเวลาคำไม่ครบ')
+    return result

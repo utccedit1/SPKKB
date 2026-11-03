@@ -90,6 +90,42 @@ class CommitTests(unittest.TestCase):
         material=json.loads((self.target/'draft_info.json').read_bytes())['materials']['videos'][0]
         path=Path(material['path']);self.assertTrue(path.is_relative_to(self.target.resolve()));self.assertEqual(path.read_bytes(),b'new media')
 
+    def test_import_without_hashlib_file_digest(self):
+        import hashlib
+        if not hasattr(hashlib, 'file_digest'):
+            self.test_result_assets_copied_inside_project()
+            return
+        with patch.object(hashlib, 'file_digest'):
+            del hashlib.file_digest
+            self.test_result_assets_copied_inside_project()
+
+    def test_corrupt_media_copy_never_changes_project(self):
+        asset=self.result/'asset.mp4';asset.write_bytes(b'new media')
+        draft=json.loads((self.result/'draft_info.json').read_bytes())
+        draft['materials']['videos'][0]['path']=str(asset)
+        (self.result/'draft_info.json').write_text(json.dumps(draft))
+        ticket=self.preview()['install_id']
+        def corrupt(source, destination):
+            Path(destination).write_bytes(b'bad media')
+        with patch.object(C.shutil, 'copyfile', side_effect=corrupt):
+            with self.assertRaisesRegex(ValueError, 'คัดลอกสื่อ'):
+                C.commit('owner',self.target,ticket)
+        for folder in (self.root,self.target):
+            for name in ('draft_info.json','template-2.tmp'):
+                self.assertEqual((folder/name).read_bytes(), self.before)
+        self.assertEqual(list((self.target/'cli_lab_assets').glob('*')), [])
+
+    def test_capcut_internal_png_image_is_copied_with_supported_extension(self):
+        asset=self.result/'generated.image';contents=b'\x89PNG\r\n\x1a\nfixture';asset.write_bytes(contents)
+        draft=json.loads((self.result/'draft_info.json').read_bytes())
+        draft['materials']['videos'][0].update(path=str(asset),type='photo')
+        (self.result/'draft_info.json').write_text(json.dumps(draft))
+        C.commit('owner',self.target,self.preview()['install_id'])
+        material=json.loads((self.target/'draft_info.json').read_bytes())['materials']['videos'][0]
+        path=Path(material['path']);self.assertEqual(path.suffix,'.png');self.assertEqual(path.read_bytes(),contents)
+        meta=json.loads((self.root/'draft_meta_info.json').read_bytes())
+        self.assertTrue(any(e.get('file_Path')==str(path) for group in meta['draft_materials'] for e in group['value']))
+
     def test_old_checkpoints_without_optional_mirrors_still_load(self):
         backup=T.checkpoint(str(self.target),'legacy')
         manifest=json.loads((backup/'manifest.json').read_bytes())

@@ -16,6 +16,7 @@ from collections import OrderedDict
 
 _CONTEXT = threading.local()
 _ANALYSIS_CACHE = OrderedDict()
+_WINDOW_CACHE = OrderedDict()
 _CATALOGUE_CACHE = OrderedDict()
 _CACHE_LOCK = threading.Lock()
 
@@ -24,7 +25,7 @@ def progress(**values):
     if callback:
         callback(**values)
 
-def provider_config(backend="utcc"):
+def provider_config(backend="route", feature="autoclip"):
     if backend == "utcc":
         conf = CE.load_config()
         url = conf.get("utcc_webhook_url")
@@ -33,10 +34,13 @@ def provider_config(backend="utcc"):
         conf.update(ai_backend="webhook", webhook_utcc=True, webhook_url=url,
                     webhook_headers=conf.get("utcc_webhook_headers") or {})
         return conf, "Webhook UTCC"
-    if backend != "route":
+    if backend not in ("route", "gemini"):
         raise ValueError("AI backend ไม่ถูกต้อง")
-    with CE.ai_feature("autoclip"):
+    with CE.ai_feature(feature):
         conf = CE.load_config()
+    if backend == "gemini":
+        conf.update(ai_backend="gemini",webhook_utcc=False)
+        if not conf.get("gemini_api_key"):raise ValueError("กรุณาเพิ่ม Gemini API key ในแท็บ API Key ก่อน")
     label = "Webhook UTCC" if conf.get("ai_backend") == "webhook" and conf.get("webhook_utcc") else ("Webhook" if conf.get("ai_backend") == "webhook" else "Gemini " + conf.get("gemini_model", ""))
     return conf, label
 
@@ -170,18 +174,19 @@ def ask(prompt, max_tokens=2048):
     if conf is None:
         with CE.ai_feature('autoclip'):
             conf = CE.load_config()
-    progress(message='กำลังรอคำตอบ AI (จำกัดเวลาต่อคำขอ 75 วินาที)')
     if conf.get('ai_backend') == 'webhook':
-        raw = CE.call_webhook(prompt, system=SYSTEM, conf=conf,
-                              utcc=bool(conf.get('webhook_utcc')), timeout=75, max_retries=1,
-                              temperature=0.2, max_tokens=max_tokens)
+        from .cli_lab_webhook import request
+        raw = request(prompt, system=SYSTEM, conf=conf,
+                      utcc=bool(conf.get('webhook_utcc')), progress=lambda message:progress(message=message),
+                      temperature=0.2, max_tokens=max_tokens)
     else:
+        progress(message='กำลังรอคำตอบ AI (จำกัดเวลาต่อคำขอ 75 วินาที)')
         if not conf.get('gemini_api_key'):
             raise ValueError('กรุณาตั้งค่า AI สำหรับ AutoClip ก่อน')
         with CE.ai_feature('autoclip'):
             raw = CE.call_gemini(conf['gemini_api_key'], conf.get('gemini_model', 'gemini-flash-latest'),
                                  prompt, system=SYSTEM, temperature=0.2, max_tokens=max_tokens,
-                                 timeout=75, max_retries=1)
+                                 timeout=75, max_retries=1, conf=conf)
     data = parse_event_response(raw)
     if not isinstance(data, list):
         progress(response_preview=str(raw)[:1500], message='AI ตอบข้อความที่ยังอ่านเป็น JSON ไม่ได้')
@@ -265,10 +270,13 @@ def analyze(proj, cfg):
     _, rows, digest = transcript(proj, cfg.get('speaker_ranges'))
     _CONTEXT.language_rule = caption_language_rule(rows)
     translate = cfg.get('translate_th') is True
-    cache_key = ('source-language-v3', translate, os.path.realpath(proj), digest, json.dumps(cfg.get('speaker_ranges') or [], sort_keys=True, ensure_ascii=False),
-                 cfg.get('backend', 'utcc'))
+    from .ce_config import get_current_uid
+    owner=get_current_uid();conf=getattr(_CONTEXT,'conf',None)
+    # Never reuse cached captions across accounts or AI routes.
+    conf_hash=hashlib.sha256(json.dumps(conf,sort_keys=True,default=str).encode()).hexdigest() if isinstance(conf,dict) else None
+    cache_key = ('source-language-v4',owner,conf_hash,translate,os.path.realpath(proj),digest,json.dumps(cfg.get('speaker_ranges') or [],sort_keys=True,ensure_ascii=False),cfg.get('backend','utcc')) if owner and conf_hash else None
     with _CACHE_LOCK:
-        if cache_key in _ANALYSIS_CACHE and not cfg.get('refresh_analysis'):
+        if cache_key is not None and cache_key in _ANALYSIS_CACHE and not cfg.get('refresh_analysis'):
             progress(completed=1, total=1, message='ใช้ผลวิเคราะห์เดิมที่ตรงกับซับล่าสุด ไม่เรียก AI ซ้ำ')
             result = copy.deepcopy(_ANALYSIS_CACHE[cache_key])
             result['cached'] = True
@@ -278,6 +286,14 @@ def analyze(proj, cfg):
     batches = list(topic_windows(rows))
     for index, batch in enumerate(batches):
         progress(completed=index, total=len(batches), start=batch[0]["start"], end=batch[-1]["end"], message="กำลังสรุปประเด็น")
+        window_key=(cache_key,index) if cache_key is not None else None
+        with _CACHE_LOCK:
+            cached=copy.deepcopy(_WINDOW_CACHE.get(window_key)) if window_key is not None and not cfg.get('refresh_analysis') else None
+        if cached is not None:
+            topics.append(cached['topic']);mentions.extend(cached['mentions'])
+            progress(completed=index+1,total=len(batches),message='ใช้ผลช่วงที่ตรวจแล้วจากงานเดิม')
+            continue
+        mentions_before=len(mentions)
         # AI describes a known window; no model-generated IDs or times are trusted.
         prompt = ('สรุปเนื้อหาทั้งช่วงซับนี้ และ keyword หลัก ห้ามเดาชื่อคน '
                   'ดึงชื่อคนเฉพาะที่มีในคำเชิญหรือแนะนำตัว พร้อม quote คัดข้อความซับตรงตัว ห้ามเดาผู้พูด '
@@ -341,6 +357,11 @@ def analyze(proj, cfg):
                        'start': batch[0]['start'], 'end': max(r['end'] for r in batch),
                        'translations': translations, 'summary': item['summary'].strip(), 'keywords': [str(k) for k in keywords],
                        'speakers': sorted({r['speaker'] for r in batch if r['speaker']})})
+        progress(completed=index+1,total=len(batches),message='ตรวจผลช่วงนี้แล้ว')
+        if window_key is not None:
+            with _CACHE_LOCK:
+                _WINDOW_CACHE[window_key]=copy.deepcopy({'topic':topics[-1],'mentions':mentions[mentions_before:]})
+                while len(_WINDOW_CACHE)>128:_WINDOW_CACHE.popitem(last=False)
     progress(completed=len(batches), total=len(batches), message='วิเคราะห์ครบทุกช่วง')
     if transcript(proj)[2] != digest:
         raise ValueError('ซับเปลี่ยนระหว่างวิเคราะห์ กรุณาโหลดซับล่าสุดและวิเคราะห์ใหม่')
@@ -348,10 +369,11 @@ def analyze(proj, cfg):
             'overview': ' / '.join(t['summary'] for t in topics), 'translate_th':translate,
             'note': 'วิเคราะห์เป็นช่วงไม่เกินประมาณ 90 วินาที แบ่งเมื่อเปลี่ยนผู้พูดหรือเว้นช่วง '
                     'เวลาอ้างอิงซับจริง ขอบช่วงอาจไม่ตรงขอบประเด็น ชื่อคนต้องยืนยันจากผู้ใช้'}
-    with _CACHE_LOCK:
-        _ANALYSIS_CACHE[cache_key] = copy.deepcopy(result)
-        while len(_ANALYSIS_CACHE) > 8:
-            _ANALYSIS_CACHE.popitem(last=False)
+    if cache_key is not None:
+        with _CACHE_LOCK:
+            _ANALYSIS_CACHE[cache_key] = copy.deepcopy(result)
+            while len(_ANALYSIS_CACHE) > 8:
+                _ANALYSIS_CACHE.popitem(last=False)
     return result
 
 

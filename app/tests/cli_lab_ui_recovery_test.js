@@ -3,14 +3,18 @@ const source=require('child_process').execFileSync(process.env.PYTHON || 'python
 const key='cliLabActiveJob:workspace';
 function page(reply,store=new Map(),results=[]){
  const elements=new Map(),calls=[];
- function element(id){if(!elements.has(id))elements.set(id,{value:'',checked:true,hidden:false,disabled:false,textContent:'',children:[],appendChild(child){this.children.push(child);},listeners:{},addEventListener(name,fn){(this.listeners[name]??=[]).push(fn);},focus(){this.focused=true;}});return elements.get(id);}
+ function newElement(){return {value:'',checked:true,hidden:false,disabled:false,textContent:'',children:[],appendChild(child){this.children.push(child);},replaceChildren(...children){this.children=[...children];},listeners:{},addEventListener(name,fn){(this.listeners[name]??=[]).push(fn);},focus(){this.focused=true;},style:{}};}
+ function element(id){if(!elements.has(id))elements.set(id,newElement());return elements.get(id);}
  element('cliLabMode').value='story';element('cliLabMin').value='30';element('cliLabMax').value='45';
- const box={document:{createElement:()=>({children:[],appendChild(child){this.children.push(child);}}),getElementById:element,querySelectorAll:()=>[...elements.values()]},location:{href:'http://localhost/editor?workspace=workspace'},URL,AbortController,sessionStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},setTimeout:(fn,ms)=>{if(ms<10000)queueMicrotask(fn);return 1;},clearTimeout(){},fetch:async(url,opts)=>{const body=JSON.parse(opts.body);if(body.action==='results')return {ok:true,status:200,json:async()=>({ok:true,results})};if(body.action==='stock_settings')return {ok:true,status:200,json:async()=>({ok:true,folder:'',destination:'/fixture/project/media'})};calls.push(body);return reply(body,calls.length);}};
+ const box={document:{createElement:tag=>Object.assign(newElement(),{tagName:tag.toUpperCase()}),getElementById:element,querySelectorAll:()=>[...elements.values()]},location:{href:'http://localhost/editor?workspace=workspace'},URL,AbortController,sessionStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},setTimeout:(fn,ms)=>{if(ms<10000)queueMicrotask(fn);return 1;},clearTimeout(){},fetch:async(url,opts)=>{const body=JSON.parse(opts.body);if(body.action==='results')return {ok:true,status:200,json:async()=>({ok:true,results})};if(body.action==='stock_settings')return {ok:true,status:200,json:async()=>({ok:true,folder:'',destination:'/fixture/project/media'})};calls.push(body);return reply(body,calls.length);}};
  box.window=box;vm.runInNewContext(source,box);return {box,element,calls,store};
 }
 const ok=data=>({ok:true,status:200,json:async()=>({ok:true,...data})});
 const settle=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
 (async()=>{
+ const failedPlan=page(b=>b.action==='start'?ok({job_id:'failed'}):ok({state:'failed',operation:'plan',error:'Webhook error 502'}));
+ failedPlan.element('cliLabInstruction').value='test';await failedPlan.box.cliLab('plan');
+ assert(!failedPlan.element('cliLabRunWait').textContent.includes('ไฟล์ที่ดาวน์โหลด'),'plan failure must not claim downloaded media can be reused');
  const presets=page(()=>ok({}));
  const choose=presets.element('cliLabPromptTemplate'),brief=presets.element('cliLabInstruction');
  assert.equal(choose.value,'social');assert(brief.value.includes('ไม่แต่งคำพูด'));
@@ -44,6 +48,9 @@ const settle=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
  });
  flow.element('cliLabInstruction').value='test';await flow.box.cliLab('plan');await flow.box.cliLab('apply');
  assert(!flow.element('cliLabPrepareResult').hidden,'completed output needs direct prepare retry');assert.equal(flow.element('cliLabResultFolder').value,'/saved-output');
+ const goal=page(b=>b.action==='start'?ok({job_id:'goal'}):ok({state:'done',result:{mode:'single',plan_id:'p',start:0,end:10,reason:'test'}}));
+ goal.element('cliLabPromptTemplate').value='highlight';goal.element('cliLabInstruction').value='test';await goal.box.cliLab('plan');
+ assert.equal(goal.calls.find(c=>c.action==='start').editorial_goal,'highlight');
  previewFails=false;await flow.box.cliLab('install_preview');assert(flow.element('cliLabPrepareResult').hidden);assert(!flow.element('cliLabInstall').disabled);assert(flow.element('cliLabCancel').hidden,'no cancel button for completed/synchronous work');
  const missing=page(()=>ok({ok:false,code:'job_not_found',error:'gone'}),new Map([[key,JSON.stringify({id:'gone',action:'plan'})]]));
  await settle();assert(!missing.store.has(key),'HTTP 200 with job_not_found must end stale tracking');assert(missing.element('cliLabResume').hidden);
@@ -57,5 +64,36 @@ const settle=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
  const staleResult=page(()=>ok({ok:false,error:'source changed'}),new Map(),[savedResult]);
  await settle();await staleResult.element('cliLabSavedResults').children[0].children[0].onclick();
  assert(staleResult.element('cliLabInstall').disabled);assert(staleResult.element('cliLabResult').textContent.includes('source changed'));
+ const story={mode:'story',plan_id:'old-plan',duration:8,cuts:[{first_id:1,last_id:1,start:1,end:5,text:'หนึ่ง',role:'hook'},{first_id:3,last_id:3,start:6,end:10,text:'สอง',role:'conclusion'}],hook:'hook',cta:'cta',reason:'เหตุผล'};
+ let rejectBoundary=false;
+ const edit=page(b=>{
+  if(b.action==='start')return ok({job_id:'edit'});
+  if(b.action==='job_status')return ok({state:'done',result:story});
+  if(b.action==='review_boundaries')return ok({cuts:story.cuts.map(c=>({...c,captions:[{id:c.first_id-1,start:0,end:1,text:'ก่อน'},{id:c.first_id,start:c.start,end:c.end,text:c.text},{id:c.first_id+1,start:10,end:11,text:'หลัง'}]}))});
+  if(b.action==='update_boundaries')return rejectBoundary?{ok:false,status:400,json:async()=>({ok:false,error:'ช่วงซ้อนกัน'})}:ok({...story,plan_id:'new-plan'});
+  throw Error('unexpected '+b.action);
+ });
+ edit.element('cliLabInstruction').value='test';await edit.box.cliLab('plan');
+ await edit.box.cliLabReviewBoundaries();
+ assert.equal(edit.calls.at(-1).plan_id,'old-plan');assert(!edit.element('cliLabBoundarySection').hidden);
+ const first=edit.element('cliLabBoundaryRows').children[0];
+ const start=first.children.find(c=>c.tagName==='SELECT');start.value='0';start.onchange();
+ assert(edit.element('cliLabApply').disabled,'edited cut must be saved before apply');
+ rejectBoundary=true;await edit.box.cliLabSaveBoundaries();assert(edit.element('cliLabApply').disabled,'rejected cut must not be applied');
+ rejectBoundary=false;await edit.box.cliLabSaveBoundaries();
+ assert.equal(edit.calls.at(-1).action,'update_boundaries');assert.equal(edit.calls.at(-1).plan_id,'old-plan');assert.equal(edit.calls.at(-1).cuts[0].first_id,0);
+ assert(!edit.element('cliLabApply').disabled,'validated new plan can be applied');
+ await edit.box.cliLabReviewBoundaries();assert.equal(edit.calls.at(-1).plan_id,'new-plan','follow-up review must use the validated new plan');
+ assert(!JSON.stringify([...edit.store.values()]).includes('ก่อน'),'caption context must not enter browser storage');
+ const pending=page(b=>{
+  if(b.action==='start')return ok({job_id:'pending'});
+  if(b.action==='job_status')return ok({state:'done',result:{...story,requires_boundary_review:true}});
+  if(b.action==='review_boundaries')return ok({cuts:story.cuts.map(c=>({...c,captions:[{id:c.first_id,start:c.start,end:c.end,text:c.text}]}))});
+  throw Error('unexpected '+b.action);
+ });
+ pending.element('cliLabInstruction').value='test';await pending.box.cliLab('plan');
+ assert(pending.element('cliLabApply').disabled,'unfinished boundaries must block apply');
+ await pending.box.cliLabReviewBoundaries();pending.box.cliLabDiscardBoundaries();
+ assert(pending.element('cliLabApply').disabled,'discard must not clear required review');
  console.log('CLI UI: offline recovery, explicit resume, terminal missing jobs, auth recovery, validation and cleanup undo isolation passed');
 })().catch(e=>{console.error(e);process.exit(1)});

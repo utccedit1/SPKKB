@@ -5,8 +5,16 @@ import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from ks.cli_lab_presentation import phrases,split_captions,emphasis
+from ks.cli_lab_story import check_coverage
 
 class PresentationTests(unittest.TestCase):
+    def test_highlight_may_omit_source_without_changing_default(self):
+        captions=[{'sources':['one']},{'sources':['two']}]
+        story={'cuts':[{'first_id':0,'last_id':0}]}
+        with self.assertRaises(ValueError): check_coverage(dict(story),captions)
+        result=dict(story);check_coverage(result,captions,require_all=False)
+        self.assertEqual(result['source_count'],1)
+        self.assertEqual(result['omitted_source_count'],1)
     def test_split_preserves_text_coverage_time_and_independent_materials(self):
         text='เราสามารถใช้เอไอช่วยลดระยะเวลาทำงานจากหนึ่งเดือนเหลือหนึ่งสัปดาห์และทำให้งานมีความถูกต้องมากขึ้น'
         draft={'duration':15000000,'materials':{'texts':[{'id':'m','content':json.dumps({'text':text,'styles':[{'range':[0,len(text)],'size':10}]})}]},'tracks':[{'type':'text','segments':[{'id':'s','material_id':'m','target_timerange':{'start':4000000,'duration':8000000}}]}]}

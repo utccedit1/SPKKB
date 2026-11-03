@@ -308,7 +308,7 @@ def call_webhook(prompt, system=None, temperature=0.95, json_mode=True,
                     return _finish(raw)
                 if _is_ack_response(data):
                     raise WebhookAckError(
-                        "ปลายทางตอบกลับแค่ใบรับข้อมูล (" + json.dumps(data, ensure_ascii=False)[:80] + ") "
+                        "ปลายทางตอบกลับแค่ใบรับข้อมูล "
                         "ยังไม่ใช่คำตอบจริงจาก AI\n"
                         "สาเหตุ: URL นี้เป็น 'Webhook Trigger' ของ agentflow ที่ทำงานแบบอะซิงค์ — "
                         "มันรับข้อมูลแล้วไปรันในเบื้องหลัง คำตอบไปโผล่ที่ Execution Monitor ไม่ส่งกลับมาทาง HTTP\n"
@@ -334,7 +334,7 @@ def call_webhook(prompt, system=None, temperature=0.95, json_mode=True,
                         "(2) ใช้ URL ตรง webhub.utcc.ac.th/api/agentflow/webhooks/… แทน chat.utcc.ac.th "
                         "(3) ถ้าตั้ง Secret ไว้ ให้ใส่ Header X-Webhook-Secret หรือ Authorization: Bearer … "
                         "(4) หรือให้แอดมินผ่อน Cloudflare Bot Fight Mode / whitelist IP เครื่องนี้")
-                raise RuntimeError(f"Webhook error {e.code}: {detail}")
+                raise RuntimeError(f"Webhook error {e.code} · ตรวจสถานะบริการและการตั้งค่า Webhook")
             except (TimeoutError, socket.timeout) as ex:
                 diagnostics.update(trace,'timeout')
                 raise RuntimeError(f"Webhook ยังไม่ส่งคำตอบภายในเวลารอ {timeout} วินาที · ไม่ส่งคำขอซ้ำอัตโนมัติ เพราะเซิร์ฟเวอร์อาจยังประมวลผลอยู่ กรุณาตรวจ Execution Monitor ของ UTCC หรือสถานะ Webhook ก่อนลองใหม่") from ex
@@ -350,20 +350,15 @@ def call_webhook(prompt, system=None, temperature=0.95, json_mode=True,
                 raise
             except Exception as ex:
                 diagnostics.update(trace,'network_error')
-                last_err = ex
-                if attempt < max_retries - 1:
-                    time.sleep(2 * (attempt + 1)); continue
-                if cand is not url_candidates[-1]:
-                    break
-                raise RuntimeError(f"เรียก Webhook ไม่สำเร็จ: {ex}")
+                raise RuntimeError('รับคำตอบ Webhook ไม่ครบหรือการเชื่อมต่อขัดข้อง · ไม่ส่งคำขอซ้ำอัตโนมัติ เพราะเซิร์ฟเวอร์อาจยังทำงานอยู่ กรุณาตรวจสถานะงานเดิมก่อนลองใหม่') from ex
     raise last_err if last_err else RuntimeError("เรียก Webhook ไม่สำเร็จ")
 
 
 # ─── call_gemini ───────────────────────────────────────────────────────────────
 def call_gemini(api_key, model, prompt, timeout=60, max_retries=4,
-                system=None, temperature=0.95, json_mode=True, max_tokens=2048):
+                system=None, temperature=0.95, json_mode=True, max_tokens=2048, conf=None):
     if _task_stage('กำลังส่งคำขอ AI / รอคำตอบ'): timeout, max_retries = min(timeout, 75), 1
-    _conf = load_config()
+    _conf = load_config() if conf is None else dict(conf)
     _is_webhook = (_conf.get("ai_backend") == "webhook") or bool(_conf.get("webhook_utcc"))
     if _is_webhook and (_conf.get("webhook_url") or "").strip():
         return call_webhook(prompt, system=system, temperature=temperature,

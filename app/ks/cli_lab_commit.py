@@ -11,6 +11,7 @@ import uuid
 from . import event_timeline as T
 from .apply_guard import project_lock
 from .cli_lab_nested import drafts
+from .file_hash import sha256_file
 from . import job_store
 
 _tickets = {}
@@ -98,6 +99,14 @@ def preview(owner, project, folder, expected=None, result_id=None):
 
 def review_notes(folder):
     notes=[];folder=Path(folder)
+    if (folder/'kinetic_text_report.json').is_file():
+        report=json.loads((folder/'kinetic_text_report.json').read_bytes())
+        notes.append(f"คำตามเสียง · {report.get('units',0)} ชิ้น · ตรวจการขึ้นคำ สี ขนาด และพื้นที่พ้นใบหน้าใน CapCut")
+    if (folder/'caption_studio_report.json').is_file():
+        report=json.loads((folder/'caption_studio_report.json').read_bytes())
+        from .caption_presets import catalog
+        name=next((p['name'] for p in catalog() if p['id']==report.get('preset')),'สไตล์ซับ')
+        notes.append(f"สไตล์ซับ {name} · {report.get('count',0)} ชิ้น · คงคำพูดและเวลาเดิม โปรดตรวจภาพและโมชั่นใน CapCut")
     if (folder/'broll_repair_report.json').is_file():notes.append('ตรวจไฟล์ B-roll แล้ว · ยืนยันเพื่อคัดลอกเข้าโปรเจกต์และซ่อมทะเบียนสื่อ โดยไม่เปลี่ยนรอยตัดหรือเพิ่มภาพซ้ำ')
     if (folder/'broll_only_report.json').is_file():
         report=json.loads((folder/'broll_only_report.json').read_bytes())
@@ -227,11 +236,17 @@ def commit(owner, project, token, progress=lambda message: None):
                     path = Path(material.get('path', '')).resolve()
                     if path.is_file() and (path.is_relative_to(result) or any(material is m for m in broll_materials)):
                         assets.mkdir(parents=True, exist_ok=True)
-                        dest = assets/(uuid.uuid4().hex[:8]+'_'+path.name)
+                        name = path.name
+                        # CapCut's generated PNG caches use .image; once copied
+                        # outside its cache CapCut needs the real PNG extension.
+                        if kind == 'videos' and material.get('type') == 'photo' and path.suffix.lower() == '.image':
+                            with path.open('rb') as source:
+                                if source.read(8) == b'\x89PNG\r\n\x1a\n':
+                                    name = path.with_suffix('.png').name
+                        dest = assets/(uuid.uuid4().hex[:8]+'_'+name)
                         shutil.copyfile(path,dest)
                         if broll_materials:
-                            with path.open('rb') as incoming,dest.open('rb') as copied:
-                                if hashlib.file_digest(incoming,'sha256').digest()!=hashlib.file_digest(copied,'sha256').digest():raise ValueError('คัดลอกสื่อ B-roll ไม่ครบ ยังไม่แก้โปรเจกต์')
+                            if sha256_file(path)!=sha256_file(dest):raise ValueError('คัดลอกสื่อ B-roll ไม่ครบ ยังไม่แก้โปรเจกต์')
                             expected_stamp=ticket['media'].get(str(path))
                             if expected_stamp and (path.stat().st_size,path.stat().st_mtime_ns)!=tuple(expected_stamp):raise ValueError('สื่อ B-roll เปลี่ยนระหว่างคัดลอก')
                         material['path'] = str(dest)

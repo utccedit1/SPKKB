@@ -22,14 +22,13 @@ def start(owner, proj, action, cfg):
     draft_writes={'apply','restore','resegment','proofread_apply','generate','align','silence_apply','history_restore','history_checkpoint'}
     if action in draft_writes:
         event_timeline.ensure_closed(home_confirmed=cfg.get('style_only') is True and cfg.get('capcut_home_confirmed') is True)
-    conf, label = ({}, 'ไม่ใช้ AI — บันทึก backup และจัดการไทม์ไลน์') if action in MUTATIONS | TASKS else E.provider_config(cfg.get('backend', 'utcc'))
+    conf, label = ({}, 'ไม่ใช้ AI — บันทึก backup และจัดการไทม์ไลน์') if action in MUTATIONS | TASKS else E.provider_config(cfg.get('backend', 'route'))
     if action == 'resegment' and not cfg.get('style_only'):
         with E.CE.ai_feature('resegment'):
             conf=E.CE.load_config()
             label=E.CE.effective_ai_label('resegment')['label']
         if cfg.get('english_loanwords'):
-            E.provider_config('utcc')  # Fail before starting if UTCC is not configured.
-            label+=' + UTCC (คำทับศัพท์)'
+            label+=' + AI (คำทับศัพท์)'
     if action in TASKS:
         feature = feature_tasks.FEATURES.get(action)
         uses_ai = action in feature_tasks.READ_TASKS | {'chatbot','align','sfx_listen'} or (action == 'generate' and cfg.get('sfx_on') and cfg.get('sfx_mode') == 'ai')

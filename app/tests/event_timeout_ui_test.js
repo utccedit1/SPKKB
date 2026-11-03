@@ -1,0 +1,5 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const raw=fs.readFileSync('app/ks/event_clip_ui.py','utf8');const code=raw.slice(raw.indexOf('async function evWatch(action)'),raw.indexOf("window.addEventListener('DOMContentLoaded'"));
+const elements=new Map();function el(id){if(!elements.has(id))elements.set(id,{textContent:'',value:0,max:0});return elements.get(id)}
+const ctx={evJob:'fixture',evPolling:false,Date,document:{getElementById:el},evPost:async()=>({state:'failed',error:'Webhook ยังไม่ส่งคำตอบ · ไม่ส่งคำขอซ้ำอัตโนมัติ กรุณาตรวจ Execution Monitor',message:'งานหยุด',completed:0,total:1,created:Date.now()/1000,backend:'fixture'}),evClock:()=>'',sessionStorage:{removeItem(){}},evBusy(){},setTimeout};vm.runInNewContext(code,ctx);
+(async()=>{await ctx.evWatch('analyze');assert(el('evStatus').textContent.includes('Execution Monitor'));assert(!el('evStatus').textContent.includes('กดวิเคราะห์ใหม่ได้'));console.log('Event timeout: no unsafe retry suggestion');})().catch(e=>{console.error(e);process.exit(1)});

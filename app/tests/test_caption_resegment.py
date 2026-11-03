@@ -38,13 +38,14 @@ class CaptionResegmentTests(unittest.TestCase):
   self.assertEqual(seg['target_timerange'],d['tracks'][0]['segments'][0]['target_timerange'])
   self.assertEqual(T.read_checkpoint(str(self.proj),result['backup_name'])['draft_info.json'],raw)
 
- def test_loanwords_on_short_caption_force_utcc_and_keep_time(self):
+ def test_loanwords_on_short_caption_uses_selected_gemini_and_keeps_time(self):
   d=copy.deepcopy(self.draft);d['materials']['texts'][0]['content']=json.dumps({'text':'ทำคอนเทนต์ค่ะ','styles':[]})
   raw=json.dumps(d).encode();(self.proj/'draft_info.json').write_bytes(raw)
   (self.proj.parent.parent/'draft_info.json').write_bytes(raw)
-  with patch.object(T,'ensure_closed'),patch.object(E,'provider_config',return_value=({'ai_backend':'webhook','webhook_utcc':True},'UTCC')) as route,patch.object(R,'ask',return_value=[{'index':0,'replacements':[{'source':'คอนเทนต์','english':'Content','occurrence':1}]}]) as ai:
+  E._CONTEXT.conf={'ai_backend':'gemini','gemini_api_key':'fixture-key','webhook_utcc':False}
+  with patch.object(T,'ensure_closed'),patch.object(E,'provider_config',side_effect=AssertionError('must reuse selected provider')),patch.object(R,'ask',return_value=[{'index':0,'replacements':[{'source':'คอนเทนต์','english':'Content','occurrence':1}]}]) as ai:
    result=R.run(str(self.proj),{'max_words':20,'english_loanwords':True})
-  route.assert_called_once_with('utcc');self.assertTrue(ai.call_args[0][1]['webhook_utcc'])
+  self.assertEqual(ai.call_args[0][1]['ai_backend'],'gemini')
   self.assertEqual(result['loanword_changed'],1)
   saved=json.loads((self.proj/'draft_info.json').read_bytes());seg=saved['tracks'][0]['segments'][0]
   mat=next(m for m in saved['materials']['texts'] if m['id']==seg['material_id'])

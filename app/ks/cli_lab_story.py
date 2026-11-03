@@ -347,6 +347,8 @@ def decorate(work, plan, run_cli, progress, owner=None):
         run_cli('volume', work, added[0]['id'], 0 if kind == 'broll' else 1.0)
         if kind == 'music':
             run_cli('audio-fade', work, added[0]['id'], '--in', min(.5, length/4), '--fade-out', min(1, length/4))
+    from .cli_lab_backdrop import insert as insert_audio_backdrop
+    insert_audio_backdrop(work, plan, run_cli, progress)
     from .stock_media import apply as insert_stock
     insert_stock(work,plan,owner,run_cli,progress)
     from .cli_lab_visuals import insert_library
@@ -393,7 +395,7 @@ def publish(source, parsed, base, review=None):
             return [relocate(v) for v in value]
         return value
     try:
-        for name in ('speech_alignment.json','alignment_report.json','speech_cleanup.json','visuals_report.json','stock_report.json','caption_layout_report.json','audio_levels_report.json'):
+        for name in ('speech_alignment.json','alignment_report.json','speech_cleanup.json','visuals_report.json','backdrop_report.json','stock_report.json','caption_layout_report.json','audio_levels_report.json'):
             if (source/name).is_file():shutil.copyfile(source/name,staging/name)
         for directory in ('assets', 'draft_materials'):
             if (source / directory).is_dir():
@@ -428,12 +430,13 @@ def source_windows(draft):
     return result
 
 
-def check_coverage(story, captions):
+def check_coverage(story, captions, require_all=True):
     required={source for cue in captions for source in cue.get('sources',[])}
     used={source for cut in story['cuts'] for cue in captions[cut['first_id']:cut['last_id']+1] for source in cue.get('sources',[])}
     missing=required-used
-    if missing:raise ValueError('แผนยังไม่ใช้เนื้อหาจากทุกคลิป: '+', '.join(Path(str(s)).name for s in sorted(missing)))
+    if missing and require_all:raise ValueError('แผนยังไม่ใช้เนื้อหาจากทุกคลิป: '+', '.join(Path(str(s)).name for s in sorted(missing)))
     story['source_count']=len(used)
+    if not require_all:story['omitted_source_count']=len(missing)
 
 
 def preflight(draft,needs_audio=True):

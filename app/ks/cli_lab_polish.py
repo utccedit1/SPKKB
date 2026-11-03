@@ -1,6 +1,7 @@
 """Conservative speech edits with one shared time map for every timeline track."""
 import copy
 import json
+import math
 import re
 import uuid
 
@@ -17,10 +18,12 @@ def candidates(draft, timings):
         words=timings.get(seg['id'])
         if not words:continue
         spans=timed_spans(words);origin=seg['target_timerange']['start']
+        measured=[w for w in words if normalize(w['word'])]
         for match in FILLERS.finditer(text):
             first=len(normalize(text[:match.start()]));last=len(normalize(text[:match.end()]))
             selected=[w for w in spans if w[0]<last and w[1]>first]
-            if any(float(w.get('confidence',1))<.35 for w in words if len(normalize(w['word'])) and match.group() in w['word']):continue
+            confidences=[float(w.get('confidence',1)) for span,w in zip(spans,measured) if span[0]<last and span[1]>first]
+            if any(not math.isfinite(value) or value<.35 for value in confidences):continue
             # Never cut a token shared by a meaningful neighboring word.
             if not selected or selected[0][0]!=first or selected[-1][1]!=last:continue
             a,b=selected[0][2],selected[-1][3]

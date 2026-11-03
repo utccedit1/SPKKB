@@ -17,7 +17,7 @@ def status(owner):
     from . import cli_lab,capcut_session,event_clip,stock_accounts
     try:cli=bool(cli_lab.executable())
     except ValueError:cli=False
-    try:event_clip.provider_config('utcc');ai=True
+    try:conf,_=event_clip.provider_config('route');ai=conf.get('ai_backend')=='webhook' and bool(conf.get('webhook_url')) or bool(conf.get('gemini_api_key'))
     except ValueError:ai=False
     try:stock=stock_accounts.handle(owner,{'action':'status'})
     except Exception:stock={}
@@ -44,7 +44,7 @@ def handle(owner,data):
     raise ValueError('คำสั่งตั้งค่าไม่ถูกต้อง')
 
 UI=r'''
-<button id="setupReopen" type="button" onclick="studioSetupOpen()" style="position:fixed;bottom:12px;right:12px;z-index:1050">ตั้งค่าครั้งแรก</button>
+<button id="setupReopen" type="button" onclick="studioSetupOpen()">ตั้งค่าครั้งแรก</button>
 <dialog id="studioSetup" aria-labelledby="setupTitle" style="max-width:680px;width:90%;border-radius:16px;border:1px solid var(--line);background:var(--card,#fff);color:var(--txt,#222);padding:24px;max-height:85vh;overflow:auto">
 <h2 id="setupTitle">เริ่มใช้งานช่วยด้วยจ้า</h2><p>ตรวจเครื่องให้ก่อน แล้วทำเฉพาะขั้นที่ยังไม่พร้อม บัญชีและรหัสผ่านใช้ของคุณเอง</p>
 <ol style="line-height:1.6;max-height:42vh;overflow-y:auto;padding-right:12px">
@@ -67,7 +67,7 @@ window.studioSetupOpen=()=>check(false);
 window.studioSetupSave=async action=>{if(busy)return;busy=true;try{await send({action});q('studioSetup').close();}catch(e){q('setupMessage').textContent=e.message;}finally{busy=false;}};
 window.studioSetupPrivacy=async()=>{if(busy)return;busy=true;try{q('setupMessage').textContent=(await send({action:'accessibility'})).message;}catch(e){q('setupMessage').textContent=e.message;}finally{busy=false;}};
 window.studioSetupGo=where=>{q('studioSetup').close();if(where==='project'){sessionStorage.setItem('studioSetupPick','1');location.href='/';return;}if(!window.ksSide){q('setupMessage').textContent='เลือกโปรเจกต์ก่อน แล้วเปิดตั้งค่าครั้งแรกอีกครั้ง';q('studioSetup').showModal();return;}window.ksSide(where==='stock'?'clilab':where);if(where==='stock'){const panel=q('stockAccountsPanel');if(panel)panel.open=true;window.stockAccounts?.('start');}};
-document.addEventListener('DOMContentLoaded',()=>check(true));
+document.addEventListener('DOMContentLoaded',()=>{if(!q('tab_main'))document.querySelector?.('.wrap')?.prepend(q('setupReopen'));return check(true)});
 })();
 </script>
 '''

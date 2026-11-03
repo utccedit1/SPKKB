@@ -15,7 +15,8 @@ def admit(function):
     return call
 
 def busy():
-    from . import event_jobs, cli_lab, stock_accounts
+    from . import event_jobs, cli_lab, stock_accounts, caption_studio
+    if caption_studio._active:return True
     for module, guard in ((event_jobs, event_jobs._lock), (cli_lab, cli_lab._jobs_lock), (stock_accounts, stock_accounts._lock)):
         with guard:
             if any(j.get('state') in ('queued', 'running', 'cancelling') for j in module._jobs.values()):

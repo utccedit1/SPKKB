@@ -32,10 +32,10 @@ def report(owner):
  from . import core_engine as CE,event_clip as E
  with CE.ai_feature('chatbot'):chat=CE.load_config()
  with CE.ai_feature('broll'):broll=CE.load_config()
- try:cut,_=E.provider_config('utcc')
+ try:cut,_=E.provider_config('route')
  except ValueError:cut={}
  def route(cfg):return dict(backend=cfg.get('ai_backend','gemini'),endpoint=endpoint_id(cfg.get('webhook_url')) if cfg.get('ai_backend')=='webhook' else '')
- routes={'chat':route(chat),'broll':route(broll),'cut':dict(backend='webhook_utcc',endpoint=endpoint_id(cut.get('webhook_url')))}
+ routes={'chat':route(chat),'broll':route(broll),'cut':route(cut)}
  rows=recent(owner);names={'chat':'แชท','broll':'B-roll ปกติ','cut':'ตัด AI'};lines=['รายงาน AI · เฉพาะการเชื่อมต่อ ไม่เก็บซับ ข้อความแชท รหัส หรือ URL เต็ม']
  for key,r in routes.items():lines.append(names[key]+': '+r['backend']+(' · ปลายทาง #'+r['endpoint'] if r['endpoint'] else ''))
  if routes['chat']['endpoint'] and routes['chat']['endpoint']==routes['cut']['endpoint']:lines.append('แชทและตัด AI ใช้ Webhook เดียวกัน')

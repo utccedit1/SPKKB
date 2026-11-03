@@ -222,6 +222,19 @@ class ExtraRegressionTests(unittest.TestCase):
         self.assertEqual(''.join(x['word'] for x in result),'alpha beta')
         self.assertAlmostEqual(result[1]['start'],19.9)
 
+    def test_alignment_rejects_nonfinite_confidence(self):
+        import numpy as np
+        from ks.cli_lab_alignment import align_windows
+        class Tokenizer:
+            def encode(self,text):return [1]
+        class Model:
+            def feature_extractor(self,audio):return np.zeros((80,len(audio)//160))
+            def encode(self,value):return value
+            def find_alignment(self,*args):
+                return [[{'word':'เอ่อ','start':.1,'end':.5,'probability':float('nan')}]]
+        with self.assertRaises(ValueError):
+            align_windows(Model(),Tokenizer(),np.zeros(16000),'เอ่อ',1,lambda x:x)
+
     def test_legacy_motion_can_be_cut_again_without_duplicate_key_ids(self):
         from ks import cli_lab_story as S
         with tempfile.TemporaryDirectory() as folder:

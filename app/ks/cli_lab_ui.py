@@ -4,7 +4,9 @@ UI = r'''
  <div class="card">
   <h2>ตัดคลิปด้วย AI</h2>
   <p>ใช้ซับจาก CapCut เลือกช่วงสำคัญ แล้วนำคลิปที่ตัดกลับเข้าโปรเจกต์เดิม</p>
-  <p style="opacity:.75">ก่อนเริ่ม: สร้างซับใน CapCut และบันทึกโปรเจกต์ · ข้อความซับจะส่งให้ UTCC วางแผน</p>
+  <p style="opacity:.75">ก่อนเริ่ม: สร้างซับใน CapCut และบันทึกโปรเจกต์ · ข้อความซับจะส่งให้ AI ที่คุณเลือกวางแผน</p>
+  <label>AI ที่ใช้ <select id="cliLabBackend"><option value="route">ตามการตั้งค่า AutoClip</option><option value="gemini">Gemini API key</option><option value="utcc">Webhook UTCC</option></select></label>
+  <p style="opacity:.75">เพิ่มคีย์ในแท็บ API Key · เลือกคีย์และโมเดลแยกแต่ละงานได้ในแท็บสมอง AI · ไม่สลับผู้ให้บริการเองเมื่อหมดเวลารอ</p>
   <div id="cliLabSavedResults" aria-live="polite"></div>
   <button type="button" onclick="cliLabLoadResults()">ตรวจผลล่าสุดที่ยังไม่ใส่โปรเจกต์</button>
   <label for="cliLabInstruction">อยากได้คลิปแบบไหน?</label>
@@ -45,6 +47,15 @@ UI = r'''
    <h3>แผนตัดคลิป</h3>
    <p>แผนใช้สร้างคลิปได้ภายใน 1 ชั่วโมง ส่วนผลที่สร้างเสร็จแล้วไม่หมดอายุเพราะเวลา</p>
    <pre id="cliLabPlan" style="white-space:pre-wrap;overflow-wrap:anywhere" aria-live="polite"></pre>
+   <button type="button" id="cliLabBoundaryOpen" hidden onclick="cliLabReviewBoundaries()">ตรวจและปรับจุดเริ่ม / จบแต่ละช่วง</button>
+   <div id="cliLabBoundarySection" hidden style="margin:12px 0;padding:14px;border:1px solid #8295b4;border-radius:10px">
+    <p>เลือกซับที่เป็นจุดเริ่มและจุดจบของแต่ละช่วง แล้วกดตรวจและบันทึกแผนใหม่ · ฟังรอยต่อจริงใน CapCut ก่อนนำไปใช้</p>
+    <p role="note" style="padding:10px;background:#fff0c2;color:#503400;border-radius:8px">เมื่อบันทึกจุดตัดใหม่ ระบบจะนำคำค้น B-roll และข้อความเน้นเดิมออก เพราะอาจไม่ตรงกับช่วงที่แก้ โปรดตรวจผลตกแต่งอีกครั้ง</p>
+    <div id="cliLabBoundaryRows"></div>
+    <p id="cliLabBoundaryStatus" role="status"></p>
+    <button type="button" onclick="cliLabSaveBoundaries()">ตรวจและบันทึกแผนใหม่</button>
+    <button type="button" onclick="cliLabDiscardBoundaries()">ยกเลิกการปรับ</button>
+   </div>
    <details id="cliLabOverlayReview" hidden><summary>แก้ข้อความเปิดเรื่อง / ปิดท้าย</summary>
     <label for="cliLabHook">ข้อความเปิดเรื่อง</label><input id="cliLabHook" maxlength="120" style="width:100%;box-sizing:border-box">
     <label for="cliLabCTA">ข้อความปิดท้าย</label><input id="cliLabCTA" maxlength="120" style="width:100%;box-sizing:border-box">
@@ -81,10 +92,10 @@ __RUN_MONITOR_UI__
 JS = r'''
 <script>
 (function(){
-let plan=null,install=null,busy=false,waiting=false;
+let plan=null,install=null,busy=false,waiting=false,boundaryDirty=false,mustReview=false,boundaryInputs=[];
 const q=id=>document.getElementById(id);
 __RUN_MONITOR_JS__
-function resetPlan(){plan=null;install=null;q('cliLabPrepareResult').hidden=true;q('cliLabApply').disabled=true;q('cliLabInstall').disabled=true;q('cliLabPlanSection').hidden=true;q('cliLabInstallSection').hidden=true;q('cliLabPlanButton').textContent='1. วางแผนตัดคลิป';q('cliLabPlanButton').className='primary';q('cliLabApply').hidden=false;}
+function resetPlan(){plan=null;install=null;boundaryDirty=false;mustReview=false;boundaryInputs=[];q('cliLabBoundarySection').hidden=true;q('cliLabBoundaryOpen').hidden=true;q('cliLabPrepareResult').hidden=true;q('cliLabApply').disabled=true;q('cliLabInstall').disabled=true;q('cliLabPlanSection').hidden=true;q('cliLabInstallSection').hidden=true;q('cliLabPlanButton').textContent='1. วางแผนตัดคลิป';q('cliLabPlanButton').className='primary';q('cliLabApply').hidden=false;}
 q('cliLabInstruction').addEventListener('input',resetPlan);
 __PROMPT_TEMPLATE_JS__
 ['cliLabMode','cliLabMin','cliLabMax','cliLabStyle','cliLabEffects','cliLabAutoStock','cliLabStockDensity','cliLabSpeakerPip','cliLabStockFolder','cliLabCleanSpeech','cliLabLibrary','cliLabStyleCaps','cliLabBroll','cliLabMusic','cliLabAutoMusic'].forEach(id=>q(id).addEventListener('change',resetPlan));
@@ -93,8 +104,39 @@ q('cliLabResultFolder').addEventListener('input',()=>{install=null;q('cliLabInst
 function modeControls(){const single=q('cliLabMode').value==='single';q('cliLabModeHint').hidden=!single;['cliLabStyleCaps','cliLabStyle','cliLabAutoStock','cliLabStockDensity','cliLabSpeakerPip','cliLabStockFolder','cliLabCleanSpeech','cliLabEffects','cliLabLibrary','cliLabBroll','cliLabMusic','cliLabAutoMusic'].forEach(id=>q(id).disabled=busy||single);}
 q('cliLabMode').addEventListener('change',modeControls);
 function isImportJob(){try{return JSON.parse(sessionStorage.getItem(storageKey)||'null')?.action==='install_commit';}catch(e){return false;}}
-function controls(on){busy=on;document.querySelectorAll('#tab_clilab button,#tab_clilab input,#tab_clilab select,#cliLabInstruction').forEach(e=>e.disabled=on);q('cliLabApply').disabled=on||!plan;q('cliLabInstall').disabled=on||!install;const cancel=q('cliLabCancel');if(cancel){cancel.hidden=!sessionStorage.getItem(storageKey)||isImportJob();cancel.disabled=false;}q('cliLabResume').hidden=!waiting||on;q('cliLabResume').disabled=on;q('cliLabForgetImport').hidden=on||!isImportJob();modeControls();}
+function controls(on){busy=on;document.querySelectorAll('#tab_clilab button,#tab_clilab input,#tab_clilab select,#cliLabInstruction').forEach(e=>e.disabled=on);q('cliLabApply').disabled=on||!plan||boundaryDirty||mustReview;q('cliLabInstall').disabled=on||!install;const cancel=q('cliLabCancel');if(cancel){cancel.hidden=!sessionStorage.getItem(storageKey)||isImportJob();cancel.disabled=false;}q('cliLabResume').hidden=!waiting||on;q('cliLabResume').disabled=on;q('cliLabForgetImport').hidden=on||!isImportJob();modeControls();}
 async function post(body){const c=new AbortController(),timer=setTimeout(()=>c.abort(),150000);try{const r=await fetch('/api/cli_lab',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:c.signal});const j=await r.json();if(!r.ok||!j.ok){const e=Error(j.error||'ทำงานไม่สำเร็จ');e.definitive=[400,404].includes(r.status)||['job_not_found','project_mismatch'].includes(j.code);throw e;}return j;}finally{clearTimeout(timer);}}
+window.cliLabReviewBoundaries=async function(){
+ if(busy||!plan)return;
+ controls(true);q('cliLabBoundaryStatus').textContent='กำลังอ่านซับรอบรอยต่อ…';
+ try{
+  const result=await post({action:'review_boundaries',plan_id:plan});
+  const list=q('cliLabBoundaryRows');list.replaceChildren();boundaryInputs=[];
+  (result.cuts||[]).forEach((cut,index)=>{
+   const section=document.createElement('div');section.style.margin='14px 0';
+   const title=document.createElement('strong');title.textContent='ช่วงที่ '+(index+1)+' · '+({hook:'เปิดเรื่อง',body:'เนื้อหา',conclusion:'สรุป'}[cut.role]||cut.role);section.appendChild(title);
+   function select(label,chosen){
+    const caption=document.createElement('label');caption.textContent=label;caption.style.display='block';section.appendChild(caption);
+    const input=document.createElement('select');input.style.width='100%';input.setAttribute?.('aria-label',label+' ช่วงที่ '+(index+1));
+    (cut.captions||[]).forEach(row=>{const option=document.createElement('option');option.value=String(row.id);option.textContent=Number(row.start).toFixed(2)+'–'+Number(row.end).toFixed(2)+' วินาที · '+row.text;input.appendChild(option);});
+    input.value=String(chosen);input.onchange=()=>{boundaryDirty=true;q('cliLabApply').disabled=true;q('cliLabBoundaryStatus').textContent='มีการปรับที่ยังไม่บันทึก · ตรวจและบันทึกแผนใหม่ หรือยกเลิกการปรับ';};section.appendChild(input);return input;
+   }
+   const first=select('เริ่มที่ซับ',cut.first_id),last=select('จบที่ซับ',cut.last_id);boundaryInputs.push({first,last});list.appendChild(section);
+  });
+  boundaryDirty=false;q('cliLabBoundarySection').hidden=false;q('cliLabBoundaryOpen').hidden=true;q('cliLabBoundaryStatus').textContent='ตรวจคำพูดก่อนและหลังแต่ละจุด แล้วเลือกช่วงที่ต้องการ';
+ }catch(e){q('cliLabBoundaryStatus').textContent='เปิดรอยต่อไม่ได้: '+e.message;q('cliLabResult').textContent=q('cliLabBoundaryStatus').textContent;}
+ finally{controls(false);}
+};
+window.cliLabDiscardBoundaries=function(){if(busy)return;boundaryDirty=false;boundaryInputs=[];q('cliLabBoundarySection').hidden=true;q('cliLabBoundaryOpen').hidden=false;q('cliLabBoundaryStatus').textContent='';controls(false);};
+window.cliLabSaveBoundaries=async function(){
+ if(busy||!plan||!boundaryInputs.length)return;
+ const cuts=boundaryInputs.map(({first,last})=>({first_id:Number(first.value),last_id:Number(last.value)}));
+ if(cuts.some(c=>!Number.isInteger(c.first_id)||!Number.isInteger(c.last_id)||c.first_id>c.last_id)){q('cliLabBoundaryStatus').textContent='จุดเริ่มต้องอยู่ก่อนหรือเท่ากับจุดจบ';return;}
+ controls(true);q('cliLabBoundaryStatus').textContent='กำลังตรวจช่วงและบันทึกแผนใหม่…';
+ try{const hook=q('cliLabHook').value,cta=q('cliLabCTA').value;const result=await post({action:'update_boundaries',plan_id:plan,cuts});display('plan',result);q('cliLabHook').value=hook;q('cliLabCTA').value=cta;q('cliLabResult').textContent='บันทึกแผนใหม่แล้ว · ตรวจคำพูดและรอยต่อก่อนสร้างคลิป';}
+ catch(e){boundaryDirty=true;q('cliLabBoundaryStatus').textContent='ยังบันทึกแผนไม่ได้: '+e.message;}
+ finally{controls(false);}
+};
 function display(action,j){
  if(action==='install_preview'){
   q('cliLabPrepareResult').hidden=true;
@@ -107,17 +149,18 @@ function display(action,j){
   q('cliLabResult').textContent=(j.warning?'⚠️ '+j.warning+' · ':'')+j.message;window.loadCaps?.();loadResults();return;
  }
  if(action==='status'){
-  q('cliLabStatus').textContent='capcut-cli: '+(j.cli_available?'พบแล้ว':'ยังไม่ติดตั้ง')+' | UTCC: '+(j.utcc_configured?'ตั้งค่าแล้ว':'ยังไม่ตั้งค่า')+' | จับเวลาคำ: '+(j.alignment_ready?'พร้อม':'ต้องติดตั้งเครื่องมือ');
+  q('cliLabStatus').textContent='capcut-cli: '+(j.cli_available?'พบแล้ว':'ยังไม่ติดตั้ง')+' | AI: '+(j.ai_label||'ตามการตั้งค่า AutoClip')+' · '+(j.ai_configured?'พร้อม':'เพิ่มคีย์หรือตั้งค่าก่อน')+' | จับเวลาคำ: '+(j.alignment_ready?'พร้อม':'ต้องติดตั้งเครื่องมือ');
   q('cliLabResult').textContent='ตรวจการตั้งค่าเสร็จแล้ว';
  }else if(action==='plan'){
-  plan=j.plan_id;q('cliLabPlanSection').hidden=false;q('cliLabPlanButton').textContent='วางแผนใหม่';q('cliLabPlanButton').className='ghost';
+  plan=j.plan_id;mustReview=!!j.requires_boundary_review;q('cliLabPlanSection').hidden=false;q('cliLabPlanButton').textContent='วางแผนใหม่';q('cliLabPlanButton').className='ghost';
+  boundaryDirty=false;boundaryInputs=[];q('cliLabBoundarySection').hidden=true;q('cliLabBoundaryOpen').hidden=j.mode!=='story';
   q('cliLabOverlayReview').hidden=j.mode!=='story';
   if(j.mode==='story'){
    q('cliLabHook').value=j.hook;q('cliLabCTA').value=j.cta;
    const roles={hook:'เปิดเรื่อง',body:'เนื้อหา',conclusion:'สรุป'};
-   q('cliLabPlan').textContent='รวม '+j.duration.toFixed(2)+' วินาที · '+j.cuts.length+' ช่วง'+(j.source_count?' · ใช้ '+j.source_count+' คลิปต้นฉบับ':'')+'\n\n'+j.cuts.map((c,i)=>(i+1)+'. '+roles[c.role]+' · ต้นฉบับ '+c.start.toFixed(2)+'–'+c.end.toFixed(2)+' วินาที\n'+c.text).join('\n\n')+'\n\nข้อความเน้น: '+((j.supers||[]).join(' · ')||'เลือกจากคำพูดตอนสร้างคลิป')+'\n\nเหตุผล: '+j.reason+'\n\nตัดคำลังเล: '+(j.clean_speech?'เปิด (เฉพาะคำที่จับเวลาได้ชัด)':'ปิด')+' · ภาพประกอบในคลัง: '+(j.visual_library||[]).length+' ไฟล์'+'\n\nสื่อออนไลน์: '+(j.auto_stock?(j.stock_requests||[]).map(r=>r.kind+': '+r.query).join(' · '):'ปิด')+'\n\nเอฟเฟกต์: '+(j.effects?'ซูม / เฟด':'ปิด')+' · สไตล์ซับ: '+(j.style_captions?j.style:'คงเดิม')+((j.warnings||[]).length?'\n\n'+j.warnings.join('\n'):'');
+   q('cliLabPlan').textContent='รวม '+j.duration.toFixed(2)+' วินาที · '+j.cuts.length+' ช่วง'+(j.source_count?' · ใช้ '+j.source_count+' คลิปต้นฉบับ':'')+(j.omitted_source_count?' · ไม่เลือก '+j.omitted_source_count+' คลิปที่ไม่จำเป็น':'')+'\n\n'+j.cuts.map((c,i)=>(i+1)+'. '+roles[c.role]+' · ต้นฉบับ '+c.start.toFixed(2)+'–'+c.end.toFixed(2)+' วินาที\n'+c.text).join('\n\n')+'\n\nข้อความเน้น: '+((j.supers||[]).join(' · ')||'เลือกจากคำพูดตอนสร้างคลิป')+'\n\nเหตุผล: '+j.reason+'\n\nตัดคำลังเล: '+(j.clean_speech?'เปิด (เฉพาะคำที่จับเวลาได้ชัด)':'ปิด')+' · ภาพประกอบในคลัง: '+(j.visual_library||[]).length+' ไฟล์'+'\n\nสื่อออนไลน์: '+(j.auto_stock?(j.stock_requests||[]).map(r=>r.kind+': '+r.query).join(' · '):'ปิด')+'\n\nเอฟเฟกต์: '+(j.effects?'ซูม / เฟด':'ปิด')+' · สไตล์ซับ: '+(j.style_captions?j.style:'คงเดิม')+((j.warnings||[]).length?'\n\n'+j.warnings.join('\n'):'');
   }else q('cliLabPlan').textContent='ช่วง '+j.start+' – '+j.end+' วินาที ('+(j.end-j.start).toFixed(2)+' วินาที)\n'+j.reason;
-  q('cliLabResult').textContent='อ่านแผน แล้วกดสร้างคลิปตามแผน';
+  q('cliLabResult').textContent=mustReview?'กรุณากดตรวจและปรับรอยต่อให้ครบความคิดก่อนสร้างคลิป':'อ่านแผน แล้วกดสร้างคลิปตามแผน';
  }else{
   if(['apply','enhance'].includes(action)){plan=null;install=null;q('cliLabApply').hidden=true;q('cliLabPlanSection').hidden=true;q('cliLabPrepareResult').hidden=false;q('cliLabResultFolder').value=j.destination||'';}
   q('cliLabResult').textContent=[j.destination,j.caption_count?'สร้างซับ '+j.caption_count+' ท่อน':'',j.note,j.output,j.warnings].filter(Boolean).join('\n\n')||'เสร็จแล้ว';
@@ -138,7 +181,7 @@ async function loadResults(){
   const j=await post({action:'results'});area.textContent='';
   for(const row of j.results||[]){
    const line=document.createElement('div'),button=document.createElement('button');
-   line.textContent='ผลล่าสุด · '+new Date(row.created*1000).toLocaleString('th-TH')+' · '+(row.operation==='broll_only'?'เพิ่ม B-roll เท่านั้น':row.operation==='enhance'?'ปรับคลิปเดิม':'ตัดคลิป')+' ';
+   line.textContent='ผลล่าสุด · '+new Date(row.created*1000).toLocaleString('th-TH')+' · '+(row.operation==='kinetic_text'?'คำตามเสียง':row.operation==='caption_style'?'สไตล์ซับ':row.operation==='broll_only'?'เพิ่ม B-roll เท่านั้น':row.operation==='enhance'?'ปรับคลิปเดิม':'ตัดคลิป')+' ';
    button.type='button';button.textContent='ตรวจและใช้ผลนี้ต่อ';
    button.onclick=async()=>{
     if(busy)return;controls(true);install=null;
@@ -211,6 +254,7 @@ window.cliLabStorage=async function(action){
 window.cliLabCancelJob=async function(){try{const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');if(!saved)return;const j=await post({action:'cancel',job_id:saved.id});q('cliLabResult').textContent=j.message;}catch(e){q('cliLabResult').textContent=e.message;}};
 window.cliLab=async function(action){
  if(busy)return;
+ if(action==='apply'&&(boundaryDirty||mustReview)){q('cliLabResult').textContent=mustReview?'กรุณาตรวจและบันทึกรอยต่อให้ครบความคิดก่อนสร้างคลิป':'กรุณาบันทึกหรือยกเลิกการปรับจุดตัดก่อนสร้างคลิป';return;}
  if(sessionStorage.getItem(storageKey)){waiting=true;controls(false);q('cliLabResult').textContent='มีงานเดิมรอตรวจผล กดตรวจงานเดิมต่อก่อนเริ่มงานใหม่';return;}
  if(action==='plan'){
   const min=Number(q('cliLabMin').value),max=Number(q('cliLabMax').value);
@@ -221,7 +265,7 @@ window.cliLab=async function(action){
  controls(true);
  q('cliLabResult').textContent=action==='plan'?'กำลังตรวจซับ / เตรียมวางแผน…':['apply','enhance'].includes(action)?'กำลังสร้างคลิปตามแผน…':'กำลังตรวจ…';
  try{
-  const body={action,instruction:q('cliLabInstruction').value,plan_id:plan,
+  const body={action,backend:q('cliLabBackend').value,instruction:q('cliLabInstruction').value,plan_id:plan,editorial_goal:q('cliLabPromptTemplate').value,
    mode:q('cliLabMode').value,min_seconds:Number(q('cliLabMin').value),max_seconds:Number(q('cliLabMax').value),style:q('cliLabStyle').value,
    stock_folder:q('cliLabStockFolder').value,stock_density:q('cliLabStockDensity').value,speaker_pip:q('cliLabSpeakerPip').checked,auto_stock:q('cliLabAutoStock').checked,stock_provider:'artlist',clean_speech:q('cliLabCleanSpeech').checked,visual_library:q('cliLabLibrary').value,effects:q('cliLabEffects').checked,style_captions:q('cliLabStyleCaps').checked,broll:q('cliLabBroll').value,music:q('cliLabMusic').value,auto_music:q('cliLabAutoMusic').checked,
    text_style:typeof buildCfg==='function'?buildCfg():{},hook:q('cliLabHook').value,cta:q('cliLabCTA').value,result_folder:q('cliLabResultFolder').value,install_id:install};

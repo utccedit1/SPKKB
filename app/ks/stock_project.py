@@ -8,6 +8,8 @@ import re
 import shutil
 import tempfile
 
+from .file_hash import sha256_file
+
 
 def project_key(project):
     path=Path(project).expanduser().resolve()
@@ -42,13 +44,11 @@ def store(source,destination,category,title='media'):
     """Content-addressed copy; never replace an unrelated existing file."""
     source=Path(source);root=Path(destination)/category
     root.mkdir(parents=True,exist_ok=True)
-    def sha(path):
-        with Path(path).open('rb') as handle:return hashlib.file_digest(handle,'sha256').hexdigest()
-    digest=sha(source)
+    digest=sha256_file(source)
     title=re.sub(r'[^\w\- .ก-๙]','_',title).strip(' .')[:64] or 'media'
     target=root/(title+'-'+digest[:16]+source.suffix.lower())
     if target.exists():
-        if sha(target)!=digest:raise ValueError('ไฟล์ปลายทางถูกแก้ไข กรุณาเลือกโฟลเดอร์ใหม่')
+        if sha256_file(target)!=digest:raise ValueError('ไฟล์ปลายทางถูกแก้ไข กรุณาเลือกโฟลเดอร์ใหม่')
         return str(target)
     fd,temporary=tempfile.mkstemp(prefix='.stock-',dir=root);os.close(fd)
     try:
@@ -57,12 +57,12 @@ def store(source,destination,category,title='media'):
         try:os.link(temporary,target)
         except OSError as exc:
             if isinstance(exc,FileExistsError):
-                if sha(target)!=digest:raise ValueError('ไฟล์ปลายทางชนกัน กรุณาลองใหม่')
+                if sha256_file(target)!=digest:raise ValueError('ไฟล์ปลายทางชนกัน กรุณาลองใหม่')
             elif exc.errno in (errno.EPERM,errno.EOPNOTSUPP,errno.ENOSYS,errno.EXDEV):
                 # exFAT/removable drives may not support hard links.
                 try:handle=target.open('xb')
                 except FileExistsError:
-                    if sha(target)!=digest:raise ValueError('ไฟล์ปลายทางชนกัน กรุณาลองใหม่')
+                    if sha256_file(target)!=digest:raise ValueError('ไฟล์ปลายทางชนกัน กรุณาลองใหม่')
                 else:
                     try:
                         with handle,Path(temporary).open('rb') as incoming:shutil.copyfileobj(incoming,handle)
