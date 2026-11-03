@@ -114,7 +114,7 @@ def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption
  from . import kinetic_scene as SC
  from .caption_presets import caption_rows
  source_cues={seg['id']:text for _,seg,mat,text in caption_rows(draft)}
- scenes=SC.scenes(plan['blocks']);out=SC.apply(draft,scenes);canvas=out.get('canvas_config') or {};w=canvas.get('width',1080);h=canvas.get('height',1920)
+ scenes=SC.scenes(plan['blocks'],draft);out=SC.apply(draft,scenes);canvas=out.get('canvas_config') or {};w=canvas.get('width',1080);h=canvas.get('height',1920)
  templates=out['materials'].get('texts') or []
  if not templates:raise ValueError('ไม่พบแม่แบบข้อความ CapCut')
  base=templates[0];entries=[];tracks=[]

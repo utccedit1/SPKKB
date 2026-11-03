@@ -1,7 +1,7 @@
 """Opt-in scene geometry shared by native copies and web playback. No face inference."""
 import copy,uuid,math
 FRAMINGS=('keep','speaker_left')
-MOVES=('static','push','pull','smooth_in','smooth_out','smooth_in_out','snap_in','snap_out','snap_in_out')
+MOVES=('static','push','pull','smooth_in','smooth_out','smooth_in_out','snap_in','snap_out','snap_in_out','snap_to_cut','cinematic')
 JOIN_GAP=.75
 
 DEFAULT_COMPOSITION=dict(video_x=-.06,video_y=0,video_scale=1.08,text_x=.51,text_y=.32)
@@ -14,19 +14,39 @@ def composition(raw=None):
   if type(v) not in (int,float) or not math.isfinite(v) or not bounds[k][0]<=v<=bounds[k][1]:raise ValueError('ค่าจัดองค์ประกอบอยู่นอกช่วงที่รองรับ')
  return result
 
-def scenes(blocks):
+def cut_end(draft,start):
+ if not isinstance(draft,dict):raise ValueError('ซูมถึงคัทต้องอ่านช็อตต้นฉบับก่อน')
+ tracks=[t for t in draft.get('tracks',[]) if t.get('type')=='video' and not t.get('attribute',0)&1]
+ if len(tracks)!=1:raise ValueError('ซูมถึงคัทรองรับภาพหลักหนึ่งแทร็ก')
+ matches=[]
+ for seg in tracks[0].get('segments',[]):
+  tr=seg.get('target_timerange') or {};a=tr.get('start',0)/1e6;b=a+tr.get('duration',0)/1e6
+  if a<=start<b:matches.append(b)
+ if len(matches)!=1:raise ValueError('ไม่พบช็อตหลักที่แน่นอนสำหรับซูมถึงคัท')
+ return matches[0]
+
+def scenes(blocks,draft=None):
  result=[];join=False
  for b in blocks:
   framing=b.get('framing','keep');move=b.get('camera_move','static')
   if framing not in FRAMINGS or move not in MOVES:raise ValueError('การจัดภาพไม่ถูกต้อง')
-  if not b.get('enabled',True) or (framing=='keep' and not move.startswith('snap_')):join=False;continue
+  if not b.get('enabled',True) or (framing=='keep' and not (move.startswith('snap_') or move=='cinematic')):join=False;continue
   geom=composition(b.get('composition'))
-  if move.startswith(('smooth_','snap_')):geom.update(video_x=0,video_y=0,video_scale=1)
+  if move.startswith(('smooth_','snap_')) or move=='cinematic':geom.update(video_x=0,video_y=0,video_scale=1)
   if move=='static' and geom['video_x']==0 and geom['video_y']==0 and geom['video_scale']==1:join=False;continue
   start=min(u['start'] for u in b['units']);end=max(u['end'] for u in b['units'])
-  if not move.startswith(('smooth_','snap_')) and join and result and start-result[-1]['end']<=JOIN_GAP and move==result[-1]['move'] and geom==result[-1]['composition']:result[-1]['end']=end
+  if move=='snap_to_cut':end=cut_end(draft,start)
+  if move!='cinematic' and not move.startswith(('smooth_','snap_')) and join and result and start-result[-1]['end']<=JOIN_GAP and move==result[-1]['move'] and geom==result[-1]['composition']:result[-1]['end']=end
   else:result.append(dict(start=start,end=end,move=move,composition=geom,x=geom['video_x'],y=geom['video_y'],scale_from=geom['video_scale']+.05 if move=='pull' else geom['video_scale'],scale_to=geom['video_scale']+.05 if move=='push' else geom['video_scale']))
   join=True
+ if any(s['move']=='snap_to_cut' for s in result):
+  resolved=[]
+  for scene in sorted(result,key=lambda s:s['start']):
+   if resolved and resolved[-1]['move']=='snap_to_cut' and scene['start']<resolved[-1]['end']:
+    if scene['move']=='snap_to_cut':continue
+    resolved[-1]['end']=scene['start']
+   resolved.append(scene)
+  result=resolved
  for scene in result:
   if scene['move'].startswith('snap_'):
    start,end=scene['start'],scene['end'];ramp=min(.30,(end-start)/3);mode=scene['move']
@@ -42,13 +62,13 @@ def scenes(blocks):
      points.append([end-ramp+ramp*u,1.3-.3*ease])
    else:points.append([end,1 if mode=='snap_out' else 1.3])
    scene.update(scale_points=points,scale_from=points[0][1],scale_to=points[-1][1])
-  if scene['move'].startswith('smooth_'):
+  if scene['move'].startswith('smooth_') or scene['move']=='cinematic':
    mode=scene['move'];points=[]
    for i in range(41):
     u=i/40
     if mode=='smooth_in_out':u=2*u if u<=.5 else 2*(1-u)
     ease=u*u*(3-2*u)
-    value=1.3-.3*ease if mode=='smooth_out' else 1+.3*ease
+    value=1.3-.3*ease if mode=='smooth_out' else 1+(.05 if mode=='cinematic' else .3)*ease
     points.append([scene['start']+(scene['end']-scene['start'])*i/40,value])
    scene.update(scale_points=points,scale_from=points[0][1],scale_to=points[-1][1])
  return result
