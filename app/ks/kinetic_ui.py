@@ -64,6 +64,8 @@ UI=r'''
  <div id="ktStage" style="position:absolute;inset:0;pointer-events:none" aria-label="พรีวิวการขึ้นคำโดยประมาณ"></div></div>
  <button type="button" id="ktPlay" disabled>เล่นชุดคำ</button>
  <input type="range" id="ktSeek" min="0" max="1" step="0.01" value="0" aria-label="เวลาในชุดคำ" style="width:min(650px,85%)"><span id="ktClock"></span>
+ <p id="ktMotionReadout" role="status"></p>
+ <div id="ktMotionReview" aria-label="ตรวจจังหวะซูมที่บันทึกแล้ว" style="display:flex;gap:6px;flex-wrap:wrap;max-height:160px;overflow:auto"></div>
  <p>โหลดภาพและเสียงเพื่อเล่นต่อเนื่องทั้งคลิป · ภาพกล้องพื้นฐานพร้อมข้อความจำลอง ไม่รวมเอฟเฟกต์ภาพเดิมทุกชนิดใน CapCut · เลือกพื้นที่ให้พ้นใบหน้าและตรวจคำกับเสียงจริงก่อนใช้ · ไม่ได้คัดลอกเอฟเฟกต์จากคลิปอ้างอิงทุกตัว</p>
  <div id="ktSummary" style="white-space:pre-wrap;max-height:260px;overflow:auto"></div>
  <div id="ktDesigner" hidden>
@@ -89,7 +91,7 @@ UI=r'''
  <label>บรรทัดเน้น <select id="ktAccent"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select></label>
  <label><input type="checkbox" id="ktEnabled" checked>แสดงชุดนี้</label>
  <button type="button" id="ktSaveBeat">บันทึกและอัปเดตพรีวิว</button><button type="button" id="ktResetBeat">คืนค่าที่บันทึกไว้</button>
- <p>พรีวิวแสดงแผนที่บันทึกแล้ว · หากมีเพียงเวลาซับ ทุกบรรทัดขึ้นพร้อมต้นท่อน ไม่สร้างจังหวะคำขึ้นเอง</p>
+ <p>พรีวิวแสดงแผนที่บันทึกแล้ว · หากจับขอบวลีได้จะขึ้นตามวลี หากมีเพียงเวลาซับจะขึ้นพร้อมต้นท่อน ไม่เดาเวลารายคำ</p>
  </div>
  <button type="button" id="ktPrepare" disabled>สร้างสำเนาจากแผนที่ตรวจแล้ว</button>
  <button type="button" id="ktReview" hidden>เปิดขั้นตรวจและนำเข้า</button>
@@ -110,7 +112,7 @@ function controls(){for(const el of document.querySelectorAll('#kineticPanel inp
  q('ktBeat').disabled=busy||editDirty;q('ktCameraMove').disabled=busy;for(const id of geometryIds)q(id).disabled=busy||q('ktFraming').value==='keep'||(/^(smooth_|snap_)/.test(q('ktCameraMove').value)&&['ktVideoX','ktVideoY','ktVideoScale'].includes(id));
  q('ktCancel').hidden=!pending();q('ktCancel').disabled=false;q('ktResume').hidden=!pending();q('ktResume').disabled=busy;}
 function stop(){q('ktVideo').pause?.();playing=false;cancelAnimationFrame(animation);q('ktPlay').textContent='เล่นชุดคำ';}
-function dirty(){stop();q('ktVideo').removeAttribute?.('src');q('ktVideo').style.display='none';gate.invalidate();q('ktStage').replaceChildren();q('ktSummary').textContent='';q('ktReview').hidden=true;q('ktDesigner').hidden=true;editDirty=false;controls();}
+function dirty(){stop();q('ktVideo').removeAttribute?.('src');q('ktVideo').style.display='none';gate.invalidate();q('ktStage').replaceChildren();q('ktSummary').textContent='';q('ktMotionReview').replaceChildren();q('ktMotionReadout').textContent='';q('ktReview').hidden=true;q('ktDesigner').hidden=true;editDirty=false;controls();}
 async function post(body,endpoint='/api/cli_lab',timeout=30000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{
  const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-Studio-Workspace':workspace},body:JSON.stringify(body),signal:controller.signal});const result=await response.json();
  if(!response.ok||!result.ok){const error=Error(result.error||'ทำงานไม่สำเร็จ');error.definitive=[400,404].includes(response.status)||['job_not_found','project_mismatch'].includes(result.code);throw error;}return result;
@@ -119,6 +121,15 @@ async function font(path){fontReady=false;if(!path){fontReady=true;return;}const
 function draw(){const p=gate.plan;if(!p)return;const stage=q('ktStage'),height=stage.clientHeight,scene=sceneFrame(p.preview.scenes,clock);q('ktVideo').style.transform=`translate(${scene.x*50}%,${-scene.y*50}%) scale(${scene.scale})`;q('ktScreen').style.background='#000';
  for(const [i,entry] of [...p.preview.entries,...(p.preview.captions||[])].entries()){const el=stage.children[i],f=entry.points?captionFrame(entry,clock):kineticFrame(entry,clock);if(!el)continue;if(entry.color_spans?.length){const parts=karaokeParts(entry,clock,p.settings.palette),key=JSON.stringify(parts);if(el.ksColorKey!==key){el.replaceChildren();for(const part of parts){const word=document.createElement('span');word.textContent=part.text;word.style.color=part.color;el.appendChild(word)}el.ksColorKey=key;}}el.style.cssText=`position:absolute;white-space:pre;line-height:1.15;font-family:KineticLocal,sans-serif;color:${entry.color||p.settings.palette[entry.tone]};font-size:${entry.size*height/100}px;left:${(1+entry.x+f.dx)*50}%;top:${(1-entry.y-f.dy)*50}%;opacity:${f.alpha};transform:translate(-50%,-50%) scale(${f.scale*(entry.scale||1)});text-shadow:0 1px 3px black;background:${entry.background?'rgba(0,0,0,.9)':'transparent'};`;}
  q('ktClock').textContent=clock.toFixed(2)+'s';q('ktSeek').value=clock;
+ const active=(p.preview.scenes||[]).find(s=>s.start<=clock&&clock<s.end);q('ktMotionReadout').textContent='ขนาดภาพ '+Math.round(scene.scale*100)+'%'+(active?' · '+(active.move==='snap_to_cut'?'ค้างถึงคัท':'จบจังหวะ')+' '+active.end.toFixed(2)+'s':' · เฟรมเดิม');
+}
+function motionReview(result){
+ const box=q('ktMotionReview');box.replaceChildren();
+ for(const [i,scene] of (result.preview.scenes||[]).entries()){
+  for(const [label,time] of [['เริ่ม',scene.start],['ก่อนจบ',Math.max(scene.start,scene.end-.04)]]){
+   const button=document.createElement('button');button.type='button';button.textContent=(i+1)+'. '+label+' '+time.toFixed(2)+'s';button.onclick=()=>{if(busy||!gate.plan)return;stop();clock=time;if(q('ktVideo').getAttribute?.('src'))q('ktVideo').currentTime=clock;draw()};box.appendChild(button);
+  }
+ }
 }
 async function showPlan(result,version,preserve=false){
  const keptClock=clock,keptBeat=q('ktBeat').value;
@@ -126,7 +137,7 @@ async function showPlan(result,version,preserve=false){
  const entries=[...result.preview.entries,...(result.preview.captions||[])];q('ktScreen').style.aspectRatio=`${result.canvas?.width||1920}/${result.canvas?.height||1080}`;q('ktStage').replaceChildren();
  entries.forEach(e=>{const el=document.createElement('span');el.textContent=e.text;q('ktStage').appendChild(el)});
  q('ktSeek').min=0;q('ktSeek').max=result.preview.duration||Math.max(...entries.map(e=>e.end));clock=preserve?keptClock:Number(q('ktSeek').min);
- q('ktSummary').textContent=(result.preview.caption_one_line?'ซับหนึ่งบรรทัด · ': '')+(result.preview.english_loanwords?'คำทับศัพท์อังกฤษ · ':'')+(result.preview.karaoke?'สีตามคำ: '+result.preview.karaoke.measured_units+' ชิ้น · คงสีเดิม '+result.preview.karaoke.unavailable_units+' ชิ้น\n':'')+result.provider+' · ข้อความเน้น '+result.preview.entries.length+' ชิ้น · ซับ '+(result.preview.captions||[]).length+' ท่อน\n'+result.plan.blocks.map(b=>b.units.map(u=>u.text+' ['+u.weight+'/'+u.tone+'/'+u.motion+'] @'+u.start.toFixed(2)).join(' → ')).join('\n');editDirty=false;populateBeats(result,preserve?keptBeat:null);status(result.note);draw();controls();
+ q('ktSummary').textContent=(result.preview.caption_one_line?'ซับหนึ่งบรรทัด · ': '')+(result.preview.english_loanwords?'คำทับศัพท์อังกฤษ · ':'')+(result.preview.karaoke?'สีตามคำ: '+result.preview.karaoke.measured_units+' ชิ้น · คงสีเดิม '+result.preview.karaoke.unavailable_units+' ชิ้น\n':'')+result.provider+' · ข้อความเน้น '+result.preview.entries.length+' ชิ้น · ซับ '+(result.preview.captions||[]).length+' ท่อน\n'+result.plan.blocks.map(b=>b.units.map(u=>u.text+' ['+u.weight+'/'+u.tone+'/'+u.motion+'] @'+u.start.toFixed(2)).join(' → ')).join('\n');editDirty=false;motionReview(result);populateBeats(result,preserve?keptBeat:null);status(result.note);draw();controls();
 }
 async function watch(saved){
  busy=true;controls();try{

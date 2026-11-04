@@ -1,6 +1,6 @@
 # โครงสร้างและแบบระบบ — ช่วยด้วยจ้า
 
-อัปเดต: 2 พฤศจิกายน 2026 · ฐานซอร์ส/Release: **1.5.66** · P3.6 เป็นซอร์สทดลอง ยังไม่แพ็ก
+อัปเดต: 4 พฤศจิกายน 2026 · ซอร์ส/Release สาธารณะ: **1.5.68** · แอปที่ติดตั้งตรวจแยกจากซอร์ส
 
 เอกสารนี้อธิบายระบบที่มีอยู่จริงและหลักการที่ต้องรักษา อ่านคู่กับ `TASK_PHASES.md` ก่อนเริ่มงาน หากโค้ดไม่ตรงเอกสาร ให้ตรวจหลักฐานและแก้เอกสารในงานเดียวกัน ไม่ใช้เอกสารเก่าเป็นข้อยืนยันว่าฟังก์ชันยังใช้ได้
 
@@ -372,3 +372,6 @@ P3.22 follow-up (4Nov): one-word trial labels were removed. Compact Supers now k
 
 ### P3.23 — recipes use final phrase forms (2026-11-04)
 Whole-clip kinetic planning now compacts measured phrases before applying the selected recipe. Impact uses snap_to_cut for punch/numeric/matched/contrast; story uses it for punch/numeric; clean stays static and original preserves manual choices. Existing primary-track/crop/transform guards still apply. Native scene split edges are deduplicated at integer microsecond precision to prevent zero-duration fragments from equivalent float cut endpoints. This does not generate camera cuts or infer faces; styles use existing shot boundaries.
+
+### P3.24 — saved motion review in full-clip preview
+The Super Text preview builds onset/near-end review buttons from saved preview.scenes. Both overlay clock and loaded source proxy seek together; current scale uses shared sceneFrame interpolation and displays saved scene end. Revisions replace the list; plan invalidation clears it. No new motion or native timeline behavior is introduced.
