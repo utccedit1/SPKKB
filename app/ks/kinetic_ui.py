@@ -45,6 +45,9 @@ UI=r'''
  <div style="padding:16px;background:#182333;border-radius:12px;max-width:230px"><b>ขยี้ไว</b><p style="font-size:30px"><strong>30%</strong> <strong style="color:#fad43d">20%</strong></p><small>เด้ง · ซูมเข้าเร็ว 0.30 วิ ค้างแล้วออก</small></div></div>
  <p>ตัวอย่างการวางคำ · เลือกสไตล์แล้วกดจัดทั้งคลิป จากนั้นโหลดภาพและเสียงเพื่อดูผลกับโปรเจกต์นี้ตลอดคลิป · คงคำพูดและรอยตัดเดิม</p>
  <label><input type="checkbox" id="ktKaraoke">เปลี่ยนสี Super Text ตามคำจริง (จับเวลาในเครื่อง · คำที่ไม่ผ่านคงสีเดิม)</label>
+ <label><input type="checkbox" id="ktOneLine">ซับพูดหนึ่งบรรทัด (จัดทั้งคลิป · ต้องจับขอบเสียงได้ครบ)</label>
+ <label><input type="checkbox" id="ktEnglish">คำทับศัพท์เป็นอังกฤษ เช่น Campaign, Brand (จัดทั้งคลิป)</label>
+ <small>สองตัวเลือกนี้ใช้ฟอนต์และเอฟเฟกต์ซับที่เลือก หากเลือกคงซับเดิมจะใช้แบบปรากฏทันที</small>
  <label>รูปแบบบรรทัด <select id="ktLayout"><option value="matched">สองบรรทัดกว้างเท่ากัน</option><option value="hierarchy">คำหลักใหญ่ คำรองเล็ก</option></select></label>
  <label>เอฟเฟกต์ซับ <select id="ktCaption"><option value="punch">เด้งคำเน้น</option><option value="rise">ลอยขึ้น</option><option value="focus">ขยายเข้าพอดี</option><option value="slide">เลื่อนเข้า</option><option value="clean">เฟดนุ่ม</option><option value="keep">คงซับเดิม</option></select></label>
  <p>เลือกช่วงทดลอง 15–20 วินาทีก่อน · สูงสุด 30 ซับ / ช่วงเวลา 60 วินาที · ใช้เวลาคำจาก CapCut หรือจับคู่คำเดิมกับเสียงในเครื่อง หากไม่มั่นใจจะหยุดให้ตรวจ</p>
@@ -123,7 +126,7 @@ async function showPlan(result,version,preserve=false){
  const entries=[...result.preview.entries,...(result.preview.captions||[])];q('ktScreen').style.aspectRatio=`${result.canvas?.width||1920}/${result.canvas?.height||1080}`;q('ktStage').replaceChildren();
  entries.forEach(e=>{const el=document.createElement('span');el.textContent=e.text;q('ktStage').appendChild(el)});
  q('ktSeek').min=0;q('ktSeek').max=result.preview.duration||Math.max(...entries.map(e=>e.end));clock=preserve?keptClock:Number(q('ktSeek').min);
- q('ktSummary').textContent=(result.preview.karaoke?'สีตามคำ: '+result.preview.karaoke.measured_units+' ชิ้น · คงสีเดิม '+result.preview.karaoke.unavailable_units+' ชิ้น\n':'')+result.provider+' · ข้อความเน้น '+result.preview.entries.length+' ชิ้น · ซับ '+(result.preview.captions||[]).length+' ท่อน\n'+result.plan.blocks.map(b=>b.units.map(u=>u.text+' ['+u.weight+'/'+u.tone+'/'+u.motion+'] @'+u.start.toFixed(2)).join(' → ')).join('\n');editDirty=false;populateBeats(result,preserve?keptBeat:null);status(result.note);draw();controls();
+ q('ktSummary').textContent=(result.preview.caption_one_line?'ซับหนึ่งบรรทัด · ': '')+(result.preview.english_loanwords?'คำทับศัพท์อังกฤษ · ':'')+(result.preview.karaoke?'สีตามคำ: '+result.preview.karaoke.measured_units+' ชิ้น · คงสีเดิม '+result.preview.karaoke.unavailable_units+' ชิ้น\n':'')+result.provider+' · ข้อความเน้น '+result.preview.entries.length+' ชิ้น · ซับ '+(result.preview.captions||[]).length+' ท่อน\n'+result.plan.blocks.map(b=>b.units.map(u=>u.text+' ['+u.weight+'/'+u.tone+'/'+u.motion+'] @'+u.start.toFixed(2)).join(' → ')).join('\n');editDirty=false;populateBeats(result,preserve?keptBeat:null);status(result.note);draw();controls();
 }
 async function watch(saved){
  busy=true;controls();try{
@@ -137,7 +140,7 @@ async function start(operation){if(busy||pending())return;stop();busy=true;contr
  if(operation==='kinetic_plan'&&!ids.length)throw Error('เลือกซับที่จะทดลองก่อน');
  if(operation==='kinetic_assist'&&(!gate.plan||editDirty))throw Error('บันทึกแผนให้พร้อมก่อนช่วยจัดกรอบ');
  if(operation==='kinetic_prepare'&&(!gate.plan||!fontReady||editDirty))throw Error('โหลดแผนและฟอนต์ให้พร้อมก่อนสร้าง');
- const body={action:'start',operation,request_id:crypto.randomUUID().replaceAll('-',''),source_hash:meta?.source_hash,media_hash:meta?.media_hash,ids,backend:q('ktBackend').value,zone:q('ktZone').value,font:q('ktFont').value,layout:q('ktLayout').value,caption_preset:q('ktCaption').value,style:q('ktStyle').value||'original',karaoke:q('ktKaraoke').checked===true,plan_id:gate.plan?.plan_id};
+ const body={action:'start',operation,request_id:crypto.randomUUID().replaceAll('-',''),source_hash:meta?.source_hash,media_hash:meta?.media_hash,ids,backend:q('ktBackend').value,zone:q('ktZone').value,font:q('ktFont').value,layout:q('ktLayout').value,caption_preset:q('ktCaption').value,style:q('ktStyle').value||'original',karaoke:q('ktKaraoke').checked===true,caption_one_line:q('ktOneLine').checked===true,english_loanwords:q('ktEnglish').checked===true,plan_id:gate.plan?.plan_id};
  if(operation==='kinetic_revise')body.edits=[beatEdit()];
  const saved={body,operation,version,project:meta?.project};sessionStorage.setItem(key,JSON.stringify(saved));const result=await post(body);saved.id=result.job_id;sessionStorage.setItem(key,JSON.stringify(saved));busy=false;await watch(saved);
  }catch(e){if(e.definitive&&!pending()?.id)sessionStorage.removeItem(key);status(e.message||'เริ่มงานไม่ได้');}finally{busy=false;controls();}}
@@ -167,7 +170,7 @@ q('ktLoad').onclick=async()=>{if(busy)return;dirty();busy=true;controls();try{me
  }catch(e){meta=null;status(e.message)}finally{busy=false;controls()}};
 q('ktPlan').onclick=()=>start('kinetic_plan');q('ktFull').onclick=()=>start('kinetic_full_plan');q('ktPrepare').onclick=()=>start('kinetic_prepare');q('ktResume').onclick=async()=>{const saved=pending();if(!saved||busy)return;busy=true;controls();try{saved.version=gate.version;if(!saved.id){const result=await post(saved.body);saved.id=result.job_id;sessionStorage.setItem(key,JSON.stringify(saved));}await watch(saved);}catch(e){if(e.definitive&&!saved.id)sessionStorage.removeItem(key);status(e.message)}finally{busy=false;controls()}};
 q('ktCancel').onclick=async()=>{const saved=pending();if(saved&&!saved.id){status('กดตรวจงานเดิมต่อเพื่อรับสถานะก่อนยกเลิก');return;}if(saved)try{const j=await post({action:'cancel',job_id:saved.id});status(j.message||'ส่งคำขอยกเลิกแล้ว')}catch(e){status(e.message)}};
-for(const id of ['ktFont','ktZone','ktBackend','ktLayout','ktCaption','ktStyle','ktKaraoke'])q(id).onchange=dirty;
+for(const id of ['ktFont','ktZone','ktBackend','ktLayout','ktCaption','ktStyle','ktKaraoke','ktOneLine','ktEnglish'])q(id).onchange=dirty;
 q('ktSeek').oninput=()=>{stop();clock=Number(q('ktSeek').value);if(q('ktVideo').getAttribute?.('src'))q('ktVideo').currentTime=clock;draw()};q('ktPlay').onclick=()=>{if(playing){stop();return;}if(!gate.plan)return;if(clock>=Number(q('ktSeek').max))clock=Number(q('ktSeek').min);if(q('ktVideo').getAttribute?.('src')){q('ktVideo').currentTime=clock;q('ktVideo').play().catch(e=>status(e.message));}playing=true;previous=performance.now();q('ktPlay').textContent='หยุด';function tick(now){if(!playing)return;clock=q('ktVideo').getAttribute?.('src')?q('ktVideo').currentTime:clock+(now-previous)/1000;previous=now;if(clock>=Number(q('ktSeek').max)){clock=Number(q('ktSeek').max);stop();}draw();if(playing)animation=requestAnimationFrame(tick)}animation=requestAnimationFrame(tick)};
 q('ktVideo').onplay=()=>{if(!playing)q('ktPlay').onclick()};q('ktVideo').onpause=()=>{if(playing)stop()};
 q('ktVideo').ontimeupdate=()=>{clock=q('ktVideo').currentTime;draw()};

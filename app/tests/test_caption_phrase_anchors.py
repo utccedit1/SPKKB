@@ -18,3 +18,10 @@ class PhraseAnchorTests(unittest.TestCase):
   raw=[dict(word='a ',start=0,end=.5,probability=.9),dict(word='b ',start=.5,end=1,probability=.9),dict(word='c',start=1,end=1.2,probability=.9)]
   rows=phrases(raw,'a b c',1.2,limit=4)
   self.assertEqual([(r['text'],r['start'],r['end']) for r in rows],[('a',0,.5),('b c',.5,1.2)])
+
+class CompoundCaptionTests(unittest.TestCase):
+ def test_dictionary_ambiguity_cannot_split_business_inside_a_compound(self):
+  from unittest.mock import patch
+  text='นี่คือธุรกิจจะสำเร็จ';tokens=['นี่คือ','ธุร','กิจจะ','สำเร็จ'];raw=[dict(word=w,start=i,end=i+1,probability=.9) for i,w in enumerate(tokens)]
+  with patch('ks.ce_tokenizer.tokenize',return_value=tokens):result=phrases(raw,text,4,limit=6)
+  self.assertFalse(any(p['text'].endswith('ธุร') for p in result));self.assertEqual(''.join(p['text'] for p in result),text)

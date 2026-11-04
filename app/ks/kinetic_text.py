@@ -102,10 +102,13 @@ def geometry(units,width,height,zone,*,layout='hierarchy',font='',form='stack'):
  return output
 
 
-def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption_preset='keep',style='original',karaoke=False,karaoke_timings=None):
+def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption_preset='keep',style='original',karaoke=False,karaoke_timings=None,caption_one_line=False,english_loanwords=False,caption_phrases=None):
  from . import core_engine as CE
  from .text_layout import detach_caption
  if plan.get('profile_hash')!=SK.fingerprint():raise ValueError('สไตล์เปลี่ยนแล้ว กรุณาวางแผนใหม่')
+ if caption_one_line:
+  from .caption_finish import reveal_plan
+  plan=reveal_plan(draft,plan,caption_phrases or {})
  if karaoke:
   from .kinetic_karaoke import enrich
   plan=enrich(draft,plan,karaoke_timings)
@@ -118,6 +121,14 @@ def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption
  templates=out['materials'].get('texts') or []
  if not templates:raise ValueError('ไม่พบแม่แบบข้อความ CapCut')
  base=templates[0];entries=[];tracks=[]
+ if caption_one_line or english_loanwords:
+  from . import caption_finish as CF
+  CF.apply(out,caption_phrases or {},english_loanwords,one_line=caption_one_line)
+  if caption_preset=='keep':caption_preset='cut'
+  if caption_one_line:
+   for _,seg,mat,text in caption_rows(out):
+    peak=1.12 if caption_preset=='punch' else 1
+    if '\n' in text or text_width(text,h*.075,font)*peak>w*.86:raise ValueError('ซับยังยาวเกินหนึ่งบรรทัด กรุณาแบ่งซับต้นทางให้สั้นลงแล้วลองใหม่')
  if caption_preset!='keep':
   from . import caption_presets as P
   cfg=P.settings(dict(preset=caption_preset,font=font,size=7.5,y=-.72),[dict(path=font)] if font else [])
@@ -132,6 +143,11 @@ def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption
    allowed=numeric_parts(source_cues.get(block['cue_id'],''))
    if not allowed or any(u['text'] not in allowed for u in display_units):raise ValueError('รูปแบบตัวเลขต้องใช้จำนวนและหน่วยที่ตรวจจากซับเต็มได้')
    for u in display_units:u['text']=display(u['text'],True)
+  if english_loanwords:
+   from .caption_finish import display
+   for u in display_units:
+    before=u['text'];u['text']=display(before)
+    if u['text']!=before:u['color_spans']=[]
   form=block.get('form','stack');geom=geometry(display_units,w,h,'right' if framed else zone,layout=layout,font=font,form=form)
   if framed:
    placement=SC.composition(block.get('composition'))
@@ -165,7 +181,7 @@ def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption
  if caption_preset!='keep':
   for _,seg,mat,text in P.caption_rows(out):
    tr=seg['target_timerange'];clip=seg['clip'];captions.append(dict(text=text,start=tr['start']/1e6,end=(tr['start']+tr['duration'])/1e6,size=mat['font_size'],x=clip['transform']['x'],y=clip['transform']['y'],scale=clip['scale']['x'],tone='base',color=cfg['color'],caption_mode=cfg['mode'],points=P.motion(cfg,tr['duration'])))
- return out,dict(karaoke=karaoke_report,editing_style=style,scenes=scenes,captions=captions,duration=out.get('duration',0)/1e6,profile=plan['profile'],units=len(entries),entries=entries,native_review_required=True,zone=zone,layout=layout,captions_styled=caption_preset!='keep',caption_preset=caption_preset)
+ return out,dict(caption_one_line=caption_one_line,english_loanwords=english_loanwords,karaoke=karaoke_report,editing_style=style,scenes=scenes,captions=captions,duration=out.get('duration',0)/1e6,profile=plan['profile'],units=len(entries),entries=entries,native_review_required=True,zone=zone,layout=layout,captions_styled=caption_preset!='keep',caption_preset=caption_preset)
 
 
 def text_width(text,pixels,font):

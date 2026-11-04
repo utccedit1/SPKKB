@@ -20,6 +20,11 @@ def phrases(fragments,text,duration,limit=20):
   offset+=len(normalize(word['word']))
   if word['probability']>=.5 and word['end']>word['start'] and 0<word['end']<duration:
    candidates.append((positions[offset-1]+1,word['end']))
+ # Protect known complete business terms when Thai dictionary context splits them.
+ import re
+ protected=('ธุรกิจ','สติ๊กเกอร์','แคมเปญ','เซลส์โปรโมชั่น','เกมมิฟิเคชัน','เกมมิฟิเคชั่น','เอ็นเกจเมนต์','แบรนด์ดิ้ง')
+ inside={i for word in protected for match in re.finditer(re.escape(word),text) for i in range(match.start()+1,match.end())}
+ candidates=[(end,t) for end,t in candidates if end not in inside]
  # Final cue boundary is native; do not truncate the last phrase to an earlier word end.
  nodes=[(0,0)]+sorted({end:t for end,t in candidates if end<len(text)}.items())+[(len(text),duration)]
  next_node={len(nodes)-1:None}

@@ -13,7 +13,7 @@ def _source(project,data,expected=False):
 def _settings(data):
  from . import core_engine as CE
  from .cli_lab_typography import editorial_font
- cfg=CE.load_config();fonts=S.available_fonts();font=data.get('font') or cfg.get('font') or editorial_font()
+ cfg=CE.load_config();fonts=S.available_fonts();font=data.get('font') or editorial_font() or cfg.get('font')
  if not font or font not in {f['path'] for f in fonts}:
   if data.get('font'):raise ValueError('ไม่พบฟอนต์ที่เลือก')
   font=editorial_font()
@@ -29,7 +29,9 @@ def _settings(data):
  if style not in {p['id'] for p in catalog()}:raise ValueError('ไม่พบสไตล์ที่เลือก')
  karaoke=data.get('karaoke',False)
  if type(karaoke) is not bool:raise ValueError('ตัวเลือกสีตามคำไม่ถูกต้อง')
- return dict(font=font,zone=zone,palette=palette,layout=layout,caption_preset=caption_preset,style=style,karaoke=karaoke)
+ options={k:data.get(k,False) for k in ('caption_one_line','english_loanwords')}
+ if any(type(v) is not bool for v in options.values()):raise ValueError('ตัวเลือกซับต้องเป็นเปิดหรือปิด')
+ return dict(font=font,zone=zone,palette=palette,layout=layout,caption_preset=caption_preset,style=style,karaoke=karaoke,**options)
 
 
 def _selected(draft,ids,project,progress):
@@ -71,13 +73,16 @@ def handle(owner,project,data,progress=lambda message:None):
    warnings=[]
    settings['karaoke_timings']=align_existing(resolve_media_paths(copy.deepcopy(draft),project),progress,warnings,lexical=True)
    progress('จับเวลารายคำผ่าน '+str(len(settings['karaoke_timings']))+' ท่อน · ยังไม่ผ่าน '+str(len(warnings))+' ท่อนจะคงสีเดิม')
+  _caption_settings(draft,project,settings,progress)
+  if settings['caption_one_line']:plan=_compact_caption_plan(plan,draft,settings)
   _,preview=K.render(draft,plan,**settings)
   _source(project,dict(source_hash=S.fingerprint(raw),media_hash=media),True)
   token=uuid.uuid4().hex;saved=dict(owner=owner,project=project,created=time.time(),kind='kinetic_text',source_hash=S.fingerprint(raw),media_hash=media,plan=plan,settings=settings,provider='จัดทั้งคลิปในเครื่อง · เวลาซับทั้งท่อน')
   L._store_plan(token,saved,progress)
-  return dict(ok=True,plan_id=token,plan=plan,preview=preview,settings=settings,provider=saved['provider'],canvas=draft.get('canvas_config'),note='การขึ้นวลีใช้เวลาซับทั้งท่อน · สีตามคำเฉพาะช่วงที่จับเวลาผ่าน · ตรวจภาพและเสียงก่อนใช้' if settings['karaoke'] else 'ข้อความขึ้นตามเวลาซับทั้งท่อน ไม่ใช่เวลารายคำ · ตรวจภาพและเสียงก่อนใช้')
+  return dict(ok=True,plan_id=token,plan=plan,preview=preview,settings=settings,provider=saved['provider'],canvas=draft.get('canvas_config'),note=('ซับหนึ่งบรรทัดใช้ขอบวลีที่ตรวจได้ · ' if settings['caption_one_line'] else '')+('คำอังกฤษเป็นข้อความแสดงผล · ' if settings['english_loanwords'] else '')+('การขึ้นวลีใช้เวลาซับทั้งท่อน · สีตามคำเฉพาะช่วงที่จับเวลาผ่าน · ตรวจภาพและเสียงก่อนใช้' if settings['karaoke'] else 'ข้อความเน้นใช้เวลาซับทั้งท่อน ไม่ใช่เวลารายคำ · ตรวจภาพและเสียงก่อนใช้'))
  if action=='kinetic_plan':
   raw,draft,media=_source(project,data,True);settings=_settings(data)
+  if settings['caption_one_line'] or settings['english_loanwords']:raise ValueError('ซับหนึ่งบรรทัดและคำอังกฤษใช้กับจัดทั้งคลิปในเครื่อง')
   if settings['style']!='original':raise ValueError('สไตล์สำเร็จรูปใช้กับจัดทั้งคลิปในเครื่อง · โหมด AI เลือกแบบเดิม / ปรับเอง')
   cues=_selected(draft,data.get('ids'),project,progress)
   if settings['karaoke']:settings['karaoke_timings']={c['id']:c['words'] for c in cues}
@@ -146,3 +151,47 @@ def handle(owner,project,data,progress=lambda message:None):
    return dict(ok=True,result_id=result[0],destination=str(folder),units=report['units'],message='สร้างสำเนาคำตามเสียง '+str(report['units'])+' ชิ้นแล้ว ตรวจและนำเข้าผ่านขั้นตอนเดิม')
   except BaseException:shutil.rmtree(folder,ignore_errors=True);raise
  raise ValueError('คำสั่งคำตามเสียงไม่ถูกต้อง')
+
+
+def _caption_settings(draft,project,settings,progress):
+ if not settings['caption_one_line']:return
+ from .caption_finish import display
+ canvas=draft.get('canvas_config') or {};w=canvas.get('width',1080);h=canvas.get('height',1920);peak=1.12 if settings['caption_preset']=='punch' else 1
+ pending=set()
+ for _,seg,mat,text in P.caption_rows(draft):
+  shown=display(text) if settings['english_loanwords'] else text
+  if K.text_width(' '.join(shown.split()),h*.075,settings['font'])*peak>w*.86:pending.add(seg['id'])
+ if not pending:settings['caption_phrases']={};return
+ from .cli_lab_story import resolve_media_paths
+ from .cli_lab_alignment import align_existing
+ isolated=resolve_media_paths(copy.deepcopy(draft),project)
+ for track in isolated['tracks']:
+  if track.get('type')=='text':track['segments']=[s for s in track.get('segments',[]) if s['id'] in pending]
+ progress('จับขอบวลีจากเสียงเดิมในเครื่องสำหรับซับหนึ่งบรรทัด · ไม่ถอดบทใหม่')
+ warnings=[];measured=align_existing(isolated,progress,warnings,phrase_mode=True)
+ if pending-set(measured):raise ValueError('ยังจับเวลาวลีไม่ครบ '+str(len(pending-set(measured)))+' ท่อน จึงยังไม่สร้างซับหนึ่งบรรทัด กรุณาตรวจเสียงหรือแบ่งท่อนใน CapCut ก่อน')
+ settings['caption_phrases']=measured
+
+
+def _compact_caption_plan(plan,draft,settings):
+ # Keep a source-grounded main/support phrase pair, not an isolated topic label.
+ from . import kinetic_design as D
+ measured=settings.get('caption_phrases') or {};sources={s['id']:t for _,s,m,t in P.caption_rows(draft)};edits=[]
+ markers=('ไหม','ทำไม','แต่','คือ','ภารกิจ','สำเร็จ','ส่วนลด','ยอดซื้อ','ผูกพัน','เปอร์เซ็นต์')
+ def score(pair):
+  text=''.join(p['text'] for p in pair)
+  return sum(2 for word in markers if word in text)-sum(2 for p in pair if p['text'].endswith(('หรือ','เพื่อ','ในการ','เพราะว่า')))
+ for b in plan['blocks']:
+  parts=measured.get(b['cue_id'])
+  if not parts:continue
+  pair=max((parts[i:i+2] for i in range(max(1,len(parts)-1))),key=score)
+  rows=[p['text'] for p in pair]
+  # Source-grounded concept/explanation pairs; never introduce replacement dialogue.
+  patterns=[('แคมเปญแปะสติ๊กเกอร์','รับส่วนลดไหมคะ'),('เซลส์โปรโมชั่น','การส่งเสริมการขาย'),('เพื่อทำ','ภารกิจให้สำเร็จ'),('ลูกค้าสามารถจะเลือกได้','ความคุ้มค่าเงิน'),('ยอดซื้อต่อบิล','สูงขึ้น'),('คูปอง','ทำให้มันจบ'),('ความผูกพันในแบรนด์','เอ็นเกจเมนต์')]
+  source=sources[b['cue_id']]
+  for main,support in patterns:
+   a=source.find(main);c=source.find(support,a+len(main)) if a>=0 else -1
+   if c>=0:rows=[main,support];break
+  form='matched' if len(rows)>1 else 'punch'
+  edits.append(dict(cue_id=b['cue_id'],form=form,rows=rows,accent=len(rows)-1,motion=b['units'][-1]['motion'],enabled=b.get('enabled',True),framing=b.get('framing','keep'),camera_move=b.get('camera_move','static'),composition=b.get('composition')))
+ return D.revise(plan,edits,sources) if edits else plan

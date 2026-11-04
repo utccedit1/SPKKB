@@ -85,7 +85,7 @@ def render_speech(draft, output, respect_volume=False, *, sample_rate=16000, cha
     if run.returncode:raise ValueError('เตรียมเสียงจับเวลาไม่ได้: '+run.stderr[-600:])
 
 
-def align_existing(draft, progress=lambda x:None, warnings=None, *, lexical=False):
+def align_existing(draft, progress=lambda x:None, warnings=None, *, lexical=False, phrase_mode=False):
     """Return segment IDs -> measured relative word times, using only supplied text."""
     from . import core_engine as CE
     from .caption_roles import speech_rows
@@ -93,7 +93,11 @@ def align_existing(draft, progress=lambda x:None, warnings=None, *, lexical=Fals
     for _,segment,material,text in rows:
         if not text.strip():continue
         timed=native_words(material,segment['target_timerange']['duration'])
-        if timed:result[segment['id']]=timed
+        if timed:
+            if phrase_mode:
+                from .caption_phrase_anchors import phrases
+                timed=phrases([dict(word=w['word'],start=w['start'],end=w['end'],probability=1) for w in timed],text,segment['target_timerange']['duration']/1e6,limit=26)
+            result[segment['id']]=timed
         else:pending.append((segment,text))
     if not pending:return result
     try:
@@ -142,6 +146,9 @@ def align_existing(draft, progress=lambda x:None, warnings=None, *, lexical=Fals
                 tokenizer=Tokenizer(_model.hf_tokenizer,_model.model.is_multilingual,task='transcribe',language=language)
                 window=samples[round(start*16000):round((start+duration)*16000)]
                 try:
+                    if phrase_mode:
+                        result[segment['id']]=align_caption_window(_model,tokenizer,window,text,duration,pad_or_trim)
+                        continue
                     aligned=align_windows(_model,tokenizer,window,text,duration,pad_or_trim,lexical=lexical)
                     if not aligned or normalize(''.join(w['word'] for w in aligned))!=normalize(text):raise ValueError('จับเวลาคำไม่ครบ จึงหยุดแทนการเดาเวลาซับ')
                     last=0;valid=[]
@@ -255,3 +262,14 @@ def lexical_words(fragments,text,*,allow_prefix=False):
             group=[]
     if group and not allow_prefix:raise ValueError('จับเวลาคำไม่ครบ')
     return result
+
+
+def align_caption_window(model,tokenizer,samples,text,duration,pad):
+    """Caption-only anchors; retain uncertain internal words, never expose word times."""
+    if not 0<duration<=29:raise ValueError('ซับยาวเกิน29วินาที กรุณาแบ่งท่อนต้นทางก่อนจับเวลาวลี')
+    tokens=tokenizer.encode(text)
+    if len(tokens)>400:raise ValueError('ซับยาวเกินขอบเขตจับเวลาวลี กรุณาแบ่งท่อนต้นทางก่อน')
+    features=model.feature_extractor(samples);encoded=model.encode(pad(features))
+    raw=model.find_alignment(tokenizer,[tokens],encoded,min(3000,features.shape[-1]))[0]
+    from .caption_phrase_anchors import phrases
+    return phrases(raw,text,duration,limit=26)
