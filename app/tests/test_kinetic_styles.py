@@ -2,12 +2,12 @@ import unittest
 from ks import kinetic_styles as S
 class StyleTests(unittest.TestCase):
  def plan(self):
-  return dict(blocks=[dict(cue_id=str(i),form=f,enabled=True,framing='keep',units=[dict(text='คำจริง',start=i*3,end=i*3+2,motion='rise',tone='accent',weight='hero',row=0)]) for i,f in enumerate(['stack','question','punch','numeric'])])
+  return dict(blocks=[dict(cue_id=str(i),form=f,enabled=True,framing='keep',units=[dict(text=['รายละเอียด','เพราะอะไร','สำเร็จ','30%'][i],start=i*3,end=i*3+2,motion='rise',tone='accent',weight='hero',row=0)]) for i,f in enumerate(['stack','question','punch','numeric'])])
  def test_styles_change_density_and_motion_without_changing_source(self):
   p=self.plan();clean=S.apply(p,'clean');impact=S.apply(p,'impact')
   self.assertLess(sum(b['enabled'] for b in clean['blocks']),sum(b['enabled'] for b in impact['blocks']))
   self.assertEqual(impact['blocks'][2]['camera_move'],'snap_to_cut')
-  self.assertEqual(impact['blocks'][2]['units'][0]['text'],'คำจริง')
+  self.assertEqual(impact['blocks'][2]['units'][0]['text'],'สำเร็จ')
   self.assertEqual(impact['blocks'][2]['units'][0]['start'],6)
   self.assertNotIn('camera_move',p['blocks'][2])
  def test_unknown_style_rejected(self):

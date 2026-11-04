@@ -3,7 +3,7 @@ import copy
 FORMS={'numeric':'ตัวเลข / เปอร์เซ็นต์','stack':'คำหลัก–คำรอง','matched':'สองบรรทัดเท่ากัน','punch':'คำขยี้','question':'คำถาม / จุดตอบ','contrast':'คู่เปรียบเทียบ','list':'รายการ'}
 MOTIONS=('pop','rise','slide','fade')
 
-def revise(plan,edits,sources):
+def revise(plan,edits,sources,*,allow_empty=False):
  if plan.get('kind')!='caption_full':raise ValueError('แก้รูปแบบได้เฉพาะแผนทั้งคลิปในเครื่อง')
  if not isinstance(edits,list) or not edits or len(edits)>500:raise ValueError('รายการแก้ไขไม่ถูกต้อง')
  out=copy.deepcopy(plan);lookup={b['cue_id']:b for b in out['blocks']};seen=set()
@@ -27,7 +27,10 @@ def revise(plan,edits,sources):
   if framing not in FRAMINGS or move not in MOVES:raise ValueError('การจัดภาพไม่ถูกต้อง')
   geom=composition(e.get('composition',b.get('composition')))
   b.update(composition=geom,framing=framing,camera_move=move,form=e['form'],enabled=e['enabled'],units=[dict(text=r.strip(),row=i,start=start,end=end,timing='caption',weight='hero' if i==accent else 'support',tone='accent' if i==accent else 'secondary' if e['form']=='contrast' else 'base',motion=e['motion']) for i,r in enumerate(rows)])
- if not any(b.get('enabled',True) for b in out['blocks']):raise ValueError('ต้องเหลือข้อความอย่างน้อยหนึ่งชุด')
+ if not any(b.get('enabled',True) for b in out['blocks']):
+  if allow_empty is not True:raise ValueError('ต้องเหลือข้อความอย่างน้อยหนึ่งชุด')
+  out['caption_only']=True
+ else:out.pop('caption_only',None)
  return out
 
 
@@ -42,7 +45,7 @@ def validate_saved(plan,draft):
   units=b['units'];accent=next((i for i,u in enumerate(units) if u['tone']=='accent'),len(units)-1)
   edits.append(dict(cue_id=b['cue_id'],form=b.get('form','stack'),rows=[u['text'] for u in units],motion=units[-1]['motion'],accent=accent,enabled=b.get('enabled',True),framing=b.get('framing','keep'),camera_move=b.get('camera_move','static'),composition=b.get('composition')))
  # Preserve initial mixed entrances unless a revision explicitly replaced them.
- checked=revise(baseline,edits,{s['id']:t for _,s,m,t in caption_rows(draft)})
+ checked=revise(baseline,edits,{s['id']:t for _,s,m,t in caption_rows(draft)},allow_empty=plan.get('caption_only') is True)
  for original,b in zip(plan['blocks'],checked['blocks']):
   if [u['text'] for u in original['units']]!=[u['text'] for u in b['units']]:raise ValueError('ลำดับคำผิด')
   for old,u in zip(original['units'],b['units']):

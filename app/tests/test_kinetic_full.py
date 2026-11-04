@@ -32,6 +32,16 @@ class FullTypographyTests(unittest.TestCase):
    calls.append(t);return dict(path='/fixture',offset=t,remaining=(2 if t<2 else 5)-t,speed=1,photo=False)
   with patch('ks.caption_studio.source_at',side_effect=at):parts=sources({'duration':5000000})
   self.assertEqual([p['duration'] for p in parts],[2,3]);self.assertEqual(calls,[0,2])
+ def test_proxy_real_segments_do_not_reselect_float_end_boundary(self):
+  from ks.kinetic_proxy import sources
+  import tempfile
+  from pathlib import Path
+  with tempfile.TemporaryDirectory() as root:
+   media=Path(root)/'fixture.mp4';media.touch()
+   cuts=[0,13180000,29260000,32440000,46880000,50740000,74080000,81660000,90840000]
+   segments=[dict(material_id='v',target_timerange=dict(start=a,duration=b-a),source_timerange=dict(start=a,duration=b-a)) for a,b in zip(cuts,cuts[1:])]
+   d=dict(duration=cuts[-1],materials=dict(videos=[dict(id='v',path=str(media))]),tracks=[dict(type='video',segments=segments)])
+   self.assertEqual([p['start'] for p in sources(d)],[t/1e6 for t in cuts[:-1]])
  def test_proxy_frames_use_absolute_timeline_boundaries_without_drift(self):
   from ks.kinetic_proxy import frame_counts
   parts=[dict(start=i*1.01,duration=1.01) for i in range(100)]

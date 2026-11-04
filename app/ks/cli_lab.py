@@ -263,6 +263,8 @@ def handle(owner, project, data, progress=lambda message: None):
         from .cli_lab_enhance import enhance
         return enhance(owner,project,data,progress,run_cli)
     if action == 'plan':
+        from .editorial_finish import option as finish_option
+        editing_finish=finish_option(data)
         progress('ขั้น 1/4 · ตรวจโปรเจกต์และอ่านซับ')
         instruction = str(data.get('instruction', '')).strip()
         if not instruction or len(instruction) > 4000:
@@ -540,8 +542,8 @@ def handle(owner, project, data, progress=lambda message: None):
             style = data.get('style', 'bold')
             if style not in ('bold', 'clean'):
                 raise ValueError('เลือกสไตล์ซับไม่ถูกต้อง')
-            story.update(text_style=data.get('text_style') if isinstance(data.get('text_style'),dict) else {},stock_destination=stock_storage['destination'],stock_density=data.get('stock_density','balanced'),speaker_pip=data.get('speaker_pip',False) is True,auto_stock=auto_stock,stock_provider=stock_provider,style=style, effects=data.get('effects', True) is True,
-                         style_captions=data.get('style_captions', True) is True, clean_speech=data.get('clean_speech',True) is True, assets=selected_assets, visual_library=visual_library)
+            story.update(editing_finish=editing_finish,editing_semantic_ai=data.get('editing_semantic_ai',False),editing_backend=data.get('backend','route'),text_style=data.get('text_style') if isinstance(data.get('text_style'),dict) else {},stock_destination=stock_storage['destination'],stock_density=data.get('stock_density','balanced'),speaker_pip=data.get('speaker_pip',False) is True,auto_stock=auto_stock,stock_provider=stock_provider,style=style, effects=False if editing_finish!='off' else data.get('effects', True) is True,
+                         style_captions=False if editing_finish!='off' else data.get('style_captions', True) is True, clean_speech=data.get('clean_speech',True) is True, assets=selected_assets, visual_library=visual_library)
             if snapshot(path)[1] != digest:
                 raise ValueError('โปรเจกต์เปลี่ยนระหว่างวางแผน กรุณาวางแผนใหม่')
             progress('ขั้น 4/4 · บันทึกแผนพร้อมตรวจทาน')
@@ -716,6 +718,10 @@ def handle(owner, project, data, progress=lambda message: None):
                     S.build(draft, plan['cuts'], source, run_cli, progress)
                     S.decorate(source, plan, run_cli, progress,owner=owner)
                     result = {'output': 'จัดเรื่องหลายช่วง พร้อม Hook / CTA ซับ และเอฟเฟกต์ตามแผนแล้ว'}
+                    if (source/'editorial_finish_report.json').is_file():
+                        finish=json.loads((source/'editorial_finish_report.json').read_bytes())
+                        result['output']='จัดคลิปตามเรื่องที่ตรวจแล้ว · ซับ '+str(finish['captions'])+' ท่อน · Super Text '+str(finish['supers'])+' ชิ้น · จังหวะซูม '+str(finish['scenes'])+' ช่วง · กรุณาตรวจภาพและฟังทั้งคลิป'
+                        if finish['requires_visual_review']:result['output']+=' · ยังมีพื้นที่วางคำที่ต้องตรวจเอง '+str(finish['placement']['uncertain'])+' ชุด'
                     if (source/'speech_cleanup.json').is_file():
                         cleanup=json.loads((source/'speech_cleanup.json').read_bytes())
                         result['output']+='\nตัดคำลังเล/ช่วงเงียบ '+str(len(cleanup['removed']))+' จุด · ลดเวลา '+str(round(cleanup['saved_seconds'],2))+' วินาที\n'+cleanup.get('note','')

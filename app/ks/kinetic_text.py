@@ -102,7 +102,7 @@ def geometry(units,width,height,zone,*,layout='hierarchy',font='',form='stack'):
  return output
 
 
-def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption_preset='keep',style='original',karaoke=False,karaoke_timings=None,caption_one_line=False,english_loanwords=False,caption_phrases=None):
+def render(draft,plan,*,font,zone='left',palette=None,layout='hierarchy',caption_preset='keep',style='original',karaoke=False,karaoke_timings=None,caption_one_line=False,english_loanwords=False,caption_phrases=None,semantic_ai=False):
  from . import core_engine as CE
  from .text_layout import detach_caption
  if plan.get('profile_hash')!=SK.fingerprint():raise ValueError('สไตล์เปลี่ยนแล้ว กรุณาวางแผนใหม่')

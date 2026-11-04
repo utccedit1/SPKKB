@@ -1,6 +1,7 @@
 """Reviewed replacement of the selected timeline, with recoverable mirror backups."""
 import copy
 import hashlib
+import math
 import json
 from pathlib import Path
 import shutil
@@ -102,6 +103,13 @@ def review_notes(folder):
     if (folder/'kinetic_text_report.json').is_file():
         report=json.loads((folder/'kinetic_text_report.json').read_bytes())
         notes.append(f"คำตามเสียง · {report.get('units',0)} ชิ้น · ตรวจการขึ้นคำ สี ขนาด และพื้นที่พ้นใบหน้าใน CapCut")
+        labels={'faces overlap text':'คำอาจทับใบหน้า','hands overlap text':'คำอาจทับมือ','face and hand evidence incomplete':'ตรวจหน้าและมือได้ไม่ครบ','face extends outside canvas during motion':'ซูมอาจตัดใบหน้า'}
+        for record in (report.get('assistance') or {}).get('records',[]):
+            if record.get('safe') is not False:continue
+            span=record.get('interval')
+            if not isinstance(span,list) or len(span)!=2 or any(type(t) not in (int,float) or not math.isfinite(t) for t in span) or not 0<=span[0]<span[1]:continue
+            reasons=' · '.join(dict.fromkeys(labels.get(r,'ตรวจภาพจริงเพิ่มเติม') for r in record.get('reasons',[])))
+            notes.append(f'ต้องตรวจช่วง {span[0]:.2f}–{span[1]:.2f}s · {reasons} · ผลตรวจเป็นเฟรมตัวอย่าง')
     if (folder/'caption_studio_report.json').is_file():
         report=json.loads((folder/'caption_studio_report.json').read_bytes())
         from .caption_presets import catalog

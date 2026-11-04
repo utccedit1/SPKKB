@@ -124,3 +124,12 @@ class NumericDisplayReuseTests(unittest.TestCase):
  def test_existing_supported_percentages_use_numbers_without_inventing_units(self):
   self.assertEqual(F.display('ส่วนลดสามสิบเปอร์เซ็นต์'),'ส่วนลด 30%')
   self.assertEqual(F.display('สิบสองจุดห้าเปอร์เซ็นต์'),'สิบสองจุดห้าเปอร์เซ็นต์')
+
+class UnsupportedPhraseRestTests(unittest.TestCase):
+ def test_overlong_question_rests_instead_of_rendering_paragraph_super(self):
+  from ks import kinetic_jobs as J,kinetic_full as B,kinetic_styles as S
+  d=draft();text='ทำไม'+('รายละเอียดที่ต้องอธิบายให้ครบถ้วน'*8)+'ไหม';d['materials']['texts'][0]['content']=json.dumps(dict(text=text,styles=[]));d['tracks'][0]['segments']=d['tracks'][0]['segments'][:1]
+  m=copy.deepcopy(d['materials']['texts'][0]);m.update(id='other',content=json.dumps(dict(text='เพื่อทำภารกิจให้สำเร็จ',styles=[])));d['materials']['texts'].append(m);seg=copy.deepcopy(d['tracks'][0]['segments'][0]);seg.update(id='two',material_id='other',target_timerange=dict(start=2000000,duration=1000000));d['tracks'][0]['segments'].append(seg);d['duration']=3000000
+  parts=[dict(text=text[:20],start=0,end=.5),dict(text=text[20:],start=.5,end=1)]
+  p=J._compact_caption_plan(B.plan(d),d,dict(caption_phrases={'one':parts}));out=S.apply(p,'story')
+  self.assertFalse(out['blocks'][0]['enabled']);self.assertTrue(out['blocks'][1]['enabled']);self.assertLess(len(out['blocks'][0]['units'][0]['text']),30)

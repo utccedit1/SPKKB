@@ -33,7 +33,7 @@ def reveal_plan(draft,plan,phrases):
  lookup,_=_validated(draft,phrases);out=copy.deepcopy(plan)
  for block in out['blocks']:
   parts=phrases.get(block['cue_id']) or [];units=block['units']
-  if len(units)<2:continue
+  if not units:continue
   if not parts:continue
   source=normalize(lookup[block['cue_id']][2]);cursor=0;matches=[];bounds=[];position=0
   for part in parts:

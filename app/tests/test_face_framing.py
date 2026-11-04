@@ -47,8 +47,8 @@ class AssistServiceTests(unittest.TestCase):
   import copy,json
   from pathlib import Path
   meta=J.handle('alice',self.proj,dict(action='kinetic_meta'));p=J.handle('alice',self.proj,dict(action='kinetic_full_plan',source_hash=meta['source_hash'],media_hash=meta['media_hash']))
-  def assist(draft,plan,project,progress):
-   out=copy.deepcopy(plan);out['blocks'][0].update(framing='speaker_left',camera_move='static',composition=dict(video_x=-.03,video_y=.01,video_scale=1.05,text_x=.5,text_y=.4));return out,dict(accepted=1,uncertain=0)
+  def assist(draft,plan,project,progress,settings=None):
+   out=copy.deepcopy(plan);out['blocks'][0].update(framing='speaker_left',camera_move='static',composition=dict(video_x=-.03,video_y=.01,video_scale=1.05,text_x=.5,text_y=.4));return out,dict(accepted=1,uncertain=1,records=[dict(cue_id='unresolved',safe=False,interval=[1,2],reasons=['face and hand evidence incomplete'])])
   with patch.object(A,'assist',side_effect=assist) as detector:
    with self.assertRaises(ValueError):J.handle('bob',self.proj,dict(action='kinetic_assist',plan_id=p['plan_id']))
    detector.assert_not_called()
@@ -60,17 +60,22 @@ class AssistServiceTests(unittest.TestCase):
    self.assertEqual(list(job_store.records('alice','plans')),before)
    assisted=J.handle('alice',self.proj,dict(action='kinetic_assist',plan_id=p['plan_id']))
   self.assertNotEqual(assisted['plan_id'],p['plan_id']);self.assertEqual(assisted['preview']['scenes'][0]['x'],-.03)
+  self.assertTrue(assisted['preview']['requires_visual_review']);self.assertEqual(assisted['preview']['assistance']['records'][0]['interval'],[1,2])
   with patch.object(S,'output_root',return_value=self.root/'outputs'):built=J.handle('alice',self.proj,dict(action='kinetic_prepare',plan_id=assisted['plan_id']))
   self.assertEqual(json.loads((Path(built['destination'])/'kinetic_text_report.json').read_text()),assisted['preview']);self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
   block=assisted['plan']['blocks'][0];edit=dict(cue_id=block['cue_id'],rows=[u['text'] for u in block['units']],form=block['form'],accent=len(block['units'])-1,motion='rise',enabled=True,framing='speaker_left',composition=dict(video_x=-.04))
   manual=J.handle('alice',self.proj,dict(action='kinetic_revise',plan_id=assisted['plan_id'],edits=[edit]));self.assertNotIn('assistance',job_store.load('alice','plans',manual['plan_id']))
- def test_no_confident_result_does_not_create_a_success_receipt(self):
+ def test_all_uncertain_keeps_unchanged_plan_and_reviewable_evidence(self):
   from ks import kinetic_jobs as J,job_store
   from unittest.mock import patch
-  meta=J.handle('alice',self.proj,dict(action='kinetic_meta'));p=J.handle('alice',self.proj,dict(action='kinetic_full_plan',source_hash=meta['source_hash'],media_hash=meta['media_hash']));before=list(job_store.records('alice','plans'))
-  with patch.object(A,'assist',return_value=(p['plan'],dict(accepted=0,uncertain=1))):
-   with self.assertRaises(ValueError):J.handle('alice',self.proj,dict(action='kinetic_assist',plan_id=p['plan_id']))
-  self.assertEqual(list(job_store.records('alice','plans')),before)
+  meta=J.handle('alice',self.proj,dict(action='kinetic_meta'));p=J.handle('alice',self.proj,dict(action='kinetic_full_plan',source_hash=meta['source_hash'],media_hash=meta['media_hash']))
+  evidence=dict(accepted=0,uncertain=1,records=[dict(cue_id=p['plan']['blocks'][0]['cue_id'],safe=False,interval=[0,3],reasons=['face and hand evidence incomplete'])])
+  with patch.object(A,'assist',return_value=(p['plan'],evidence)):
+   result=J.handle('alice',self.proj,dict(action='kinetic_assist',plan_id=p['plan_id']))
+  self.assertEqual(result['plan'],p['plan'])
+  self.assertTrue(result['preview']['requires_visual_review'])
+  self.assertEqual(job_store.load('alice','plans',result['plan_id'])['assistance'],evidence)
+  self.assertEqual((self.proj/'draft_info.json').read_bytes(),self.raw)
 
 class SampleCanvasTests(unittest.TestCase):
  def test_portrait_and_landscape_faces_are_sampled_in_displayed_canvas_space(self):

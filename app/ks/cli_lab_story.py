@@ -174,6 +174,9 @@ def build(draft, cuts, work, run_cli, progress):
 
 
 def decorate(work, plan, run_cli, progress, owner=None):
+    if plan.get('editing_finish','off')!='off':
+        from .editorial_finish import decorate as finish
+        return finish(work,plan,progress)
     work = Path(work)
     path = work / 'draft_info.json'
     draft = json.loads(path.read_bytes())
@@ -395,7 +398,7 @@ def publish(source, parsed, base, review=None):
             return [relocate(v) for v in value]
         return value
     try:
-        for name in ('speech_alignment.json','alignment_report.json','speech_cleanup.json','visuals_report.json','backdrop_report.json','stock_report.json','caption_layout_report.json','audio_levels_report.json'):
+        for name in ('speech_alignment.json','alignment_report.json','speech_cleanup.json','visuals_report.json','backdrop_report.json','stock_report.json','caption_layout_report.json','audio_levels_report.json','kinetic_text_report.json','editorial_finish_report.json'):
             if (source/name).is_file():shutil.copyfile(source/name,staging/name)
         for directory in ('assets', 'draft_materials'):
             if (source / directory).is_dir():

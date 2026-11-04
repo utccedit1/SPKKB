@@ -60,7 +60,7 @@ def source_at(draft,at,_depth=0):
     for track in draft.get('tracks',[]):
         if track.get('type')!='video' or track.get('attribute',0)&1:continue
         for seg in track.get('segments',[]):
-            tr=seg.get('target_timerange') or {};start=tr.get('start',0)/1e6;end=start+tr.get('duration',0)/1e6
+            tr=seg.get('target_timerange') or {};start=tr.get('start',0)/1e6;end=(tr.get('start',0)+tr.get('duration',0))/1e6
             if not start<=at<end:continue
             refs=seg.get('extra_material_refs',[])
             if any((speeds.get(r) or {}).get('curve_speed') for r in refs) or seg.get('reverse') or seg.get('is_reverse'):raise ValueError('พรีวิว compound / multicam / กราฟความเร็วนี้ยังไม่ได้ โปรดตรวจใน CapCut')

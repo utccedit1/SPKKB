@@ -29,8 +29,9 @@ def _settings(data):
  if style not in {p['id'] for p in catalog()}:raise ValueError('ไม่พบสไตล์ที่เลือก')
  karaoke=data.get('karaoke',False)
  if type(karaoke) is not bool:raise ValueError('ตัวเลือกสีตามคำไม่ถูกต้อง')
- options={k:data.get(k,False) for k in ('caption_one_line','english_loanwords')}
+ options={k:data.get(k,False) for k in ('caption_one_line','english_loanwords','semantic_ai')}
  if any(type(v) is not bool for v in options.values()):raise ValueError('ตัวเลือกซับต้องเป็นเปิดหรือปิด')
+ if options['semantic_ai'] and not options['caption_one_line']:raise ValueError('AI เลือกวลีต้องเปิดซับหนึ่งบรรทัดเพื่อจับขอบวลีก่อน')
  return dict(font=font,zone=zone,palette=palette,layout=layout,caption_preset=caption_preset,style=style,karaoke=karaoke,**options)
 
 
@@ -64,7 +65,6 @@ def handle(owner,project,data,progress=lambda message:None):
  if action=='kinetic_full_plan':
   from . import kinetic_full as F,cli_lab as L
   raw,draft,media=_source(project,data,True);settings=_settings(data)
-  from .kinetic_styles import apply as style_plan
   plan=F.plan(draft)
   if settings['karaoke']:
    from .cli_lab_alignment import align_existing
@@ -74,16 +74,20 @@ def handle(owner,project,data,progress=lambda message:None):
    settings['karaoke_timings']=align_existing(resolve_media_paths(copy.deepcopy(draft),project),progress,warnings,lexical=True)
    progress('จับเวลารายคำผ่าน '+str(len(settings['karaoke_timings']))+' ท่อน · ยังไม่ผ่าน '+str(len(warnings))+' ท่อนจะคงสีเดิม')
   _caption_settings(draft,project,settings,progress)
-  if settings['caption_one_line']:plan=_compact_caption_plan(plan,draft,settings)
-  plan=style_plan(plan,settings['style'])
+  if settings['semantic_ai']:
+   from .editorial_ai import design
+   plan=design(draft,plan,settings,data.get('backend','route'),progress)
+  elif settings['caption_one_line']:plan=_compact_caption_plan(plan,draft,settings)
+  plan=_style_plan(draft,plan,settings)
+  plan['caption_only']=not any(b.get('enabled',True) for b in plan['blocks'])
   _,preview=K.render(draft,plan,**settings)
   _source(project,dict(source_hash=S.fingerprint(raw),media_hash=media),True)
-  token=uuid.uuid4().hex;saved=dict(owner=owner,project=project,created=time.time(),kind='kinetic_text',source_hash=S.fingerprint(raw),media_hash=media,plan=plan,settings=settings,provider='จัดทั้งคลิปในเครื่อง · เวลาซับทั้งท่อน')
+  token=uuid.uuid4().hex;saved=dict(owner=owner,project=project,created=time.time(),kind='kinetic_text',source_hash=S.fingerprint(raw),media_hash=media,plan=plan,settings=settings,provider=plan.get('editorial_provider','จัดทั้งคลิปในเครื่อง · เวลาซับทั้งท่อน'))
   L._store_plan(token,saved,progress)
   return dict(ok=True,plan_id=token,plan=plan,preview=preview,settings=settings,provider=saved['provider'],canvas=draft.get('canvas_config'),note=('ซับหนึ่งบรรทัดใช้ขอบวลีที่ตรวจได้ · ' if settings['caption_one_line'] else '')+('คำอังกฤษเป็นข้อความแสดงผล · ' if settings['english_loanwords'] else '')+('การขึ้นวลีใช้เวลาซับทั้งท่อน · สีตามคำเฉพาะช่วงที่จับเวลาผ่าน · ตรวจภาพและเสียงก่อนใช้' if settings['karaoke'] else 'ข้อความเน้นใช้เวลาซับทั้งท่อน ไม่ใช่เวลารายคำ · ตรวจภาพและเสียงก่อนใช้'))
  if action=='kinetic_plan':
   raw,draft,media=_source(project,data,True);settings=_settings(data)
-  if settings['caption_one_line'] or settings['english_loanwords']:raise ValueError('ซับหนึ่งบรรทัดและคำอังกฤษใช้กับจัดทั้งคลิปในเครื่อง')
+  if settings['caption_one_line'] or settings['english_loanwords'] or settings['semantic_ai']:raise ValueError('ซับหนึ่งบรรทัดและคำอังกฤษใช้กับจัดทั้งคลิปในเครื่อง')
   if settings['style']!='original':raise ValueError('สไตล์สำเร็จรูปใช้กับจัดทั้งคลิปในเครื่อง · โหมด AI เลือกแบบเดิม / ปรับเอง')
   cues=_selected(draft,data.get('ids'),project,progress)
   if settings['karaoke']:settings['karaoke_timings']={c['id']:c['words'] for c in cues}
@@ -118,12 +122,13 @@ def handle(owner,project,data,progress=lambda message:None):
   if action=='kinetic_assist':
    from . import assisted_framing as A,cli_lab as L
    if plan.get('kind')!='caption_full':raise ValueError('ช่วยจัดกรอบได้เฉพาะแผนทั้งคลิปในเครื่อง')
-   plan,assistance=A.assist(draft,plan,project,progress)
-   if not assistance['accepted']:raise ValueError('ยังไม่มีชุดที่ตรวจภาพได้มั่นใจพอ แผนเดิมยังอยู่ กรุณาปรับเองและตรวจใน CapCut')
+   plan,assistance=A.assist(draft,plan,project,progress,settings=saved['settings'])
    _,preview=K.render(draft,plan,**saved['settings']);_source(project,saved,True)
+   preview.update(assistance=copy.deepcopy(assistance),requires_visual_review=bool(assistance.get('uncertain')))
    token=uuid.uuid4().hex;revised=dict(saved,plan=plan,created=time.time(),assistance=assistance)
    L._store_plan(token,revised,progress)
    note='ช่วยจัดกรอบจากภาพในเครื่อง '+str(assistance['accepted'])+' ชุด · ไม่เปลี่ยน '+str(assistance['uncertain'])+' ชุดที่ยังไม่มั่นใจ · ตรวจภาพและเสียงก่อนใช้'
+   if not assistance['accepted']:note='คงแผนเดิม · ยังไม่มีช่วงที่ตรวจพื้นที่วางคำได้มั่นใจ · กดช่วงที่ต้องตรวจและปรับเองก่อนใช้'
    return dict(ok=True,plan_id=token,plan=plan,preview=preview,settings=saved['settings'],provider=saved['provider'],canvas=draft.get('canvas_config'),assistance=assistance,note=note)
   if action=='kinetic_revise':
    from . import cli_lab as L,kinetic_design as D
@@ -135,6 +140,7 @@ def handle(owner,project,data,progress=lambda message:None):
    return dict(ok=True,plan_id=token,plan=plan,preview=preview,settings=saved['settings'],provider=saved['provider'],canvas=draft.get('canvas_config'),note='บันทึกรูปแบบแล้ว · ใช้เวลาซับทั้งท่อน ไม่เดาเวลารายคำ')
   from .cli_lab_story import resolve_media_paths
   edited,report=K.render(resolve_media_paths(draft,project),plan,**saved['settings'])
+  if saved.get('assistance') is not None:report.update(assistance=copy.deepcopy(saved['assistance']),requires_visual_review=bool(saved['assistance'].get('uncertain')))
   root=S.output_root()/hashlib.sha256((owner+'\0'+project).encode()).hexdigest();root.mkdir(parents=True,exist_ok=True)
   folder=Path(tempfile.mkdtemp(prefix='kinetic-',dir=root))
   try:
@@ -175,24 +181,45 @@ def _caption_settings(draft,project,settings,progress):
 
 
 def _compact_caption_plan(plan,draft,settings):
- # Keep a source-grounded main/support phrase pair, not an isolated topic label.
  from . import kinetic_design as D
- measured=settings.get('caption_phrases') or {};sources={s['id']:t for _,s,m,t in P.caption_rows(draft)};edits=[]
- markers=('ไหม','ทำไม','แต่','คือ','ภารกิจ','สำเร็จ','ส่วนลด','ยอดซื้อ','ผูกพัน','เปอร์เซ็นต์')
- def score(pair):
-  text=''.join(p['text'] for p in pair)
-  return sum(2 for word in markers if word in text)-sum(2 for p in pair if p['text'].endswith(('หรือ','เพื่อ','ในการ','เพราะว่า')))
+ from .editorial_phrases import select
+ measured=settings.get('caption_phrases') or {};sources={s['id']:t for _,s,m,t in P.caption_rows(draft)};edits=[];roles={}
  for b in plan['blocks']:
-  parts=measured.get(b['cue_id'])
-  if not parts:continue
-  pair=max((parts[i:i+2] for i in range(max(1,len(parts)-1))),key=score)
-  rows=[p['text'] for p in pair]
-  # Source-grounded concept/explanation pairs; never introduce replacement dialogue.
-  patterns=[('แคมเปญแปะสติ๊กเกอร์','รับส่วนลดไหมคะ'),('เซลส์โปรโมชั่น','การส่งเสริมการขาย'),('เพื่อทำ','ภารกิจให้สำเร็จ'),('ลูกค้าสามารถจะเลือกได้','ความคุ้มค่าเงิน'),('ยอดซื้อต่อบิล','สูงขึ้น'),('คูปอง','ทำให้มันจบ'),('ความผูกพันในแบรนด์','เอ็นเกจเมนต์')]
-  source=sources[b['cue_id']]
-  for main,support in patterns:
-   a=source.find(main);c=source.find(support,a+len(main)) if a>=0 else -1
-   if c>=0:rows=[main,support];break
-  form='matched' if len(rows)>1 else 'punch'
-  edits.append(dict(cue_id=b['cue_id'],form=form,rows=rows,accent=len(rows)-1,motion=b['units'][-1]['motion'],enabled=b.get('enabled',True),framing=b.get('framing','keep'),camera_move=b.get('camera_move','static'),composition=b.get('composition')))
- return D.revise(plan,edits,sources) if edits else plan
+  source=sources[b['cue_id']];parts=measured.get(b['cue_id']) or [dict(text=source)]
+  selected=select(source,parts)
+  if not selected:
+   from .ce_tokenizer import thai_clusters
+   if len(thai_clusters(source))<=40:roles[b['cue_id']]=dict(editorial_role='detail',phrase_reason='ยังไม่พบคู่คำที่สมบูรณ์');continue
+   rows=[parts[0]['text'][:100]];roles[b['cue_id']]=dict(editorial_role='detail',editorial_skip=True,phrase_reason='พักข้อความที่ยังย่อครบความไม่ได้')
+   edits.append(dict(cue_id=b['cue_id'],form='punch',rows=rows,accent=0,motion='fade',enabled=False,framing='keep',camera_move='static',composition=b.get('composition')))
+   continue
+  rows=selected['rows'];roles[b['cue_id']]=dict(editorial_role=selected['role'],phrase_reason=selected['reason'])
+  edits.append(dict(cue_id=b['cue_id'],form=selected['form'],rows=rows,accent=len(rows)-1,motion=b['units'][-1]['motion'],enabled=b.get('enabled',True),framing=b.get('framing','keep'),camera_move=b.get('camera_move','static'),composition=b.get('composition')))
+ out=D.revise(plan,edits,sources,allow_empty=True) if edits else copy.deepcopy(plan)
+ for b in out['blocks']:
+  b.update(roles[b['cue_id']])
+  if not b.get('enabled',True):continue
+  units=copy.deepcopy(b['units'])
+  if settings.get('english_loanwords'):
+   from .caption_finish import display
+   for u in units:u['text']=display(u['text'])
+  canvas=draft.get('canvas_config') or {}
+  try:K.geometry(units,canvas.get('width',1080),canvas.get('height',1920),settings.get('zone','left'),layout=settings.get('layout','hierarchy'),font=settings.get('font',''),form=b.get('form','stack'))
+  except ValueError:b.update(enabled=False,editorial_skip=True,phrase_reason='พักข้อความที่ยังวางให้อ่านง่ายไม่ได้')
+ out['caption_only']=not any(b.get('enabled',True) for b in out['blocks'])
+ return out
+
+def _style_plan(draft,plan,settings):
+ from .kinetic_styles import apply
+ if settings.get('caption_one_line'):
+  from .caption_finish import reveal_plan
+  plan=reveal_plan(draft,plan,settings.get('caption_phrases') or {})
+ out=apply(plan,settings.get('style','original'))
+ if settings.get('style','original')!='original':
+  from .kinetic_scene import cut_end
+  for block in out['blocks']:
+   if block.get('enabled',True) and block.get('camera_move')=='snap_to_cut':
+    start=min(u['start'] for u in block['units'])
+    if cut_end(draft,start)-start>12:
+     block.update(camera_move='snap_in_out',editorial_reason=block.get('editorial_reason','')+' · คัทยังไกล กลับนุ่มเมื่อจบคำเน้น')
+ return out
