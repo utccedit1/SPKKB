@@ -65,7 +65,7 @@ def handle(owner,project,data,progress=lambda message:None):
   from . import kinetic_full as F,cli_lab as L
   raw,draft,media=_source(project,data,True);settings=_settings(data)
   from .kinetic_styles import apply as style_plan
-  plan=style_plan(F.plan(draft),settings['style'])
+  plan=F.plan(draft)
   if settings['karaoke']:
    from .cli_lab_alignment import align_existing
    from .cli_lab_story import resolve_media_paths
@@ -75,6 +75,7 @@ def handle(owner,project,data,progress=lambda message:None):
    progress('จับเวลารายคำผ่าน '+str(len(settings['karaoke_timings']))+' ท่อน · ยังไม่ผ่าน '+str(len(warnings))+' ท่อนจะคงสีเดิม')
   _caption_settings(draft,project,settings,progress)
   if settings['caption_one_line']:plan=_compact_caption_plan(plan,draft,settings)
+  plan=style_plan(plan,settings['style'])
   _,preview=K.render(draft,plan,**settings)
   _source(project,dict(source_hash=S.fingerprint(raw),media_hash=media),True)
   token=uuid.uuid4().hex;saved=dict(owner=owner,project=project,created=time.time(),kind='kinetic_text',source_hash=S.fingerprint(raw),media_hash=media,plan=plan,settings=settings,provider='จัดทั้งคลิปในเครื่อง · เวลาซับทั้งท่อน')

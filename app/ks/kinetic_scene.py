@@ -102,7 +102,8 @@ def apply(draft,scenes):
   if (type(speed) not in (int,float) or not math.isfinite(speed) or not .125<=speed<=8 or original.get('reverse') or original.get('is_reverse') or original.get('common_keyframes') or original.get('keyframe_refs') or clip.get('rotation',0) or any((clip.get('flip') or {}).values()) or any(abs(scale.get(k,1)-1)>1e-6 or abs(pos.get(k,0))>1e-6 for k in ('x','y'))):raise ValueError('ภาพมีครอป/การเคลื่อนชั้นนอกอยู่แล้ว กรุณาคงภาพเดิมเพื่อรักษางานเดิม')
   source=original.get('source_timerange')
   if not source:raise ValueError('อ่านช่วงภาพต้นฉบับไม่ได้')
-  edges=sorted({a,b,*[max(a,c['start']) for c in overlaps],*[min(b,c['end']) for c in overlaps]})
+  # CapCut stores integer microseconds; coalesce equivalent float endpoints before splitting.
+  edges=sorted({round(t*1e6)/1e6 for t in [a,b,*[max(a,c['start']) for c in overlaps],*[min(b,c['end']) for c in overlaps]]})
   for left,right in zip(edges,edges[1:]):
    seg=copy.deepcopy(original);seg['id']=uuid.uuid4().hex;seg['target_timerange']=dict(start=round(left*1e6),duration=round(right*1e6)-round(left*1e6));src=source['start']+round((left-a)*speed*1e6);finish=source['start']+round((right-a)*speed*1e6);seg['source_timerange']=dict(start=src,duration=finish-src)
    scene=next((c for c in overlaps if c['start']<=left+1e-7<c['end']),None)

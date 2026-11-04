@@ -3,8 +3,8 @@ import copy
 CATALOG=[
  dict(id='original',name='แบบเดิม / ปรับเอง',description='วลีครบตามซับ · ใช้รูปแบบรายประโยคที่เลือกไว้',sample='เพื่อทำ / ภารกิจให้สำเร็จ'),
  dict(id='clean',name='สาระเรียบ',description='พักสายตา · เน้นคำสั้นและตัวเลข · เฟด · คงเฟรม',sample='ความคุ้มค่าเงิน'),
- dict(id='story',name='เล่าเรื่องเป็นจังหวะ',description='คำถาม–คู่เปรียบเทียบ–ข้อสรุป · ลอยขึ้นและเลื่อน · ซูมคำขยี้เร็ว',sample='ดูเหมือนธรรมดา / แต่กลับไม่ธรรมดา'),
- dict(id='impact',name='ขยี้ไว',description='คำใหญ่–ตัวเลข · เด้ง · ซูมเข้าเร็ว 0.30 วิ ค้างแล้วออก',sample='30%   20%   10%'),
+ dict(id='story',name='เล่าเรื่องเป็นจังหวะ',description='คำถาม–คู่เปรียบเทียบ–ข้อสรุป · ลอยขึ้นและเลื่อน · ซูมคำขยี้ค้างถึงคัท',sample='ดูเหมือนธรรมดา / แต่กลับไม่ธรรมดา'),
+ dict(id='impact',name='ขยี้ไว',description='คำใหญ่–ตัวเลข · เด้ง · ซูมเข้าเร็ว 0.30 วิ ค้างถึงคัทถัดไป',sample='30%   20%   10%'),
 ]
 def catalog():return copy.deepcopy(CATALOG)
 def apply(plan,style):
@@ -14,7 +14,8 @@ def apply(plan,style):
  for b in out['blocks']:
   form=b.get('form','stack');units=b['units'];duration=max(u['end'] for u in units)-min(u['start'] for u in units)
   b['enabled']=form in ('punch','numeric') if style=='clean' else form in ('punch','numeric','question','contrast','matched') if style=='story' else duration>=.9
-  b['camera_move']='snap_in_out' if b['enabled'] and form=='punch' and style!='clean' else 'static'
+  emphasis=form in ('punch','numeric') or (style=='impact' and form in ('matched','contrast'))
+  b['camera_move']='snap_to_cut' if b['enabled'] and emphasis and style!='clean' else 'static'
   for u in units:u['motion']='fade' if style=='clean' else 'pop' if style=='impact' else 'slide' if form=='contrast' else 'rise'
  if out['blocks'] and not any(b['enabled'] for b in out['blocks']):min(out['blocks'],key=lambda b:sum(len(u['text']) for u in b['units']))['enabled']=True
  return out

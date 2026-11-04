@@ -59,6 +59,31 @@ class CaptionFinishServiceTests(unittest.TestCase):
   self.assertGreater(len(result['preview']['captions']),2)
   self.assertTrue(all(e['source_text'] in text and len(e['source_text'])<60 for e in result['preview']['entries']))
 
+class RecipeAfterCompactionTests(unittest.TestCase):
+ from test_kinetic_text import KineticServiceTests as _Fixture
+ setUp=_Fixture.setUp
+ def test_impact_uses_final_matched_phrase_form_and_prepare_keeps_scene(self):
+  from ks import kinetic_jobs as J,caption_studio as S
+  from test_kinetic_scene import SceneTests
+  from unittest.mock import patch
+  from pathlib import Path
+  words=('alpha beta gamma '*12).split();text=' '.join(words)
+  self.d['canvas_config']=dict(width=1920,height=1080)
+  m=self.d['materials']['texts'][0];m['content']=json.dumps(dict(text=text,styles=[]));m['words']=dict(text=[w+' ' if i<len(words)-1 else w for i,w in enumerate(words)],start_time=[i*100 for i in range(len(words))],end_time=[(i+1)*100 for i in range(len(words))])
+  self.d['tracks'][0]['segments'][0]['target_timerange']['duration']=4000000
+  video=SceneTests().fixture();self.d['tracks']+=video['tracks'];self.d['duration']=6000000
+  (self.proj/'draft_info.json').write_text(json.dumps(self.d));raw=(self.proj/'draft_info.json').read_bytes()
+  meta=J.handle('alice',self.proj,dict(action='kinetic_meta'))
+  result=J.handle('alice',self.proj,dict(action='kinetic_full_plan',source_hash=meta['source_hash'],media_hash=meta['media_hash'],caption_one_line=True,style='impact'))
+  self.assertEqual(result['plan']['blocks'][0]['form'],'matched')
+  self.assertEqual(result['plan']['blocks'][0]['camera_move'],'snap_to_cut')
+  self.assertEqual(result['preview']['scenes'][0]['end'],6)
+  with patch.object(S,'output_root',return_value=self.root/'outputs'):
+   ready=J.handle('alice',self.proj,dict(action='kinetic_prepare',plan_id=result['plan_id']))
+  report=json.loads((Path(ready['destination'])/'kinetic_text_report.json').read_text())
+  self.assertEqual(report['scenes'],result['preview']['scenes'])
+  self.assertEqual((self.proj/'draft_info.json').read_bytes(),raw)
+
 class NativeCaptionContractTests(unittest.TestCase):
  def test_one_line_clears_inherited_native_wrapping_constraints(self):
   d=draft();d['materials']['texts'][0].update(force_apply_line_max_width=True,line_max_width=.1,fixed_width=100,line_feed=1)

@@ -42,7 +42,7 @@ UI=r'''
  <div id="ktStyleExamples" style="display:flex;gap:12px;flex-wrap:wrap">
  <div style="padding:16px;background:#182333;border-radius:12px;max-width:230px"><b>สาระเรียบ</b><p style="font-size:24px;color:#fad43d">ความคุ้มค่าเงิน</p><small>เน้นเฉพาะคำสั้น/ตัวเลข · เฟด · คงเฟรม</small></div>
  <div style="padding:16px;background:#182333;border-radius:12px;max-width:230px"><b>เล่าเรื่องเป็นจังหวะ</b><p>ดูเหมือนธรรมดา<br><strong style="font-size:24px;color:#fad43d">แต่กลับไม่ธรรมดา</strong></p><small>คำถาม–คู่เปรียบเทียบ–ข้อสรุป · ซูมคำขยี้</small></div>
- <div style="padding:16px;background:#182333;border-radius:12px;max-width:230px"><b>ขยี้ไว</b><p style="font-size:30px"><strong>30%</strong> <strong style="color:#fad43d">20%</strong></p><small>เด้ง · ซูมเข้าเร็ว 0.30 วิ ค้างแล้วออก</small></div></div>
+ <div style="padding:16px;background:#182333;border-radius:12px;max-width:230px"><b>ขยี้ไว</b><p style="font-size:30px"><strong>30%</strong> <strong style="color:#fad43d">20%</strong></p><small>เด้ง · ซูมเข้าเร็ว 0.30 วิ ค้างถึงคัทถัดไป</small></div></div>
  <p>ตัวอย่างการวางคำ · เลือกสไตล์แล้วกดจัดทั้งคลิป จากนั้นโหลดภาพและเสียงเพื่อดูผลกับโปรเจกต์นี้ตลอดคลิป · คงคำพูดและรอยตัดเดิม</p>
  <label><input type="checkbox" id="ktKaraoke">เปลี่ยนสี Super Text ตามคำจริง (จับเวลาในเครื่อง · คำที่ไม่ผ่านคงสีเดิม)</label>
  <label><input type="checkbox" id="ktOneLine">ซับพูดหนึ่งบรรทัด (จัดทั้งคลิป · ต้องจับขอบเสียงได้ครบ)</label>

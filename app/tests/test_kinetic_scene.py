@@ -128,3 +128,12 @@ class SceneServiceTests(unittest.TestCase):
   with patch.object(S,'output_root',return_value=self.root/'outputs'):built=J.handle('alice',self.proj,dict(action='kinetic_prepare',plan_id=p['plan_id']))
   from pathlib import Path
   report=json.loads((Path(built['destination'])/'kinetic_text_report.json').read_text());self.assertEqual(report,p['preview']);self.assertEqual((self.proj/'draft_info.json').read_bytes(),original)
+
+class MicrosecondBoundaryTests(unittest.TestCase):
+ def test_float_cut_endpoint_never_creates_zero_duration_native_piece(self):
+  d=SceneTests().fixture();seg=d['tracks'][0]['segments'][0];seg['target_timerange']=dict(start=32440000,duration=14440000);seg['source_timerange']=dict(start=10000000,duration=14440000);d['duration']=46880000
+  scene=C.scenes([dict(framing='keep',camera_move='snap_to_cut',units=[dict(start=32.44,end=40)])],d)
+  out=C.apply(d,scene);segments=out['tracks'][0]['segments']
+  self.assertTrue(all(s['target_timerange']['duration']>0 for s in segments))
+  self.assertEqual(sum(s['target_timerange']['duration'] for s in segments),14440000)
+  self.assertEqual(len(segments),1)
