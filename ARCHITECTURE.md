@@ -1,6 +1,6 @@
 # โครงสร้างและแบบระบบ — ช่วยด้วยจ้า
 
-อัปเดต: 4 พฤศจิกายน 2026 · ซอร์ส/Release สาธารณะ: **1.5.68** · แอปที่ติดตั้งตรวจแยกจากซอร์ส
+อัปเดต: 4 พฤศจิกายน 2026 · ซอร์ส/Release สาธารณะ: **1.5.69** · แอปที่ติดตั้งตรวจแยกจากซอร์ส
 
 เอกสารนี้อธิบายระบบที่มีอยู่จริงและหลักการที่ต้องรักษา อ่านคู่กับ `TASK_PHASES.md` ก่อนเริ่มงาน หากโค้ดไม่ตรงเอกสาร ให้ตรวจหลักฐานและแก้เอกสารในงานเดียวกัน ไม่ใช้เอกสารเก่าเป็นข้อยืนยันว่าฟังก์ชันยังใช้ได้
 
@@ -394,3 +394,5 @@ P3.26 review follow-up: the kinetic preview now exposes bounded start/end seek b
 P3.26 review notes: guarded import preview now surfaces uncertain placement intervals and translated face/hand/crop reasons from kinetic reports. It omits safe/invalid spans and explicitly calls these sampled observations. No commit guard or native renderer change.
 
 Automatic editorial_finish rests unverified Super blocks, then rechecks remaining blocks on recomputed final scenes until stable (bounded by block count). This avoids retaining placement evidence from a previous shared zoom after its leading beat is removed. Caption-only output remains valid; report placement_rests retains reasons. Manual assistance with zero accepted placements returns unchanged plan plus review evidence, without claiming an adjustment succeeded.
+
+Release1.5.69 includes P3.25–28 editorial finishing and review contracts. Bundle self-test/runtime/signature/module+credential exclusion/ZIP/publicdownload/updater verified; installed app is separate and was not replaced.
