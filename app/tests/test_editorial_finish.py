@@ -5,7 +5,7 @@ from ks import cli_lab as L,cli_lab_story as S
 class FinishOptionsTests(unittest.TestCase):
  def test_unknown_style_and_media_conflicts_reject_before_ai(self):
   from ks import editorial_finish as F
-  for data in [dict(editing_finish='random'),dict(editing_finish=True),dict(editing_finish='story',mode='single'),dict(editing_finish='story',auto_stock=True),dict(editing_finish='impact',music='/a'),dict(editing_finish='story',effects=True),dict(editing_finish='story',style_captions=True)]:
+  for data in [dict(editing_finish='random'),dict(editing_finish=True),dict(editing_finish='story',mode='single'),dict(editing_finish='story',auto_stock=True),dict(editing_finish='impact',music='/a'),dict(editing_finish='story',editing_camera='yes'),dict(editing_camera=True),dict(editing_finish='story',effects=True),dict(editing_finish='story',style_captions=True)]:
    with self.subTest(data=data),self.assertRaises(ValueError):F.option(data)
   self.assertEqual(F.option(dict(editing_finish='story',mode='story')),'story')
   self.assertEqual(F.option({}),'off')
@@ -20,7 +20,7 @@ class FinishPipelineTests(unittest.TestCase):
   def observation(draft,plan,project,progress,settings=None,allow_motion_fallback=False):return plan,dict(accepted=0,uncertain=1,note='fixture: cannot certify placement')
   with patch.object(A,'assist',side_effect=observation),patch('ks.audio_levels.normalize_speech',return_value={}):out=F.decorate(self.proj,dict(editing_finish='story'),lambda m:None)
   self.assertEqual([text for _,seg,mat,text in P.caption_rows(out)],[text for _,seg,mat,text in P.caption_rows(before)])
-  report=json.loads((self.proj/'kinetic_text_report.json').read_text());self.assertTrue(report['requires_visual_review'])
+  report=json.loads((self.proj/'kinetic_text_report.json').read_text());self.assertTrue(report['requires_visual_review']);self.assertTrue((self.proj/'editorial_quality_report.json').is_file())
   published=S.publish(self.proj,out,self.root/'published');self.assertTrue((published/'kinetic_text_report.json').is_file());self.assertTrue((published/'editorial_finish_report.json').is_file())
 
 class FinishMediaChangeTests(unittest.TestCase):

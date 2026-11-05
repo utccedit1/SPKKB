@@ -398,7 +398,7 @@ def publish(source, parsed, base, review=None):
             return [relocate(v) for v in value]
         return value
     try:
-        for name in ('speech_alignment.json','alignment_report.json','speech_cleanup.json','visuals_report.json','backdrop_report.json','stock_report.json','caption_layout_report.json','audio_levels_report.json','kinetic_text_report.json','editorial_finish_report.json'):
+        for name in ('speech_alignment.json','alignment_report.json','speech_cleanup.json','visuals_report.json','backdrop_report.json','stock_report.json','caption_layout_report.json','audio_levels_report.json','kinetic_text_report.json','editorial_finish_report.json','editorial_quality_report.json','editorial_camera_report.json'):
             if (source/name).is_file():shutil.copyfile(source/name,staging/name)
         for directory in ('assets', 'draft_materials'):
             if (source / directory).is_dir():

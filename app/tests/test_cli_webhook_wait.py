@@ -62,3 +62,11 @@ class EditorialWebhookWait(unittest.TestCase):
    with patch.object(CE,'call_webhook',side_effect=lambda *a,**k:release.wait(1)),patch.object(W,'PLAN_TIMEOUT',.03),patch.object(W,'POLL_SECONDS',.01):
     with self.assertRaisesRegex(TimeoutError,'ยังไม่ได้สร้างหรือแก้โปรเจกต์'):W.request('captions')
   finally:release.set()
+ def test_json_provider_error_is_not_a_plan_or_a_reason_to_repost(self):
+  for response in ('{"error":"private fixture quota message"}',{'error':{'message':'private fixture quota message'}}):
+   messages=[]
+   with patch.object(CE,'call_webhook',return_value=response) as send:
+    with self.assertRaises(RuntimeError) as caught:W.request('captions',progress=messages.append)
+   self.assertEqual(send.call_count,1)
+   self.assertNotIn('private fixture',str(caught.exception))
+   self.assertFalse(any('ได้รับคำตอบ AI' in m for m in messages))

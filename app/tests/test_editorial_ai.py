@@ -61,6 +61,12 @@ class EditorialAITests(unittest.TestCase):
             config.assert_not_called()
             request.assert_not_called()
 
+    def test_exact_but_dangling_pronoun_is_not_a_complete_super(self):
+        self.d['materials']['texts'][0]['content']=json.dumps(dict(text='มันคือความคุ้มค่าเงิน',styles=[]))
+        self.p=F.plan(self.d)
+        with self.assertRaises(ValueError):
+            self.call(dict(blocks=[dict(self.choice,rows=['มัน'],form='punch',role='detail',accent=0)]))
+
     def test_timeout_is_one_request_no_fallback(self):
         with patch('ks.event_clip.provider_config', return_value=({}, 'test')), patch('ks.cli_lab_webhook.request', side_effect=TimeoutError('timeout')) as request:
             with self.assertRaises(TimeoutError):A.design(self.d, self.p, {}, 'route', lambda _: None)

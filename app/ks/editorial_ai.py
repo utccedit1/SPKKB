@@ -87,6 +87,8 @@ def design(draft, base_plan, settings, backend, progress):
             # the provider and user, never treat omission of negation as safe.
             if any(m.start() < first or m.start() >= cursor for m in re.finditer('ไม่|มิได้|ห้าม', source)):
                 raise ValueError('AI ต้องคงคำปฏิเสธของต้นทาง')
+            from .editorial_quality import review
+            if review(source,rows,choice['form']):raise ValueError('AI เลือกวลีที่ยังไม่ครบความหรือแบ่งคำไม่เหมาะสม กรุณาออกแบบใหม่')
             selected[cid] = choice
     edits = []
     for block in blocks:

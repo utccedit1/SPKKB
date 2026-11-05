@@ -1,0 +1,11 @@
+# Release 1.5.70
+
+Authorized release of P3.29–33 implementation with explicit limitations. Explicit Gemini overrides a stale UTCC flag; terminal provider error envelopes do not trigger malformed-plan repairs. Strict narrative evidence must quote each selected passage and cover opening/development/payoff; manual range edits discard stale AI evidence. Shared lexical Super checks protect compounds, negation, quantities and fragments. Optional experimental local multicam selection is off by default and preserves original selected audio. Whole-clip structural findings and heuristic pacing warnings persist to import review.
+
+Verification: full Python3.9 804 tests passed14.674s; Node CLI recovery, Studio recovery, kinetic preview, kinetic async and Gemini switch checks passed. Independent reviewer found a P2 stale narrative evidence issue; regression red→green, recheck32focused passed/no remaining blockers. Earlier camera P1 nested coverage gaps fixed with boundary walk regressions. Frozen self-test1.5.70 passed editor/sharedSTATE/bundled FFmpeg/FFprobe/CLI0.30.0; strict deep code signature passed. Required new modules present;112compiled app modules and text resources checked against actual local private values, private filenames absent. Initial scanner false-positive was the standard public OAuth token endpoint in Google's own library; excluded that noncredential field and reran successfully.
+
+Actual BRAND frozen429.04s source assembled90.84s30captions4Super1scene using previously reviewed spans. Current camera logic kept original (0changes); final render parameters matched previously native-checked automatic export. No new visual native acceptance for a changed camera. Full continuous tracking/human listening not certified.
+
+Fresh normal main-account Gemini request on November5 returned HTTP503 and stopped; source copy SHA unchanged, no UTCC request. UTCC credit exhaustion reported by user. No successful fresh AI-selected story/semantic-design live acceptance claimed. Main-account credentials/keys remain private and are excluded from source, reports and distributable. No installed app replacement or project deletion.
+
+Package/public verification will be appended below.

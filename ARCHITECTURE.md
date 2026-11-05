@@ -1,6 +1,6 @@
 # โครงสร้างและแบบระบบ — ช่วยด้วยจ้า
 
-อัปเดต: 4 พฤศจิกายน 2026 · ซอร์ส/Release สาธารณะ: **1.5.69** · แอปที่ติดตั้งตรวจแยกจากซอร์ส
+อัปเดต: 5 พฤศจิกายน 2026 · ซอร์ส: **1.5.70** · Release สาธารณะก่อนรอบนี้: **1.5.69** · แอปที่ติดตั้งตรวจแยกจากซอร์ส
 
 เอกสารนี้อธิบายระบบที่มีอยู่จริงและหลักการที่ต้องรักษา อ่านคู่กับ `TASK_PHASES.md` ก่อนเริ่มงาน หากโค้ดไม่ตรงเอกสาร ให้ตรวจหลักฐานและแก้เอกสารในงานเดียวกัน ไม่ใช้เอกสารเก่าเป็นข้อยืนยันว่าฟังก์ชันยังใช้ได้
 
@@ -396,3 +396,16 @@ P3.26 review notes: guarded import preview now surfaces uncertain placement inte
 Automatic editorial_finish rests unverified Super blocks, then rechecks remaining blocks on recomputed final scenes until stable (bounded by block count). This avoids retaining placement evidence from a previous shared zoom after its leading beat is removed. Caption-only output remains valid; report placement_rests retains reasons. Manual assistance with zero accepted placements returns unchanged plan plus review evidence, without claiming an adjustment succeeded.
 
 Release1.5.69 includes P3.25–28 editorial finishing and review contracts. Bundle self-test/runtime/signature/module+credential exclusion/ZIP/publicdownload/updater verified; installed app is separate and was not replaced.
+
+### P3.29–P3.33 — next editorial decisions (source after1.5.69)
+- Finishing/highlight planning opts into grounded narrative review: opening promise, each development passage and payoff need exact source evidence plus explicit completeness judgments. Legacy calls retain their old contract; unverified plans still require manual review, never become a verified success by fallback.
+- `editorial_quality.review` supplies conservative lexical defects shared by local and AI Super selection. It does not rewrite speech or invent reveal timing; the question form remains typography, so a complete question may span two rows.
+- `editorial_camera.select` is explicitly opt-in for CLI finishing. It considers existing multicam shots, checks complete selected-source coverage through nested speed mappings before bounded face/hand samples, and changes only for a clearly improved side lane. Per-shot video materials are cloned; selected speech audio remains unchanged. Unsupported crop/effects, gaps or incomplete evidence keep the original camera. No speaker identity inference or random alternation.
+- `editorial_checks.report` maps selected nested-camera coverage structurally, identifies actual timeline gaps and caption-newline/heuristic pace intervals with bounded traversal, and records missing/unsupported evidence. Reports persist through publish and appear before guarded import; they never certify rendered frames or full listening.
+- Editorial requests treat explicit provider error envelopes as terminal service errors without exposing response text or starting planner repair requests. Live authorized main-account tests observed Gemini503 and UTCC error envelopes; successful new unattended long-to-short planning is still unverified. No account credentials/Key values are included in code, reports or public builds.
+
+### P3.33 — explicit Gemini routing hardening (5 November 2026)
+
+`ce_ai.call_gemini` treats an explicit `ai_backend=gemini` as authoritative even when a legacy `webhook_utcc=True` remains in the configuration. Explicit Webhook routes and legacy configurations without a Gemini selection retain their existing dispatch. No automatic Gemini-to-UTCC failover was added. User reports UTCC credits exhausted; do not use it as a live-test dependency. Source only after public 1.5.69.
+
+Manual boundary revisions discard narrative_review when caption ranges change; unchanged ranges retain evidence. Human boundary_reviewed is separate from AI narrative evidence.

@@ -359,7 +359,9 @@ def call_gemini(api_key, model, prompt, timeout=60, max_retries=4,
                 system=None, temperature=0.95, json_mode=True, max_tokens=2048, conf=None):
     if _task_stage('กำลังส่งคำขอ AI / รอคำตอบ'): timeout, max_retries = min(timeout, 75), 1
     _conf = load_config() if conf is None else dict(conf)
-    _is_webhook = (_conf.get("ai_backend") == "webhook") or bool(_conf.get("webhook_utcc"))
+    # An explicit Gemini choice wins over a legacy UTCC flag left in config.
+    _backend = _conf.get("ai_backend")
+    _is_webhook = _backend in ("webhook", "webhook_utcc") or (_backend != "gemini" and bool(_conf.get("webhook_utcc")))
     if _is_webhook and (_conf.get("webhook_url") or "").strip():
         return call_webhook(prompt, system=system, temperature=temperature,
                             json_mode=json_mode, max_tokens=max_tokens, conf=_conf)

@@ -110,6 +110,16 @@ def review_notes(folder):
             if not isinstance(span,list) or len(span)!=2 or any(type(t) not in (int,float) or not math.isfinite(t) for t in span) or not 0<=span[0]<span[1]:continue
             reasons=' · '.join(dict.fromkeys(labels.get(r,'ตรวจภาพจริงเพิ่มเติม') for r in record.get('reasons',[])))
             notes.append(f'ต้องตรวจช่วง {span[0]:.2f}–{span[1]:.2f}s · {reasons} · ผลตรวจเป็นเฟรมตัวอย่าง')
+    if (folder/'editorial_quality_report.json').is_file():
+        quality=json.loads((folder/'editorial_quality_report.json').read_bytes())
+        for issue in quality.get('issues',[])[:20]:
+            a,b=issue.get('start'),issue.get('end')
+            if any(type(t) not in (int,float) or not math.isfinite(t) for t in (a,b)) or not 0<=a<b:continue
+            notes.append(f'ตรวจคลิป {a:.2f}–{b:.2f}s · '+str(issue.get('reason','ตรวจภาพและเสียง'))+(' · เกณฑ์ประมาณ' if issue.get('evidence_kind')=='heuristic' else ''))
+        notes.append('ผลตรวจโครงสร้างคลิปไม่แทนการดูภาพและฟังเสียงจริงทั้งคลิป')
+    if (folder/'editorial_camera_report.json').is_file():
+        camera=json.loads((folder/'editorial_camera_report.json').read_bytes())
+        notes.append('ช่วยเลือกกล้องภาพ '+str(camera.get('changed',0))+' ช็อต · คงกล้องเสียงเดิม · ตรวจรอยต่อและมุมภาพจริง')
     if (folder/'caption_studio_report.json').is_file():
         report=json.loads((folder/'caption_studio_report.json').read_bytes())
         from .caption_presets import catalog

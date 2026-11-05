@@ -15,3 +15,9 @@ class PlacementReviewNotesTests(unittest.TestCase):
    (p/'kinetic_text_report.json').write_text(json.dumps(dict(units=2,assistance=dict(uncertain=0,records=[dict(safe=True,interval=[1,2],reasons=[])]))))
    notes=review_notes(p)
    self.assertFalse('ต้องตรวจช่วง' in notes)
+ def test_whole_clip_findings_are_visible_before_import(self):
+  with tempfile.TemporaryDirectory() as root:
+   p=Path(root)
+   (p/'editorial_quality_report.json').write_text(json.dumps(dict(issues=[dict(start=1,end=2,reason='ซับอ่านเร็ว',severity='warning',evidence_kind='heuristic')],missing_evidence=['audio'],unsupported_checks=['audio_listening'])))
+   notes=review_notes(p)
+   self.assertIn('1.00',notes);self.assertIn('2.00',notes);self.assertIn('ซับอ่านเร็ว',notes)

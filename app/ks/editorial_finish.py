@@ -5,6 +5,9 @@ from pathlib import Path
 def option(data):
  value=data.get('editing_finish','off')
  semantic=data.get('editing_semantic_ai',False)
+ camera=data.get('editing_camera',False)
+ if type(camera) is not bool:raise ValueError('ตัวเลือกกล้องต้องเป็นเปิดหรือปิด')
+ if camera and value=='off':raise ValueError('เลือกสไตล์ตัดต่อก่อนช่วยเลือกกล้อง')
  if type(semantic) is not bool:raise ValueError('ตัวเลือก AI เลือกวลีต้องเป็นเปิดหรือปิด')
  if semantic and value=='off':raise ValueError('เลือกสไตล์ตัดต่อก่อนใช้ AI เลือกวลี')
  if value not in ('off','story','impact'):raise ValueError('เลือกสไตล์ตัดต่อให้ถูกต้อง')
@@ -21,7 +24,11 @@ def decorate(work,plan,progress):
  from . import caption_studio as Studio
  media_source=copy.deepcopy(draft);media_hash=Studio.media_fingerprint(media_source,work)
  draft=_cleanup(draft,work,plan,progress)
- style=plan.get('editing_finish');option(dict(editing_finish=style,mode='story'))
+ style=plan.get('editing_finish');option(dict(editing_finish=style,mode='story',editing_camera=plan.get('editing_camera',False)))
+ camera_report=dict(changed=0,reason='not_selected')
+ if plan.get('editing_camera',False):
+  from .editorial_camera import select
+  draft,camera_report=select(draft,work,progress)
  if plan.get('assets') or plan.get('auto_stock') or plan.get('visual_library'):raise ValueError('สไตล์ตัดต่อคำพูดยังไม่รวมสื่อเสริม กรุณาวางแผนใหม่โดยปิดสื่อเสริม')
  text_style=plan.get('text_style') or {}
  settings=J._settings(dict(style=style,font=text_style.get('font'),caption_one_line=True,english_loanwords=True,caption_preset='rise',layout='matched'))
@@ -43,8 +50,11 @@ def decorate(work,plan,progress):
  from .audio_levels import normalize_speech
  normalize_speech(work,progress)
  if Studio.media_fingerprint(media_source,work)!=media_hash:raise ValueError('สื่อเปลี่ยนระหว่างปรับเสียง กรุณาตรวจต้นทางแล้วสร้างใหม่')
+ from .editorial_checks import report as quality_report
+ (work/'editorial_quality_report.json').write_text(json.dumps(quality_report(edited,report),ensure_ascii=False,indent=2))
+ (work/'editorial_camera_report.json').write_text(json.dumps(camera_report,ensure_ascii=False,indent=2))
  (work/'kinetic_text_report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
- (work/'editorial_finish_report.json').write_text(json.dumps(dict(style=style,semantic_ai_used=bool(plan.get('editing_semantic_ai')),captions=len(report['captions']),supers=report['units'],scenes=len(report['scenes']),placement=assistance,requires_visual_review=report['requires_visual_review'],note='ตรวจภาพและฟังเรื่องเล่าทั้งคลิปก่อนใช้ · ไม่ได้เลือกกล้องใหม่อัตโนมัติ'),ensure_ascii=False,indent=2))
+ (work/'editorial_finish_report.json').write_text(json.dumps(dict(style=style,semantic_ai_used=bool(plan.get('editing_semantic_ai')),captions=len(report['captions']),supers=report['units'],scenes=len(report['scenes']),placement=assistance,requires_visual_review=report['requires_visual_review'],camera=camera_report,note='ตรวจภาพและฟังเรื่องเล่าทั้งคลิปก่อนใช้ · เปลี่ยนกล้องเฉพาะเมื่อเลือกและตรวจภาพผ่าน'),ensure_ascii=False,indent=2))
  return json.loads(path.read_bytes())
 
 def _cleanup(draft,work,plan,progress):

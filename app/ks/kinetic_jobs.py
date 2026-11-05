@@ -199,6 +199,9 @@ def _compact_caption_plan(plan,draft,settings):
  for b in out['blocks']:
   b.update(roles[b['cue_id']])
   if not b.get('enabled',True):continue
+  from .editorial_quality import review
+  quality=review(sources[b['cue_id']],[u['text'] for u in b['units']],b.get('form','matched'))
+  if quality:b.update(enabled=False,editorial_skip=True,phrase_reason='พักวลีที่ยังไม่ครบความหรือแบ่งคำไม่เหมาะสม',quality_reasons=quality);continue
   units=copy.deepcopy(b['units'])
   if settings.get('english_loanwords'):
    from .caption_finish import display

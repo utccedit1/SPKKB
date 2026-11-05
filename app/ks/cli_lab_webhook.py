@@ -1,5 +1,6 @@
 """Wait for long editorial plans without blocking progress or duplicating POSTs."""
 import copy
+import json
 import queue
 import socket
 import threading
@@ -46,5 +47,11 @@ def request(prompt, *, progress=lambda message:None, feature='autoclip', **optio
             if isinstance(cause, (TimeoutError, socket.timeout)) or (isinstance(cause, urllib.error.URLError) and isinstance(cause.reason, (TimeoutError, socket.timeout))):
                 raise TimeoutError(str(value)) from value
             raise value
+        parsed=value
+        if isinstance(value,str):
+            try:parsed=json.loads(value)
+            except (ValueError,TypeError):parsed=None
+        if isinstance(parsed,dict) and parsed.get('error') and (set(parsed)<= {'error','message','code','status','success'} or parsed.get('success') is False):
+            raise RuntimeError(label+' ส่งสถานะผิดพลาดแทนคำตอบ AI · ยังไม่ได้สร้างผล และไม่ส่งคำขอซ้ำอัตโนมัติ กรุณาตรวจบริการหรือโควตาของบัญชี')
         progress('ได้รับคำตอบ AI กำลังตรวจแผน')
         return value

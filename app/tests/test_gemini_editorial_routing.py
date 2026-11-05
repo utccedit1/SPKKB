@@ -24,6 +24,16 @@ class GeminiEditorialRouting(unittest.TestCase):
   self.assertEqual(result,'{"cuts":[]}');self.assertEqual(send.call_count,1)
   req=send.call_args.args[0];self.assertIn('/fixture-model:generateContent',req.full_url)
   self.assertEqual(json.loads(req.data)['generationConfig']['maxOutputTokens'],1024)
+ def test_explicit_gemini_ignores_stale_utcc_flag(self):
+  class Response:
+   def __enter__(self):return self
+   def __exit__(self,*args):pass
+   def read(self):return json.dumps({'candidates':[{'content':{'parts':[{'text':'fixture answer'}]}}]}).encode()
+  cfg={'ai_backend':'gemini','webhook_utcc':True,'webhook_url':'https://example.invalid'}
+  with patch.object(AI,'_pick_available_model',side_effect=lambda m:m),patch.object(AI,'_task_stage',return_value=False),patch.object(AI,'call_webhook',side_effect=AssertionError('stale UTCC route used')),patch.object(AI.urllib.request,'urlopen',return_value=Response()) as send:
+   answer=AI.call_gemini('fixture-key','fixture-model','fixture prompt',conf=cfg,max_retries=1)
+  self.assertEqual(answer,'fixture answer')
+  self.assertIn('generativelanguage.googleapis.com',send.call_args.args[0].full_url)
  def test_missing_key_fails_without_calling_webhook(self):
   with patch.object(CE,'call_webhook',side_effect=AssertionError('unexpected request')):
    with self.assertRaisesRegex(ValueError,'Gemini'):W.request('fixture',conf={'ai_backend':'gemini'})

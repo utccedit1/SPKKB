@@ -49,6 +49,22 @@ class BoundaryReviewTests(unittest.TestCase):
         self.assertEqual(L._plans[self.token]['duration'],6)
         L._plans.pop(result['plan_id'],None)
 
+    def test_changed_boundaries_discard_old_ai_narrative_evidence(self):
+        evidence={'payoff':{'passage':2,'quote':'Third point','resolves':'test'}}
+        self.plan['narrative_review']=evidence
+        result=self.call('update_boundaries',cuts=[{'first_id':0,'last_id':1},{'first_id':3,'last_id':3}])
+        self.addCleanup(lambda:L._plans.pop(result['plan_id'],None))
+        self.assertNotIn('narrative_review',result)
+        self.assertNotIn('narrative_review',L._plans[result['plan_id']])
+        self.assertTrue(result['boundary_reviewed'])
+        self.assertEqual(self.plan['narrative_review'],evidence)
+
+    def test_unchanged_boundaries_retain_grounded_narrative_evidence(self):
+        self.plan['narrative_review']={'payoff':{'passage':2,'quote':'Third point','resolves':'test'}}
+        result=self.call('update_boundaries',cuts=[{'first_id':0,'last_id':0},{'first_id':2,'last_id':2}])
+        self.addCleanup(lambda:L._plans.pop(result['plan_id'],None))
+        self.assertEqual(result['narrative_review'],self.plan['narrative_review'])
+
     def test_wrong_owner_expired_and_changed_source_are_rejected(self):
         with self.assertRaises(ValueError): L.handle('other',self.root,dict(action='review_boundaries',plan_id=self.token))
         self.plan['created']=time.time()-3601

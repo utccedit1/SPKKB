@@ -1,0 +1,16 @@
+{
+  "version": "1.5.70",
+  "modules_present": [
+    "ks.editorial_camera",
+    "ks.editorial_checks",
+    "ks.editorial_quality",
+    "ks.cli_highlight_coherence",
+    "ks.cli_highlight_story",
+    "ks.cli_lab_webhook",
+    "ce_ai"
+  ],
+  "private_filenames_excluded": true,
+  "actual_private_values_excluded": true,
+  "compiled_modules_scanned": 112,
+  "public_oauth_endpoint_not_treated_as_credential": true
+}
