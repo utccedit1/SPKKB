@@ -46,6 +46,17 @@ def request(prompt, *, progress=lambda message:None, feature='autoclip', **optio
             cause = value.__cause__ if isinstance(value, RuntimeError) else None
             if isinstance(cause, (TimeoutError, socket.timeout)) or (isinstance(cause, urllib.error.URLError) and isinstance(cause.reason, (TimeoutError, socket.timeout))):
                 raise TimeoutError(str(value)) from value
+            if gemini and isinstance(value, urllib.error.HTTPError):
+                guidance = {
+                    400: 'คำขอไม่ถูกต้องสำหรับโมเดลนี้ กรุณาตรวจโมเดลและการตั้งค่า',
+                    401: 'คีย์ไม่ผ่านการยืนยัน กรุณาตรวจ Gemini API Key ของบัญชี',
+                    403: 'บัญชีหรือคีย์ไม่มีสิทธิ์เรียกโมเดลนี้ กรุณาตรวจสิทธิ์ใน Google AI Studio',
+                    404: 'ไม่พบโมเดลที่เลือกหรือโมเดลนี้ใช้กับคีย์ไม่ได้ กรุณาเลือกโมเดลอื่นในหน้า API Key',
+                    429: 'เกินโควตาหรืออัตราคำขอ กรุณาตรวจโควตาและการเรียกเก็บเงินใน Google AI Studio',
+                    503: 'บริการยังไม่พร้อมหรือมีคำขอหนาแน่น กรุณารอหรือเลือกโมเดลอื่นในหน้า API Key',
+                }.get(value.code, 'บริการตอบข้อผิดพลาด กรุณาตรวจสถานะบริการก่อนลองใหม่')
+                raise RuntimeError('Gemini HTTP '+str(value.code)+' · '+guidance+
+                    ' · ยังไม่ได้สร้างผล ไม่ส่งคำขอซ้ำและไม่สลับไป UTCC อัตโนมัติ') from value
             raise value
         parsed=value
         if isinstance(value,str):

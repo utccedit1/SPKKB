@@ -45,6 +45,22 @@ class EditorialCameraTests(unittest.TestCase):
             for view in (audio_view(before),audio_view(out)):
                 self.assertEqual({Path(m['path']).name for m in view['materials']['audios']},{'A.mp4'})
 
+    def test_camera_review_has_timeline_intervals_and_explains_text_space(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with patch('ks.assisted_framing._observe',side_effect=observation),patch('ks.core_engine.ac_ffmpeg_bin',return_value='fake'):
+                out,report=C.select(fixture(folder),folder)
+        first=report['records'][0]
+        self.assertEqual(first.get('interval'),[0,2])
+        self.assertEqual([c.get('reason') for c in first['cameras']],['no_clear_text_lane','clear_text_lane'])
+        self.assertEqual(first['cameras'][1].get('sample_times'),[.4,1,1.6])
+
+    def test_uncertainty_reports_missing_detector_evidence(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with patch('ks.assisted_framing._observe',return_value=dict(complete=False,faces=[],hands=[])),patch('ks.core_engine.ac_ffmpeg_bin',return_value='fake'):
+                out,report=C.select(fixture(folder),folder)
+        self.assertEqual(report['records'][0]['cameras'][0].get('reason'),'detector_incomplete')
+        self.assertEqual(report['changed'],0)
+
     def test_uncertain_detector_and_missing_media_keep_original(self):
         with tempfile.TemporaryDirectory() as folder:
             draft=fixture(folder)

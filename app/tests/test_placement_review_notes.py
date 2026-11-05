@@ -21,3 +21,11 @@ class PlacementReviewNotesTests(unittest.TestCase):
    (p/'editorial_quality_report.json').write_text(json.dumps(dict(issues=[dict(start=1,end=2,reason='ซับอ่านเร็ว',severity='warning',evidence_kind='heuristic')],missing_evidence=['audio'],unsupported_checks=['audio_listening'])))
    notes=review_notes(p)
    self.assertIn('1.00',notes);self.assertIn('2.00',notes);self.assertIn('ซับอ่านเร็ว',notes)
+
+ def test_camera_review_shows_when_and_why_original_was_kept(self):
+  with tempfile.TemporaryDirectory() as root:
+   p=Path(root)
+   (p/'editorial_camera_report.json').write_text(json.dumps(dict(changed=0,records=[dict(interval=[10,12.5],reason='uncertain_camera_evidence',cameras=[dict(reason='source_coverage_unverified')]) ,dict(interval=[float('nan'),12],reason='original_equal_or_better')])))
+   notes=review_notes(p)
+   self.assertIn('10.00–12.50',notes);self.assertIn('ภาพต้นทางไม่ครบ',notes)
+   self.assertNotIn('nan',notes)

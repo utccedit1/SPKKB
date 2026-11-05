@@ -122,6 +122,7 @@ def select(draft, project, progress=lambda message:None):
             tr=segment.get('target_timerange') or {}
             a=tr.get('start');duration=tr.get('duration')
             if type(a) not in (int,float) or type(duration) not in (int,float) or not all(math.isfinite(v) for v in (a,duration)) or duration<=0:continue
+            record['interval']=[a/1e6,(a+duration)/1e6]
             times=[(a+duration*f)/1e6 for f in (.2,.5,.8)]
             scores={};failed=False
             progress('ตรวจกล้องจากภาพในเครื่อง '+str(index+1)+'/'+str(len(shots)))
@@ -133,17 +134,22 @@ def select(draft, project, progress=lambda message:None):
                 probe_material['multi_camera_info']['cur_camera_track_id']=camera
                 candidate['tracks']=[dict(type='video',segments=[probe])]
                 candidate['materials']['videos']=[probe_material]
-                samples=[]
+                samples=[];phase='coverage'
                 try:
                     _validate_base(candidate)
                     _validate_coverage(candidate,a,duration)
+                    phase='observation'
                     for sample_index,time in enumerate(times):
                         source=S.source_at(candidate,time)
                         samples.append(F._observe(source,time,binary,image_filter,Path(folder)/('%s-%s-%s.jpg'%(index,camera_index,sample_index))))
                     score=_score(samples)
+                    reason=('detector_incomplete' if any(not sample.get('complete') for sample in samples)
+                            else 'single_stable_face_unverified' if score is None
+                            else 'no_clear_text_lane' if score==0 else 'clear_text_lane')
                 except (ValueError,OSError,KeyError,TypeError,subprocess.TimeoutExpired):
                     score=None
-                record['cameras'].append(dict(camera_id=camera,score=score,samples=len(samples)))
+                    reason='source_coverage_unverified' if phase=='coverage' else 'observation_failed'
+                record['cameras'].append(dict(camera_id=camera,score=score,samples=len(samples),reason=reason,sample_times=times[:len(samples)]))
                 if score is None:failed=True
                 else:scores[camera]=score
             if failed:

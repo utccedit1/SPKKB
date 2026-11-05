@@ -76,3 +76,18 @@ class GeminiEditorialRouting(unittest.TestCase):
   cfg={'audio_backend':'webhook','audio_webhook_url':'https://example.invalid','gemini_api_key':'fixture','ai_routes':{'align':{'backend':'gemini'}}}
   with patch.object(CE,'load_config',side_effect=lambda:C._apply_ai_route(copy.deepcopy(cfg))):
    self.assertEqual(sfx_library.provider(),'Gemini งานเสียง')
+
+ def test_gemini_http_failures_explain_next_step_without_raw_echo_or_retry(self):
+  import io,urllib.error
+  cases=[(503,'บริการ'),(429,'โควตา'),(404,'โมเดล'),(401,'คีย์'),(403,'สิทธิ์'),(400,'คำขอ'),(502,'บริการ')]
+  for code,meaning in cases:
+   err=urllib.error.HTTPError('https://example.invalid?key=fixture-secret',code,'private fixture echo',{},io.BytesIO(b'private body fixture'))
+   messages=[]
+   with self.subTest(code=code),patch.object(AI,'_pick_available_model',side_effect=lambda m:m),patch.object(AI,'_task_stage',return_value=False),patch.object(AI.urllib.request,'urlopen',side_effect=err) as send,patch.object(CE,'call_webhook',side_effect=AssertionError('no UTCC fallback')):
+    with self.assertRaises(Exception) as caught:W.request('fictional captions',conf={'ai_backend':'gemini','gemini_api_key':'fixture-key'},progress=messages.append)
+   self.assertIsInstance(caught.exception,RuntimeError)
+   message=str(caught.exception)
+   self.assertIn(str(code),message);self.assertIn(meaning,message)
+   self.assertNotIn('private',message);self.assertNotIn('fixture-secret',message)
+   self.assertIn('ไม่ส่ง',message);self.assertEqual(send.call_count,1)
+   self.assertFalse(any('ได้รับคำตอบ AI' in m for m in messages))

@@ -120,6 +120,20 @@ def review_notes(folder):
     if (folder/'editorial_camera_report.json').is_file():
         camera=json.loads((folder/'editorial_camera_report.json').read_bytes())
         notes.append('ช่วยเลือกกล้องภาพ '+str(camera.get('changed',0))+' ช็อต · คงกล้องเสียงเดิม · ตรวจรอยต่อและมุมภาพจริง')
+        labels={'stable_face_negative_space':'เลือกมุมที่มีพื้นที่วางคำมากกว่า',
+                'original_equal_or_better':'คงมุมเดิม: มุมอื่นไม่ได้ดีกว่าชัดเจน',
+                'uncertain_camera_evidence':'คงมุมเดิม: หลักฐานภาพไม่พอ',
+                'source_coverage_unverified':'ภาพต้นทางไม่ครบหรือยังตรวจช่วงซ้อนไม่ได้',
+                'observation_failed':'อ่านเฟรมภาพไม่ได้',
+                'detector_incomplete':'ตรวจหน้าและมือไม่ครบ',
+                'single_stable_face_unverified':'ยังยืนยันใบหน้าเดียวที่อยู่นิ่งไม่ได้',
+                'no_clear_text_lane':'พื้นที่วางคำด้านข้างไม่พอ'}
+        for record in camera.get('records',[])[:20]:
+            span=record.get('interval')
+            if not isinstance(span,list) or len(span)!=2 or any(type(t) not in (int,float) or not math.isfinite(t) for t in span) or not 0<=span[0]<span[1]:continue
+            reason=labels.get(record.get('reason'),'ตรวจมุมภาพจริงเพิ่มเติม')
+            details=list(dict.fromkeys(labels[c['reason']] for c in record.get('cameras',[]) if c.get('reason') in labels))
+            notes.append(f'กล้อง {span[0]:.2f}–{span[1]:.2f}s · '+reason+(' · '+' · '.join(details) if details else '')+' · ตรวจจากเฟรมตัวอย่าง')
     if (folder/'caption_studio_report.json').is_file():
         report=json.loads((folder/'caption_studio_report.json').read_bytes())
         from .caption_presets import catalog

@@ -409,3 +409,7 @@ Release1.5.69 includes P3.25–28 editorial finishing and review contracts. Bund
 `ce_ai.call_gemini` treats an explicit `ai_backend=gemini` as authoritative even when a legacy `webhook_utcc=True` remains in the configuration. Explicit Webhook routes and legacy configurations without a Gemini selection retain their existing dispatch. No automatic Gemini-to-UTCC failover was added. User reports UTCC credits exhausted; do not use it as a live-test dependency. Source only after public 1.5.69.
 
 Manual boundary revisions discard narrative_review when caption ranges change; unchanged ranges retain evidence. Human boundary_reviewed is separate from AI narrative evidence.
+
+### Source follow-up after 1.5.70 (P3.31/P3.33)
+
+Editorial Gemini HTTP errors are mapped to fixed status-specific Thai guidance after cancellation checks; upstream exception strings/bodies are not echoed. No new retry, route fallback or config mutation. Camera reports add shot intervals and candidate reason/sample times; import review surfaces at most20finite valid intervals. These are sampled diagnostics, not native camera acceptance. Old reports without this evidence remain readable.
