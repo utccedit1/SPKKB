@@ -1,6 +1,6 @@
 # แผนงาน Phase และ Sub Phase — ช่วยด้วยจ้า
 
-อัปเดต: 2 พฤศจิกายน 2026 · ฐานรุ่น 1.5.66 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
+อัปเดต: 5 พฤศจิกายน 2026 · ฐานรุ่น 1.5.70 · อ่าน `ARCHITECTURE.md` ก่อนใช้แผนนี้
 
 สถานะ: `DONE` = ทำเสร็จพร้อมหลักฐานที่ระบุ, `PARTIAL` = มีโค้ดแต่ยังตรวจไม่ครบ, `OPEN` = งานที่จะทำ, `BLOCKED` = ขาดสิ่งจำเป็นที่ระบุ ไม่ใช้คำว่า DONE แทน “น่าจะใช้ได้”
 
@@ -397,3 +397,5 @@
 | 2026-11-05 | P3.33 — Gemini explicit selection hardening | user reports UTCC credits exhausted; reproduced stale UTCC flag overriding explicit Gemini (regression failed), fixed shared caller priority; focused21Python tests and Gemini switching Node check passed | full802Python tests passed21.628s; no live credit used, no account configuration rewritten, no new release |
 
 | 2026-11-05 | P0.33 — release1.5.70 preparation | user explicitly authorized new release; source bump1.5.70; fullPython3.9 804passed14.674s/Node5passed; reviewer55+32focused no blockers after stale narrative evidence fix red→green; frozen self-test/runtime/sharedSTATE/signature passed,112compiledmodules and private resource scan passed | fresh normal main-account Gemini request again503, noUTCC call/source unchanged; experimental camera remains opt-in/off and native changed-camera acceptance unverified; no public release until package/download verification |
+
+| 2026-11-05 | P0.33 — release1.5.70 PUBLISHED | https://github.com/utccedit1/SPKKB/releases/tag/v1.5.70 ; anonymouspublicdownload203769780bytes SHA7447e3866b06c74c1203bdb4e52b5f00df5a0c9f2218aa98e681e2fdaf36f93e verified; manifestc58d7ffd31502b53809bae46479eacd49cdfde70; updaterfrom1.5.69detects1.5.70matchinghash/size; source10e1cba305d1051ec6fc813a6eb5d32538e65320 remotelyverified; candidate804passed14.202s | installed app not replaced; Gemini live503/native changed-camera acceptance limitations remain explicit; source/media/projects/accounts preserved; audits/release-1.5.70/report.md |

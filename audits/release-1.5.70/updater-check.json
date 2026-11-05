@@ -1,0 +1,10 @@
+{
+  "available": true,
+  "latest_version": "1.5.70",
+  "current_version": "1.5.69",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.70/SPKKB.app.zip",
+  "release_notes": "แก้เลือก Gemini แล้วหลงไป UTCC จากค่าเก่าค้าง เพิ่มตรวจเรื่องเปิด–กลาง–จบด้วยคำพูดจริง ตรวจคำผสม คำปฏิเสธ และตัวเลขกับหน่วยใน Super Text เพิ่มรายงานภาพขาดและซับอ่านเร็ว ตัวเลือกทดลองเลือกกล้อง multicam ปิดไว้เริ่มต้นและคงเสียงเดิม ไม่ส่งคำขอซ้ำเมื่อบริการผิดพลาด โปรดตรวจภาพและฟังเสียงก่อนใช้ · Gemini ทดสอบล่าสุดตอบ 503 ยังไม่ยืนยันการตัดเรื่องใหม่ผ่านบริการจริง",
+  "sha256": "7447e3866b06c74c1203bdb4e52b5f00df5a0c9f2218aa98e681e2fdaf36f93e",
+  "size": 203769780,
+  "install_supported": false
+}
