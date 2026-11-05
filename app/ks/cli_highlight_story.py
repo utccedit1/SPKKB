@@ -197,7 +197,7 @@ def prepare(candidate, captions, allowed, low, high):
     axis = ' '.join(axis.split())[:240] if isinstance(axis, str) else ''
     original = [(c.get('first_id'), c.get('last_id')) for c in candidate['cuts'] if isinstance(c, dict)]
     fixed = complete_boundaries(candidate, captions, high, allowed=allowed)
-    if high >= 45 and high - low >= 20:
+    if high >= 45:
         fixed = _fit_duration(fixed, captions, allowed, low, high)
     S.validate(dict(fixed, supers=[]), captions, low, high)
     validate_complete_boundaries(fixed, captions)
@@ -372,6 +372,10 @@ def plan(*, instruction, captions, rows, passages, allowed, low, high, ask_plan,
             fallback = ready[0][2]
             fallback['story']['warnings'].append('คำขอตรวจเรื่องเล่าอาจยังประมวลผลบนเซิร์ฟเวอร์ ไม่ส่งซ้ำอัตโนมัติ กรุณาตรวจเรื่องและรอยต่อก่อนสร้าง')
             return dict(fallback, verified=False, automatic_repair=False, calls=calls + 1)
+        except RuntimeError:
+            fallback = ready[0][2]
+            fallback['story']['warnings'].append('บริการตรวจเรื่องขัดข้อง · แผนนี้ยังไม่ผ่านการตรวจเรื่องเล่าด้วย AI กรุณาตรวจเรื่องและรอยต่อก่อนสร้าง')
+            return dict(fallback, verified=False, automatic_repair=False, calls=calls + 1)
         except ValueError:
             fallback = ready[0][2]
             fallback['story']['warnings'].append('AI ตรวจเรื่องเล่าไม่สำเร็จ กรุณาตรวจเรื่องและรอยต่อก่อนสร้าง')
@@ -420,7 +424,7 @@ def plan(*, instruction, captions, rows, passages, allowed, low, high, ask_plan,
                 fallback = ready[0][2]
                 fallback['story']['warnings'].append('คำขอตรวจเรื่องเล่าอาจยังประมวลผลบนเซิร์ฟเวอร์ ไม่ส่งซ้ำอัตโนมัติ กรุณาตรวจเรื่องและรอยต่อก่อนสร้าง')
                 return dict(fallback, verified=False, automatic_repair=False, calls=calls)
-            except (ValueError, TypeError, KeyError):
+            except (ValueError, TypeError, KeyError, RuntimeError):
                 fallback = ready[0][2]
                 fallback['story']['warnings'].append('ผู้ตรวจเรื่องเล่ายังไม่ยืนยันว่าทุกช่วงเป็นเรื่องเดียวกัน กรุณาตรวจเรื่องและรอยต่อก่อนสร้างคลิป')
                 return dict(fallback, verified=False, automatic_repair=False, calls=calls)

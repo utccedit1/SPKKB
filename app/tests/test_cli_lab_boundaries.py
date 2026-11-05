@@ -125,3 +125,33 @@ class BoundaryReviewTests(unittest.TestCase):
     def test_rejects_legacy_plan_without_original_bounds(self):
         del self.plan['min_seconds']
         with self.assertRaises(ValueError): self.call('update_boundaries',cuts=[{'first_id':0,'last_id':0},{'first_id':2,'last_id':2}])
+
+    def test_ai_review_reuses_saved_cuts_without_replanning_or_extending_expiry(self):
+        reply={'verdicts':[{'candidate':1,'coherent':True,'evidence':['First point','Third point'],'narrative':{'opening':{'passage':1,'quote':'First point','claim':'Opening claim'},'development':[],'payoff':{'passage':2,'quote':'Third point','resolves':'Resolved claim'},'starts_complete':True,'ends_complete':True,'no_missing_context':True,'no_unanswered_promises':True}}],'best':1}
+        self.plan.update(editing_finish='story',editing_backend='gemini',requires_boundary_review=True)
+        before=self.file.read_bytes()
+        with patch.object(L.E,'provider_config',return_value=({'ai_backend':'gemini','gemini_api_key':'fixture'},'Gemini')),patch('ks.cli_lab_webhook.request',return_value=json.dumps(reply)) as ask:
+            result=self.call('review_story')
+        self.addCleanup(lambda:L._plans.pop(result['plan_id'],None))
+        self.assertFalse(result['requires_boundary_review']);self.assertTrue(result['boundary_reviewed'])
+        self.assertNotEqual(result['plan_id'],self.token)
+        self.assertEqual(result['cuts'],self.plan['cuts'])
+        self.assertEqual(L._plans[result['plan_id']]['created'],self.plan['created'])
+        self.assertTrue(self.plan['requires_boundary_review'])
+        self.assertEqual(self.file.read_bytes(),before)
+        self.assertEqual(ask.call_count,1)
+        self.assertTrue(ask.call_args.kwargs.get('retry_unavailable'))
+        self.assertIn('narrative_review',result)
+
+    def test_failed_ai_review_preserves_original_plan_and_guard(self):
+        self.plan.update(editing_finish='story',requires_boundary_review=True)
+        with patch.object(L.E,'provider_config',return_value=({'ai_backend':'gemini','gemini_api_key':'fixture'},'Gemini')),patch('ks.cli_lab_webhook.request',side_effect=RuntimeError('service unavailable')):
+            with self.assertRaises(RuntimeError):self.call('review_story')
+        self.assertTrue(L._plans[self.token]['requires_boundary_review'])
+
+    def test_ai_review_rejects_other_owner_and_expired_plan_before_network(self):
+        with patch('ks.cli_lab_webhook.request') as ask:
+            with self.assertRaisesRegex(ValueError,'แผน|โปรเจกต์'):L.handle('other',self.root,dict(action='review_story',plan_id=self.token))
+            self.plan['created']=time.time()-3601
+            with self.assertRaisesRegex(ValueError,'แผน'):self.call('review_story')
+        ask.assert_not_called()

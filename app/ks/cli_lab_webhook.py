@@ -1,4 +1,4 @@
-"""Wait for long editorial plans without blocking progress or duplicating POSTs."""
+"""Wait with cancellation; opt-in retries only follow explicit Gemini HTTP503."""
 import copy
 import json
 import queue
@@ -11,7 +11,29 @@ PLAN_TIMEOUT = 300
 POLL_SECONDS = 2
 
 
-def request(prompt, *, progress=lambda message:None, feature='autoclip', **options):
+def _quota_guidance(error):
+    """Classify bounded structured quota IDs; never echo provider text/IDs."""
+    periods=set()
+    try:
+        data=json.loads(error.read(32768))
+        details=(data.get('error') or {}).get('details',[])
+        if isinstance(details,list):
+            for detail in details[:64]:
+                if not isinstance(detail,dict):continue
+                violations=detail.get('violations',[])
+                if not isinstance(violations,list):continue
+                for violation in violations[:64]:
+                    if not isinstance(violation,dict):continue
+                    code=str(violation.get('quotaId',''))[:256].lower()
+                    if 'perday' in code:periods.add('day')
+                    if 'perminute' in code:periods.add('minute')
+    except (ValueError,TypeError,AttributeError,OSError):pass
+    if 'day' in periods:return 'โควตารายวันของโมเดลนี้หมด กรุณารอรอบใหม่หรือเลือกโมเดลหรือคีย์ที่ยังมีโควตาในหน้า API Key'
+    if 'minute' in periods:return 'เกินอัตราคำขอต่อนาที กรุณารอก่อนเริ่มตรวจแผนที่บันทึกไว้อีกครั้ง'
+    return 'เกินโควตาหรืออัตราคำขอ กรุณาตรวจโควตาใน Google AI Studio'
+
+
+def request(prompt, *, progress=lambda message:None, feature='autoclip', retry_unavailable=False, **options):
     from . import core_engine as CE
     options=copy.deepcopy(options)
     conf=options.get('conf')
@@ -21,12 +43,16 @@ def request(prompt, *, progress=lambda message:None, feature='autoclip', **optio
     options.update(timeout=PLAN_TIMEOUT,max_retries=1,diagnostic_feature=feature)
     result=queue.Queue(maxsize=1)
     started=time.monotonic()
+    attempts=1
     progress('รอแผนจาก '+label+' · รอได้สูงสุด 5 นาที')
     def work():
         try:
             if gemini:
                 selected=dict(conf)
                 kwargs={k:v for k,v in options.items() if k in ('system','temperature','json_mode','max_tokens','timeout','max_retries')}
+                if selected.get('gemini_model','').startswith('gemini-3'):
+                    # Shared output ceiling includes reasoning; reserve JSON space.
+                    kwargs.update(thinking_level='low',max_tokens=min(65536,kwargs.get('max_tokens',2048)+2048))
                 answer=CE.call_gemini(selected['gemini_api_key'],selected.get('gemini_model','gemini-flash-latest'),prompt,conf=selected,**kwargs)
             else:answer=CE.call_webhook(prompt,**options)
             result.put((True,answer))
@@ -43,6 +69,19 @@ def request(prompt, *, progress=lambda message:None, feature='autoclip', **optio
         # Cancellation is checked before a late response is accepted or stored.
         progress('ได้รับการตอบกลับจาก '+label+' · กำลังตรวจสถานะ')
         if not ok:
+            if (isinstance(value,(TimeoutError,socket.timeout)) or
+                isinstance(value,urllib.error.URLError) and isinstance(value.reason,(TimeoutError,socket.timeout))):
+                raise TimeoutError(label+' หมดเวลารอ · ไม่ส่งคำขอซ้ำ เพราะเซิร์ฟเวอร์อาจยังทำงานอยู่') from value
+            if gemini and retry_unavailable is True and isinstance(value,urllib.error.HTTPError) and value.code==503 and attempts<3:
+                progress('Gemini ตอบ 503 บริการไม่พร้อม · รอก่อนลองส่งใหม่ '+str(attempts)+'/2')
+                time.sleep(min(2**attempts,max(0,PLAN_TIMEOUT-(time.monotonic()-started))))
+                # Recheck cancellation and the original deadline before any new POST.
+                progress('ตรวจสถานะก่อนลอง Gemini อีกครั้ง · '+str(attempts+1)+'/3')
+                if time.monotonic()-started>=PLAN_TIMEOUT:
+                    raise TimeoutError('Gemini หมดเวลารวม · ไม่ส่งคำขอเพิ่ม') from value
+                attempts+=1
+                threading.Thread(target=CE.STATE.capture(work),name='editorial-gemini-retry',daemon=True).start()
+                continue
             cause = value.__cause__ if isinstance(value, RuntimeError) else None
             if isinstance(cause, (TimeoutError, socket.timeout)) or (isinstance(cause, urllib.error.URLError) and isinstance(cause.reason, (TimeoutError, socket.timeout))):
                 raise TimeoutError(str(value)) from value
@@ -55,8 +94,9 @@ def request(prompt, *, progress=lambda message:None, feature='autoclip', **optio
                     429: 'เกินโควตาหรืออัตราคำขอ กรุณาตรวจโควตาและการเรียกเก็บเงินใน Google AI Studio',
                     503: 'บริการยังไม่พร้อมหรือมีคำขอหนาแน่น กรุณารอหรือเลือกโมเดลอื่นในหน้า API Key',
                 }.get(value.code, 'บริการตอบข้อผิดพลาด กรุณาตรวจสถานะบริการก่อนลองใหม่')
+                if value.code==429:guidance=_quota_guidance(value)
                 raise RuntimeError('Gemini HTTP '+str(value.code)+' · '+guidance+
-                    ' · ยังไม่ได้สร้างผล ไม่ส่งคำขอซ้ำและไม่สลับไป UTCC อัตโนมัติ') from value
+                    ' · ยังไม่ได้สร้างผล '+('ลองครบ 3 ครั้งแล้ว ไม่ส่งคำขอเพิ่ม' if attempts==3 else 'ไม่ส่งคำขอซ้ำ')+' และไม่สลับไป UTCC อัตโนมัติ') from value
             raise value
         parsed=value
         if isinstance(value,str):

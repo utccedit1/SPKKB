@@ -51,6 +51,7 @@ UI = r'''
    <h3>แผนตัดคลิป</h3>
    <p>แผนใช้สร้างคลิปได้ภายใน 1 ชั่วโมง ส่วนผลที่สร้างเสร็จแล้วไม่หมดอายุเพราะเวลา</p>
    <pre id="cliLabPlan" style="white-space:pre-wrap;overflow-wrap:anywhere" aria-live="polite"></pre>
+   <button type="button" id="cliLabReviewStory" hidden onclick="cliLab('review_story')">ให้ AI ตรวจเรื่องเดิมอีกครั้ง</button>
    <button type="button" id="cliLabBoundaryOpen" hidden onclick="cliLabReviewBoundaries()">ตรวจและปรับจุดเริ่ม / จบแต่ละช่วง</button>
    <div id="cliLabBoundarySection" hidden style="margin:12px 0;padding:14px;border:1px solid #8295b4;border-radius:10px">
     <p>เลือกซับที่เป็นจุดเริ่มและจุดจบของแต่ละช่วง แล้วกดตรวจและบันทึกแผนใหม่ · ฟังรอยต่อจริงใน CapCut ก่อนนำไปใช้</p>
@@ -99,7 +100,7 @@ JS = r'''
 let plan=null,install=null,busy=false,waiting=false,boundaryDirty=false,mustReview=false,boundaryInputs=[];
 const q=id=>document.getElementById(id);
 __RUN_MONITOR_JS__
-function resetPlan(){plan=null;install=null;boundaryDirty=false;mustReview=false;boundaryInputs=[];q('cliLabBoundarySection').hidden=true;q('cliLabBoundaryOpen').hidden=true;q('cliLabPrepareResult').hidden=true;q('cliLabApply').disabled=true;q('cliLabInstall').disabled=true;q('cliLabPlanSection').hidden=true;q('cliLabInstallSection').hidden=true;q('cliLabPlanButton').textContent='1. วางแผนตัดคลิป';q('cliLabPlanButton').className='primary';q('cliLabApply').hidden=false;}
+function resetPlan(){q('cliLabReviewStory').hidden=true;plan=null;install=null;boundaryDirty=false;mustReview=false;boundaryInputs=[];q('cliLabBoundarySection').hidden=true;q('cliLabBoundaryOpen').hidden=true;q('cliLabPrepareResult').hidden=true;q('cliLabApply').disabled=true;q('cliLabInstall').disabled=true;q('cliLabPlanSection').hidden=true;q('cliLabInstallSection').hidden=true;q('cliLabPlanButton').textContent='1. วางแผนตัดคลิป';q('cliLabPlanButton').className='primary';q('cliLabApply').hidden=false;}
 q('cliLabInstruction').addEventListener('input',resetPlan);
 __PROMPT_TEMPLATE_JS__
 ['cliLabCamera','cliLabSemanticAI','cliLabEditingFinish','cliLabMode','cliLabMin','cliLabMax','cliLabStyle','cliLabEffects','cliLabAutoStock','cliLabStockDensity','cliLabSpeakerPip','cliLabStockFolder','cliLabCleanSpeech','cliLabLibrary','cliLabStyleCaps','cliLabBroll','cliLabMusic','cliLabAutoMusic'].forEach(id=>q(id).addEventListener('change',resetPlan));
@@ -108,7 +109,7 @@ q('cliLabResultFolder').addEventListener('input',()=>{install=null;q('cliLabInst
 function modeControls(){const single=q('cliLabMode').value==='single',finish=(q('cliLabEditingFinish').value||'off')!=='off';q('cliLabEditingFinish').disabled=busy||single;q('cliLabSemanticAI').disabled=busy||single||!finish;q('cliLabCamera').disabled=busy||single||!finish;q('cliLabModeHint').hidden=!single;['cliLabStyleCaps','cliLabStyle','cliLabAutoStock','cliLabStockDensity','cliLabSpeakerPip','cliLabStockFolder','cliLabCleanSpeech','cliLabEffects','cliLabLibrary','cliLabBroll','cliLabMusic','cliLabAutoMusic'].forEach(id=>q(id).disabled=busy||single||(finish&&id!=='cliLabCleanSpeech'));}
 q('cliLabMode').addEventListener('change',modeControls);q('cliLabEditingFinish').addEventListener('change',modeControls);
 function isImportJob(){try{return JSON.parse(sessionStorage.getItem(storageKey)||'null')?.action==='install_commit';}catch(e){return false;}}
-function controls(on){busy=on;document.querySelectorAll('#tab_clilab button,#tab_clilab input,#tab_clilab select,#cliLabInstruction').forEach(e=>e.disabled=on);q('cliLabApply').disabled=on||!plan||boundaryDirty||mustReview;q('cliLabInstall').disabled=on||!install;const cancel=q('cliLabCancel');if(cancel){cancel.hidden=!sessionStorage.getItem(storageKey)||isImportJob();cancel.disabled=false;}q('cliLabResume').hidden=!waiting||on;q('cliLabResume').disabled=on;q('cliLabForgetImport').hidden=on||!isImportJob();modeControls();}
+function controls(on){busy=on;document.querySelectorAll('#tab_clilab button,#tab_clilab input,#tab_clilab select,#cliLabInstruction').forEach(e=>e.disabled=on);q('cliLabApply').disabled=on||!plan||boundaryDirty||mustReview;q('cliLabReviewStory').disabled=on||!plan||boundaryDirty;q('cliLabInstall').disabled=on||!install;const cancel=q('cliLabCancel');if(cancel){cancel.hidden=!sessionStorage.getItem(storageKey)||isImportJob();cancel.disabled=false;}q('cliLabResume').hidden=!waiting||on;q('cliLabResume').disabled=on;q('cliLabForgetImport').hidden=on||!isImportJob();modeControls();}
 async function post(body){const c=new AbortController(),timer=setTimeout(()=>c.abort(),150000);try{const r=await fetch('/api/cli_lab',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:c.signal});const j=await r.json();if(!r.ok||!j.ok){const e=Error(j.error||'ทำงานไม่สำเร็จ');e.definitive=[400,404].includes(r.status)||['job_not_found','project_mismatch'].includes(j.code);throw e;}return j;}finally{clearTimeout(timer);}}
 window.cliLabReviewBoundaries=async function(){
  if(busy||!plan)return;
@@ -155,8 +156,8 @@ function display(action,j){
  if(action==='status'){
   q('cliLabStatus').textContent='capcut-cli: '+(j.cli_available?'พบแล้ว':'ยังไม่ติดตั้ง')+' | AI: '+(j.ai_label||'ตามการตั้งค่า AutoClip')+' · '+(j.ai_configured?'พร้อม':'เพิ่มคีย์หรือตั้งค่าก่อน')+' | จับเวลาคำ: '+(j.alignment_ready?'พร้อม':'ต้องติดตั้งเครื่องมือ');
   q('cliLabResult').textContent='ตรวจการตั้งค่าเสร็จแล้ว';
- }else if(action==='plan'){
-  plan=j.plan_id;mustReview=!!j.requires_boundary_review;q('cliLabPlanSection').hidden=false;q('cliLabPlanButton').textContent='วางแผนใหม่';q('cliLabPlanButton').className='ghost';
+ }else if(action==='plan'||action==='review_story'){
+  plan=j.plan_id;mustReview=!!j.requires_boundary_review;q('cliLabReviewStory').hidden=j.mode!=='story'||!mustReview;q('cliLabPlanSection').hidden=false;q('cliLabPlanButton').textContent='วางแผนใหม่';q('cliLabPlanButton').className='ghost';
   boundaryDirty=false;boundaryInputs=[];q('cliLabBoundarySection').hidden=true;q('cliLabBoundaryOpen').hidden=j.mode!=='story';
   q('cliLabOverlayReview').hidden=j.mode!=='story'||!!(j.editing_finish&&j.editing_finish!=='off');
   if(j.mode==='story'){
@@ -258,6 +259,7 @@ window.cliLabStorage=async function(action){
 window.cliLabCancelJob=async function(){try{const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');if(!saved)return;const j=await post({action:'cancel',job_id:saved.id});q('cliLabResult').textContent=j.message;}catch(e){q('cliLabResult').textContent=e.message;}};
 window.cliLab=async function(action){
  if(busy)return;
+ if(action==='review_story'&&boundaryDirty){q('cliLabResult').textContent='กรุณาบันทึกหรือยกเลิกจุดตัดที่แก้ก่อนตรวจเรื่อง';return;}
  if(action==='apply'&&(boundaryDirty||mustReview)){q('cliLabResult').textContent=mustReview?'กรุณาตรวจและบันทึกรอยต่อให้ครบความคิดก่อนสร้างคลิป':'กรุณาบันทึกหรือยกเลิกการปรับจุดตัดก่อนสร้างคลิป';return;}
  if(sessionStorage.getItem(storageKey)){waiting=true;controls(false);q('cliLabResult').textContent='มีงานเดิมรอตรวจผล กดตรวจงานเดิมต่อก่อนเริ่มงานใหม่';return;}
  if(action==='plan'){
@@ -277,14 +279,14 @@ window.cliLab=async function(action){
   if(editingFinish!=='off'&&body.mode==='story'){body.effects=false;body.style_captions=false;body.auto_stock=false;body.auto_music=false;body.broll='';body.music='';body.visual_library='';body.speaker_pip=false;}
   let j;
   if(action==='install_commit'){const saved={id:install,action};sessionStorage.setItem(storageKey,JSON.stringify(saved));try{await post({...body,action:'start',operation:'install_commit'});}catch(e){q('cliLabResult').textContent='ยังไม่ได้รับคำตอบ กำลังตรวจสถานะงานเดิม';}j=await watch(saved);
-  }else if(['plan','apply','enhance','setup_alignment'].includes(action)){
+  }else if(['plan','review_story','apply','enhance','setup_alignment'].includes(action)){
    const started=await post({...body,action:'start',operation:action});const saved={id:started.job_id,action};sessionStorage.setItem(storageKey,JSON.stringify(saved));controls(true);j=await watch(saved);
   }else j=await post(body);
   await finish(action,j);
  }catch(e){if(action==='install_commit'){install=null;q('cliLabInstallSection').hidden=true;q('cliLabPrepareResult').hidden=false;}q('cliLabResult').textContent='ทำงานไม่สำเร็จ: '+e.message;}
  finally{waiting=!!sessionStorage.getItem(storageKey);controls(false);}
 };
-async function recover(){if(busy)return;let saved;try{saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');}catch(e){sessionStorage.removeItem(storageKey);return;}if(!saved)return;if(typeof saved.id!=='string'||!['plan','apply','enhance','setup_alignment','install_commit'].includes(saved.action)){sessionStorage.removeItem(storageKey);return;}controls(true);try{await finish(saved.action,await watch(saved));}catch(e){q('cliLabResult').textContent=e.message;}finally{waiting=!!sessionStorage.getItem(storageKey);controls(false);}}
+async function recover(){if(busy)return;let saved;try{saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');}catch(e){sessionStorage.removeItem(storageKey);return;}if(!saved)return;if(typeof saved.id!=='string'||!['plan','review_story','apply','enhance','setup_alignment','install_commit'].includes(saved.action)){sessionStorage.removeItem(storageKey);return;}controls(true);try{await finish(saved.action,await watch(saved));}catch(e){q('cliLabResult').textContent=e.message;}finally{waiting=!!sessionStorage.getItem(storageKey);controls(false);}}
 window.cliLabResumeJob=recover;
 window.cliLabForgetImport=function(){if(busy)return;sessionStorage.removeItem(storageKey);install=null;waiting=false;controls(false);q('cliLabResult').textContent='ล้างสถานะรอแล้ว · โปรดตรวจโปรเจกต์และประวัติก่อนเริ่มนำเข้าใหม่';};
 recover();

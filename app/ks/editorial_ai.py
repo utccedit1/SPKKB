@@ -53,7 +53,7 @@ def design(draft, base_plan, settings, backend, progress):
     for index, batch in enumerate(batches):
         progress('ให้ ' + label + ' เลือกข้อความเน้นจากคำพูดเดิม ' + str(index + 1) + '/' + str(len(batches)))
         answer = request(_INSTRUCTION + json.dumps(batch, ensure_ascii=False), progress=progress,
-                         feature='suggest', conf=conf, utcc=bool(conf.get('webhook_utcc')),
+                         feature='suggest', retry_unavailable=True, conf=conf, utcc=bool(conf.get('webhook_utcc')),
                          system=system, temperature=.2, max_tokens=7000)
         if isinstance(answer, str):
             answer = json.loads(re.sub(r'^```(?:json)?\s*|\s*```$', '', answer.strip()))

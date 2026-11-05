@@ -64,6 +64,22 @@ const settle=async()=>{for(let i=0;i<30;i++)await Promise.resolve();};
  const staleResult=page(()=>ok({ok:false,error:'source changed'}),new Map(),[savedResult]);
  await settle();await staleResult.element('cliLabSavedResults').children[0].children[0].onclick();
  assert(staleResult.element('cliLabInstall').disabled);assert(staleResult.element('cliLabResult').textContent.includes('source changed'));
+ let reviewOperation='plan';
+ const retryStory={mode:'story',plan_id:'retained-plan',duration:90,cuts:[{first_id:0,last_id:0,start:0,end:90,text:'fixture',role:'hook'}],hook:'hook',cta:'cta',reason:'fixture',requires_boundary_review:true};
+ const retry=page(b=>{
+  if(b.action==='start'){reviewOperation=b.operation;return ok({job_id:'review-job'});}
+  if(b.action==='job_status')return ok({state:'done',result:reviewOperation==='review_story'?{...retryStory,plan_id:'reviewed-plan',requires_boundary_review:false}:retryStory});
+  throw Error('unexpected review action');
+ });
+ retry.element('cliLabInstruction').value='test';await retry.box.cliLab('plan');
+ assert(!retry.element('cliLabReviewStory').hidden,'unverified retained plan needs AI review action');
+ assert(retry.element('cliLabApply').disabled);
+ await retry.box.cliLab('review_story');
+ const retryStart=retry.calls.find(c=>c.operation==='review_story');assert(retryStart,'review must run as recoverable background job');
+ assert.equal(retryStart.plan_id,'retained-plan');assert(!retry.element('cliLabApply').disabled);assert(retry.element('cliLabReviewStory').hidden);
+ const reviewStore=new Map([[key,JSON.stringify({id:'saved-review-job',action:'review_story'})]]);
+ const reviewResume=page(b=>{assert.equal(b.action,'job_status');return ok({state:'done',result:{...retryStory,plan_id:'resumed-plan',requires_boundary_review:false}});},reviewStore);
+ await settle();assert(!reviewStore.has(key));assert(!reviewResume.element('cliLabApply').disabled);assert(!reviewResume.calls.some(c=>c.action==='start'));
  const story={mode:'story',plan_id:'old-plan',duration:8,cuts:[{first_id:1,last_id:1,start:1,end:5,text:'หนึ่ง',role:'hook'},{first_id:3,last_id:3,start:6,end:10,text:'สอง',role:'conclusion'}],hook:'hook',cta:'cta',reason:'เหตุผล'};
  let rejectBoundary=false;
  const edit=page(b=>{

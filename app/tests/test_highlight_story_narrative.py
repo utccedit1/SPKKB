@@ -59,3 +59,27 @@ class StrictHighlightPlanTests(unittest.TestCase):
         self.assertFalse(result['verified'])
         self.assertEqual(len(requests),1)
         self.assertEqual(result['calls'],2)
+
+    def test_provider_failure_keeps_valid_candidate_unverified_for_manual_review(self):
+        requests=[]
+        def review(*args):
+            requests.append(args)
+            raise RuntimeError('private provider fixture')
+        result=self.run_plan(review)
+        self.assertFalse(result['verified'])
+        self.assertNotIn('narrative_review',result['story'])
+        self.assertEqual(len(requests),1)
+        self.assertEqual(result['calls'],2)
+        self.assertTrue(any('ยังไม่ผ่าน' in w for w in result['story']['warnings']))
+        self.assertNotIn('private provider',str(result))
+
+    def test_provider_failure_in_last_repair_keeps_unverified_candidate(self):
+        attempts=[]
+        def review(*args):
+            attempts.append(1)
+            if len(attempts)<3:return dict(verdicts=[dict(candidate=1,coherent=False,issue='Incomplete argument')])
+            raise RuntimeError('service unavailable')
+        result=self.run_plan(review)
+        self.assertFalse(result['verified'])
+        self.assertEqual(len(attempts),3)
+        self.assertNotIn('narrative_review',result['story'])

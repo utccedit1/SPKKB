@@ -356,7 +356,7 @@ def call_webhook(prompt, system=None, temperature=0.95, json_mode=True,
 
 # ─── call_gemini ───────────────────────────────────────────────────────────────
 def call_gemini(api_key, model, prompt, timeout=60, max_retries=4,
-                system=None, temperature=0.95, json_mode=True, max_tokens=2048, conf=None):
+                system=None, temperature=0.95, json_mode=True, max_tokens=2048, conf=None, thinking_level=None):
     if _task_stage('กำลังส่งคำขอ AI / รอคำตอบ'): timeout, max_retries = min(timeout, 75), 1
     _conf = load_config() if conf is None else dict(conf)
     # An explicit Gemini choice wins over a legacy UTCC flag left in config.
@@ -365,7 +365,7 @@ def call_gemini(api_key, model, prompt, timeout=60, max_retries=4,
     if _is_webhook and (_conf.get("webhook_url") or "").strip():
         return call_webhook(prompt, system=system, temperature=temperature,
                             json_mode=json_mode, max_tokens=max_tokens, conf=_conf)
-    active_model = _pick_available_model(model)
+    active_model = model if thinking_level is not None else _pick_available_model(model)
     url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
            f"{active_model}:generateContent?key={api_key}")
     payload = {
@@ -373,6 +373,10 @@ def call_gemini(api_key, model, prompt, timeout=60, max_retries=4,
         "generationConfig": {"temperature": temperature, "topP": 0.95, "topK": 40,
                              "maxOutputTokens": max_tokens},
     }
+    if thinking_level is not None:
+        if thinking_level != "low" or not active_model.startswith("gemini-3"):
+            raise ValueError("thinking level ไม่รองรับกับโมเดลนี้")
+        payload["generationConfig"]["thinkingConfig"] = {"thinkingLevel": thinking_level}
     if json_mode:
         payload["generationConfig"]["responseMimeType"] = "application/json"
     if system:
@@ -386,14 +390,19 @@ def call_gemini(api_key, model, prompt, timeout=60, max_retries=4,
                 data = json.loads(resp.read().decode("utf-8"))
             cands = data.get("candidates") or []
             if not cands: raise RuntimeError("Gemini ไม่ได้ตอบผลลัพธ์กลับมา (อาจโดนบล็อกเนื้อหา)")
+            finish = cands[0].get("finishReason")
+            if finish == "MAX_TOKENS":
+                raise RuntimeError("Gemini ตอบไม่ครบเพราะถึงเพดานโทเคน · ยังไม่นำคำตอบบางส่วนไปสร้างแผน กรุณาปรับงบคำตอบก่อนลองใหม่")
+            if finish and finish != "STOP":
+                raise RuntimeError("Gemini หยุดก่อนตอบครบ · ยังไม่นำคำตอบบางส่วนไปสร้างแผน")
             parts = cands[0].get("content", {}).get("parts", [])
-            return "".join(p.get("text", "") for p in parts)
+            return "".join(p.get("text", "") for p in parts if not p.get("thought"))
         except urllib.error.HTTPError as e:
             if e.code in (503, 429) and attempt < max_retries - 1:
                 last_err = e
                 if e.code == 429:
                     _model_set_cooldown(active_model, 65.0)
-                    next_m = _pick_available_model(model)
+                    next_m = active_model if thinking_level is not None else _pick_available_model(model)
                     if next_m != active_model:
                         active_model = next_m
                         url = (f"https://generativelanguage.googleapis.com/v1beta/"

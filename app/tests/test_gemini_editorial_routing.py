@@ -55,9 +55,9 @@ class GeminiEditorialRouting(unittest.TestCase):
     requested.append(backend)
     if backend!='gemini':raise AssertionError('wrong provider')
     return {'ai_backend':'gemini','gemini_api_key':'fixture-key'},'Gemini'
-   with patch.object(E,'provider_config',side_effect=provider),patch.object(W,'request',return_value='{"start":0,"end":10,"reason":"fixture"}'),patch.object(L,'_store_plan'):
+   with patch.object(E,'provider_config',side_effect=provider),patch.object(W,'request',return_value='{"start":0,"end":10,"reason":"fixture"}') as request,patch.object(L,'_store_plan'):
     out=L.handle('alice',p,{'action':'plan','mode':'single','instruction':'fictional request','backend':'gemini'})
-   self.assertTrue(out['ok']);self.assertEqual(requested,['gemini'])
+   self.assertTrue(out['ok']);self.assertEqual(requested,['gemini']);self.assertTrue(request.call_args.kwargs.get('retry_unavailable'))
  def test_align_route_uses_selected_gemini_key_for_audio(self):
   cfg={'audio_backend':'webhook','audio_api_key':'old-fixture','gemini_api_key':'main-fixture','gemini_keys':[{'name':'audio-key','key':'selected-fixture'}],'ai_routes':{'align':{'backend':'gemini','key_name':'audio-key','model':'audio-model'}}}
   with C.ai_feature('align'):out=C._apply_ai_route(copy.deepcopy(cfg))
