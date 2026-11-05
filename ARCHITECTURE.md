@@ -413,3 +413,5 @@ Manual boundary revisions discard narrative_review when caption ranges change; u
 ### Source follow-up after 1.5.70 (P3.31/P3.33)
 
 Editorial Gemini HTTP errors are mapped to fixed status-specific Thai guidance after cancellation checks; upstream exception strings/bodies are not echoed. No new retry, route fallback or config mutation. Camera reports add shot intervals and candidate reason/sample times; import review surfaces at most20finite valid intervals. These are sampled diagnostics, not native camera acceptance. Old reports without this evidence remain readable.
+
+P3.31 controlled native contract follow-up: production camera selection choseB in a6second derived-media fixture, guarded import/export in1105(1) preservedA speech (Bsilent), decoded native output matchedB picture andA waveform. This validates native material/audio routing in the controlled fixture; actual full-clip editorial camera quality is still unverified. Gemini3.6 synthetic connection returned200, but fresh transcript planning still terminated on503 before verified story approval; no persistent account model change.

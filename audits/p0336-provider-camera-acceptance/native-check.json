@@ -1,0 +1,16 @@
+{
+  "native_export": true,
+  "fixture": true,
+  "duration": 6.0,
+  "bytes": 4373018,
+  "sha256": "7ba9a4e6430d18065c9575b00203bee99dd44afd3b03a13f7c18519bbc395dd7",
+  "decoded": true,
+  "picture_mae_to_A": 40.408886316872426,
+  "picture_mae_to_B": 0.37308706275720166,
+  "audio_correlation_to_A": 0.9987582000324836,
+  "B_audio_silent": true,
+  "automatic_camera_changes": 1,
+  "original_project_untouched": true,
+  "original_source_hash": "ef197cb17745f58e77851e0d5e9f7870d3669b5a7a455ea154c6bc8272040423",
+  "original_source_hash_matches": true
+}
