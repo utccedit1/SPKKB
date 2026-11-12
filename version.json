@@ -1,7 +1,7 @@
 {
-  "version": "1.5.72",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.72/SPKKB.app.zip",
-  "release_notes": "แก้การตรวจรูปแบบ Super Text และข้อความเน้นจาก AI ให้ยืดหยุ่นและรองรับโครงสร้างคำตอบหลากหลาย เพิ่มระบบสลับใช้การเลือกวลีในเครื่อง (local fallback) อัตโนมัติเมื่อบริการภายนอกขัดข้อง เพื่อรักษาและสร้างคลิปเรื่องเล่าที่ผ่านการตรวจแล้วได้สำเร็จโดยไม่ล้มเหลวทั้งคลิป พร้อมแยกสถานะตรวจข้อความเน้นให้ชัดเจน · การใช้ AI ต้องมีคีย์หรือโควตาที่พร้อมใช้งาน",
+  "version": "1.5.73",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.73/SPKKB.app.zip",
+  "release_notes": "เพิ่มการเชื่อมต่อ Local AI (Ollama บน mediapro-station) ในเมนูสมองหลักและแยกรายฟีเจอร์ รองรับโมเดล Qwen 2.5 14B สำหรับคิดคำเน้น Super Text, ค้น B-roll และเขียนแคปชันโซเชียล พร้อมระบบทดสอบการเชื่อมต่อสด · ปรับปรุงความเสถียรและโครงสร้างความปลอดภัย",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "75d4b599f638efbb1a12930ed872ca04e9829e75ae3b05cbb95f2740e858e763",
-  "size": 203776661,
+  "sha256": "6c1827f36963a853b42d93e947ef85e229faa3b17e63c96d1024d2b61d189d84",
+  "size": 203780368,
   "platform": "macos",
   "architecture": "arm64"
 }
