@@ -1,7 +1,7 @@
 {
-  "version": "1.5.75",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.75/SPKKB.app.zip",
-  "release_notes": "เปิดใช้งาน Public AI Endpoint ถาวรผ่าน Tailscale Funnel (https://mediapro-station.tailc801ea.ts.net) ผู้ใช้ทุกคนสามารถเชื่อมต่อ Local AI (Qwen 2.5 14B) บน mediapro-station ได้จากภายนอกผ่านอินเทอร์เน็ตได้ทันที โดยไม่ต้องติดตั้งหรือเปิดโปรแกรม Tailscale",
+  "version": "1.5.76",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.76/SPKKB.app.zip",
+  "release_notes": "ปรับ Webhook UTCC (agentflow) เป็นสมองหลักค่าเริ่มต้น ล็อกฟังก์ชันงานเสียง (align, sfx) ให้ใช้ Gemini เพื่อความแม่นยำ และเว้นช่องกรอก Ollama URL สำหรับ Local AI เพื่อความปลอดภัยในการแจกจ่าย",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "869d93ad7365a2fef542d3545a3732b88d325bc4b173ff131d8d55aec2b93e43",
-  "size": 176966723,
+  "sha256": "f0a8d770c34ab658dbcf8c15644dc44c5e12b53fb48306f9c3d9403b13931668",
+  "size": 176963889,
   "platform": "macos",
   "architecture": "arm64"
 }
