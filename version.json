@@ -1,7 +1,7 @@
 {
-  "version": "1.5.73",
-  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.73/SPKKB.app.zip",
-  "release_notes": "เพิ่มการเชื่อมต่อ Local AI (Ollama บน mediapro-station) ในเมนูสมองหลักและแยกรายฟีเจอร์ รองรับโมเดล Qwen 2.5 14B สำหรับคิดคำเน้น Super Text, ค้น B-roll และเขียนแคปชันโซเชียล พร้อมระบบทดสอบการเชื่อมต่อสด · ปรับปรุงความเสถียรและโครงสร้างความปลอดภัย",
+  "version": "1.5.74",
+  "download_url": "https://github.com/utccedit1/SPKKB/releases/download/v1.5.74/SPKKB.app.zip",
+  "release_notes": "ปลดล็อกให้เลือกสมอง AI ได้อิสระทุกจุด (ทั้งสมองหลักและเมนูเลือกข้างแต่ละฟีเจอร์ Super Text, Caption, Chatbot, B-roll, Resegment, AutoClip) สามารถเลือกสลับระหว่าง Google Gemini, Webhook UTCC หรือ Local AI (Ollama บน mediapro-station) ได้ตามต้องการโดยไม่มีการบังคับค่าเริ่มต้น",
   "announcements": [
     {
       "type": "update",
@@ -9,8 +9,8 @@
       "date": "20/8/69"
     }
   ],
-  "sha256": "6c1827f36963a853b42d93e947ef85e229faa3b17e63c96d1024d2b61d189d84",
-  "size": 203780368,
+  "sha256": "fdfd78a6c52be4807eb56978acab98adc777eb536981fd464c95edaa24299001",
+  "size": 176965978,
   "platform": "macos",
   "architecture": "arm64"
 }
